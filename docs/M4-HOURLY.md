@@ -125,8 +125,17 @@ Artifacts land under `config/hourly.yaml:paths` (`data/dream/`, gitignored).
 
 | Issue | Title | Owner / status |
 |---|---|---|
-| **#12** | SUPIR upscale | Deferred |
-| **#16–#19** | Modal cron + R2/Pages delivery, dead-man switch | M5 |
+| **#12** | SUPIR upscale → ~4000×3000 | Done — see § Upscale below |
+| **#16–#19** | Modal cron + R2/Pages delivery, dead-man switch | M5 (done) |
+
+### Upscale (#12)
+
+Gates run at SDXL-native **1024×768**. On accept, `dream/upscale.py` runs
+**SUPIR** (Fanghua-Yu, sign **F** / fidelity, no LLaVA — weather prompt is the
+caption) to ~4× then fits to **4000×3000** before PNG/WebP publish. Modal clones
+SUPIR into `/opt/SUPIR`; weights live on the HF Volume (`camenduru/SUPIR`).
+Prefetch: `.venv/bin/modal run modal_app.py::prefetch_supir`.
+Fallback: Lanczos if CUDA/weights unavailable (`upscale.backend: auto`).
 
 ---
 
@@ -134,7 +143,8 @@ Artifacts land under `config/hourly.yaml:paths` (`data/dream/`, gitignored).
 
 ```bash
 PYTHONPATH=. .venv/bin/python -m pytest \
-  weather_schema/tests/test_live.py dream/tests/test_sidecar.py dream/tests/test_hourly.py -q
+  weather_schema/tests/test_live.py dream/tests/test_sidecar.py \
+  dream/tests/test_hourly.py dream/tests/test_upscale.py -q
 ```
 
 `test_hourly.py` fakes the engine + gates, so it covers the full decision matrix

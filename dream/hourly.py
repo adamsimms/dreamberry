@@ -318,6 +318,8 @@ def run_hourly(
                 status_path=status_path,
                 write=write,
                 store=store,
+                dream_cfg=dream_cfg,
+                engine=engine,
             )
         last_reject = ev.reject_reason
 
@@ -405,6 +407,8 @@ def _publish(
     status_path: Path,
     write: bool,
     store: Any | None = None,
+    dream_cfg: Mapping[str, Any] | None = None,
+    engine: Any | None = None,
 ) -> HourlyResult:
     timestamp = _dream_timestamp(pkt, now)
     number = _next_dream_number(archive_dir, store) if write else 1
@@ -414,6 +418,25 @@ def _publish(
     sidecar["dream_id"] = dream_id
     sidecar["validator_scores"] = evaluation.validator_scores
     sidecar["failure_mode"] = evaluation.failure_mode
+
+    # Upscale after gates (calibrated at SDXL-native) → Cloudberry ~4000×3000.
+    publish_image = result.image
+    if dream_cfg is not None:
+        from dream.upscale import upscale_for_publish
+
+        if engine is not None and hasattr(engine, "unload"):
+            engine.unload()
+        up = upscale_for_publish(
+            result.image,
+            dream_cfg,
+            prompt=str(sidecar.get("prompt") or ""),
+            seed=int(seed),
+        )
+        publish_image = up.image
+        sidecar.update(up.meta)
+        # Published dims are the upscaled frame; keep native size in upscale.*.
+        sidecar["width"] = int(publish_image.size[0])
+        sidecar["height"] = int(publish_image.size[1])
 
     current_name = "current.webp"
     image_path = str(public_dir / current_name)
@@ -434,7 +457,7 @@ def _publish(
 
     if write:
         save_local_publish(
-            image=result.image,
+            image=publish_image,
             sidecar=sidecar,
             status=status,
             dream_id=dream_id,
@@ -444,7 +467,7 @@ def _publish(
         if store is not None:
             keys = store.publish_frame(
                 dream_id=dream_id,
-                image=result.image,
+                image=publish_image,
                 sidecar=sidecar,
                 status=status,
             )
@@ -480,8 +503,13 @@ def _signal_lost(
     write: bool,
     store: Any | None = None,
 ) -> HourlyResult:
-    gen = dream_cfg["generation"]
-    size = (int(gen["width"]), int(gen["height"]))
+    from dream.upscale import target_size
+
+    size = target_size(dream_cfg)
+    # Fall back to generation size if upscale is disabled / missing.
+    if (dream_cfg.get("upscale") or {}).get("enabled", True) is False:
+        gen = dream_cfg["generation"]
+        size = (int(gen["width"]), int(gen["height"]))
     noise_name = "signal_lost.webp"
     image_path = str(public_dir / noise_name)
     noise = make_noise_image(size, seed=int(now.timestamp()))

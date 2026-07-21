@@ -24,7 +24,7 @@ runtime:
   use_ip_adapter: true
 
 generation:
-  # SDXL-native ~1MP at exact 4:3 (Cloudberry is 4000x3000). SUPIR upscales at M4.
+  # SDXL-native ~1MP at exact 4:3. Public/archive frames are upscaled (#12).
   width: 1024
   height: 768
   # GoPro fisheye / cabin-window-edge trim. Fractions removed from each edge BEFORE
@@ -45,6 +45,37 @@ generation:
     text, watermark, signage, people, boats, wildlife, buildings other than the
     cabin, oversaturated, cartoon, illustration, painting, lens flare, jpeg
     artifacts, frame border
+
+# Post-gate upscale to Cloudberry resolution (issue #12). Gates stay at native.
+upscale:
+  enabled: true
+  # auto → SUPIR on CUDA when Fanghua-Yu/SUPIR + weights exist; else Lanczos.
+  backend: auto
+  target_width: 4000
+  target_height: 3000
+  factor: 4
+  # F = fidelity (light restoration). Dial-0 is already ControlNet-locked.
+  sign: F
+  edm_steps: 50
+  s_cfg: 4.0
+  spt_linear_CFG: 1.0
+  linear_CFG: true
+  use_tile_vae: true
+  loading_half_params: true
+  ae_dtype: bf16
+  diff_dtype: fp16
+  download_weights: true
+  ckpt_repo: camenduru/SUPIR
+  sdxl_ckpt_file: sd_xl_base_1.0_0.9vae.safetensors
+  supir_ckpt_f_file: SUPIR-v0F.ckpt
+  # Optional Q weights (only needed when sign: Q).
+  download_q: false
+  a_prompt: >-
+    photograph, natural outdoor light, sharp rocks and horizon,
+    authentic wide-angle window view, fine natural detail
+  n_prompt: >-
+    painting, illustration, cartoon, CGI, over-smooth, plastic,
+    watermark, text, people, boats, deformed, lowres, blur
 
 paths:
   controls_dir: data/dream/controls

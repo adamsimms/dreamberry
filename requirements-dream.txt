@@ -1,4 +1,4 @@
-# Dreamberry M2 dream engine (SDXL + ControlNet + IP-Adapter).
+# Dreamberry M2 dream engine (SDXL + ControlNet + IP-Adapter) + M4 SUPIR.
 # Heavy GPU/ML stack; kept separate from the light M0/M1 dataset deps.
 # Install: .venv/bin/pip install -r requirements-dream.txt
 
@@ -14,3 +14,9 @@ opencv-python-headless>=4.9
 python-dotenv>=1.0
 numpy>=1.26
 lpips>=0.1.4
+# SUPIR (Fanghua-Yu) — also installed on Modal; local only if you run SUPIR here.
+einops>=0.7
+omegaconf>=2.3
+open-clip-torch>=2.17
+pytorch-lightning>=2.1
+kornia>=0.6.9

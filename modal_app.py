@@ -1,4 +1,4 @@
-"""Dreamberry Modal app — hourly GPU cron + R2 delivery (M5 / issues #16–#17).
+"""Dreamberry Modal app — hourly GPU cron + R2 delivery (M5 / issues #16–#17, #12).
 
 Modal owns schedule + L40S. Cloudflare owns R2 (this app writes) and Pages (M6).
 
@@ -10,6 +10,9 @@ One-shot (no cron wait):
 
 Sync corpus to the data Volume first (see docs/M5-PLATFORM.md):
   .venv/bin/python scripts/sync_modal_data.py
+
+Prefetch SUPIR weights onto the HF Volume (once):
+  .venv/bin/modal run modal_app.py::prefetch_supir
 """
 
 from __future__ import annotations
@@ -46,11 +49,12 @@ _IGNORE = [
     ".DS_Store",
     ".env",
     ".env.*",
+    "third_party",
 ]
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
-    .apt_install("libgl1", "libglib2.0-0")
+    .apt_install("libgl1", "libglib2.0-0", "git")
     .pip_install(
         # Light deps
         "Pillow>=10.0.0",
@@ -72,12 +76,26 @@ image = (
         "controlnet-aux>=0.0.9",
         "opencv-python-headless>=4.9",
         "lpips>=0.1.4",
+        # SUPIR (Fanghua-Yu) — do NOT pin their frozen transformers==4.28
+        "einops>=0.7",
+        "omegaconf>=2.3",
+        "open-clip-torch>=2.17",
+        "pytorch-lightning>=2.1",
+        "kornia>=0.6.9",
+        "timm>=0.9",
+        "openai-clip>=1.0.1",
+        "xformers>=0.0.20",
+    )
+    .run_commands(
+        # Official SUPIR code (LLaVA optional — we pass the weather prompt instead).
+        "git clone --depth 1 https://github.com/Fanghua-Yu/SUPIR.git /opt/SUPIR",
     )
     .env(
         {
             "HF_HOME": "/models",
             "PYTHONPATH": "/root/dreamberry",
             "HF_XET_HIGH_PERFORMANCE": "1",
+            "SUPIR_ROOT": "/opt/SUPIR",
         }
     )
     .add_local_dir(
@@ -114,42 +132,87 @@ def _run_tick(*, dial: float = 0.0) -> dict:
         "dream_id": result.dream_id,
         "attempts": result.attempts,
         "status": result.status,
+        "sidecar_size": (
+            {
+                "width": (result.sidecar or {}).get("width"),
+                "height": (result.sidecar or {}).get("height"),
+                "upscale": (result.sidecar or {}).get("upscale"),
+            }
+            if result.sidecar
+            else None
+        ),
         "healthcheck": ping,
     }
+
+
+_VOLUMES = {
+    "/models": hf_vol,
+    "/root/dreamberry/data": data_vol,
+}
+
+# SUPIR + SDXL need headroom beyond the dream stack alone.
+_TIMEOUT = 45 * 60
+_MEMORY = 65536
 
 
 @app.function(
     image=image,
     gpu="L40S",
-    timeout=30 * 60,
-    memory=32768,
-    volumes={
-        "/models": hf_vol,
-        "/root/dreamberry/data": data_vol,
-    },
+    timeout=_TIMEOUT,
+    memory=_MEMORY,
+    volumes=_VOLUMES,
     secrets=secrets,
     # :05 past each hour — Open-Meteo current-hour row usually present.
     schedule=modal.Cron("5 * * * *"),
 )
 def hourly_tick() -> dict:
-    """Scheduled live hour: weather → generate → gate → R2."""
+    """Scheduled live hour: weather → generate → gate → SUPIR → R2."""
     return _run_tick(dial=0.0)
 
 
 @app.function(
     image=image,
     gpu="L40S",
-    timeout=30 * 60,
-    memory=32768,
-    volumes={
-        "/models": hf_vol,
-        "/root/dreamberry/data": data_vol,
-    },
+    timeout=_TIMEOUT,
+    memory=_MEMORY,
+    volumes=_VOLUMES,
     secrets=secrets,
 )
 def run_once(dial: float = 0.0) -> dict:
     """Manual one-shot for smoke tests (`modal run modal_app.py::run_once`)."""
     return _run_tick(dial=dial)
+
+
+@app.function(
+    image=image,
+    timeout=60 * 60,
+    memory=8192,
+    volumes={"/models": hf_vol},
+    secrets=secrets,
+)
+def prefetch_supir() -> dict:
+    """Download SUPIR + SDXL ckpts into the HF Volume (no GPU needed)."""
+    import os
+    import sys
+
+    sys.path.insert(0, "/root/dreamberry")
+    os.chdir("/root/dreamberry")
+    os.environ.setdefault("HF_HOME", "/models")
+
+    from dream.config import load_dream_config
+    from dream.upscale import _resolve_weights
+
+    up = dict(load_dream_config().get("upscale") or {})
+    up["download_weights"] = True
+    sdxl, f_ckpt, q_ckpt = _resolve_weights(up)
+    hf_vol.commit()
+    return {
+        "sdxl": str(sdxl),
+        "supir_f": str(f_ckpt),
+        "supir_q": str(q_ckpt),
+        "sdxl_bytes": sdxl.stat().st_size,
+        "supir_f_bytes": f_ckpt.stat().st_size,
+    }
 
 
 @app.local_entrypoint()

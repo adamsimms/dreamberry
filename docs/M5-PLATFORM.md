@@ -76,8 +76,15 @@ Modal requires a **payment method** on the account before L40S functions will ru
 .venv/bin/modal run modal_app.py::run_once --dial 0
 ```
 
+Prefetch SUPIR weights onto the HF Volume once (large download):
+
+```bash
+.venv/bin/modal run modal_app.py::prefetch_supir
+```
+
 The image deliberately excludes `data/` — the `dreamberry-data` Volume mounts at
-`/root/dreamberry/data` (mounting over a non-empty image path fails).
+`/root/dreamberry/data` (mounting over a non-empty image path fails). Fanghua-Yu
+SUPIR is cloned to `/opt/SUPIR` at image build; `SUPIR_ROOT` is set in the image.
 
 Local R2-only publish test (uses local GPU/MPS if available):
 
@@ -133,5 +140,5 @@ Honesty guarantees enforced (and unit-tested in `test_hourly.py` / `test_storage
 
 ## Not in this slice
 
-- **#18 / #20** public window UI on Pages
-- **#12** SUPIR upscale
+- **#18 / #20** public window UI on Pages (M6 — done)
+- Print-resolution beyond the hourly 4000×3000 SUPIR path (on-demand only)

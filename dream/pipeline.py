@@ -55,6 +55,13 @@ class DreamEngine:
         self._pipe = None
         self._dtype = None
 
+    def unload(self) -> None:
+        """Drop the SDXL stack from VRAM so SUPIR can load (issue #12)."""
+        self._pipe = None
+        from dream.upscale import unload_torch_cuda
+
+        unload_torch_cuda()
+
     # -- model loading -------------------------------------------------------
 
     def load(self) -> None:

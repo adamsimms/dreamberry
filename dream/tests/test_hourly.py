@@ -81,7 +81,11 @@ def _eval(collapse_action: str, season_action: str) -> FrameEvaluation:
 
 def _cfgs(tmp_path):
     return dict(
-        dream_cfg={"generation": {"width": 8, "height": 8}},
+        dream_cfg={
+            "generation": {"width": 8, "height": 8},
+            # Unit tests stay at native size — no SUPIR download.
+            "upscale": {"enabled": False},
+        },
         gates_cfg={},
         weather_cfg={"live": {"staleness_hours": 3.0}},
         dataset_cfg={},
