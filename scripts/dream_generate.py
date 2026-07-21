@@ -34,6 +34,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from dataset_common import cabin_location, load_config, parse_exif_datetime  # noqa: E402
 from dream.config import load_dream_config, resolve_path  # noqa: E402
 from dream.pipeline import DreamEngine  # noqa: E402
+from dream.sidecar import write_sidecar  # noqa: E402
 
 
 def enrich_packet(pkt: dict) -> dict:
@@ -107,9 +108,7 @@ def main() -> int:
         json_path = out_dir / f"{name}.json"
         result.sidecar["dream_id"] = name
         result.image.save(jpg_path, "JPEG", quality=95, subsampling=0)
-        with open(json_path, "w") as f:
-            json.dump(result.sidecar, f, ensure_ascii=False, indent=2)
-            f.write("\n")
+        write_sidecar(json_path, result.sidecar)
         print(f"  dial {dial:g} → {jpg_path.name}")
         print(f"    prompt: {result.sidecar['prompt']}")
         print(f"    anchor: {result.sidecar['anchor_frame']} ({result.sidecar['anchor_source']})")

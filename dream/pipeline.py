@@ -8,7 +8,6 @@ mid-dial identity reservoir (follow-on) — not the lock.
 
 from __future__ import annotations
 
-import datetime as _dt
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -16,6 +15,7 @@ from typing import Any, Mapping
 from PIL import Image, ImageFilter
 
 from dream.anchor import Anchor, select_anchor
+from dream.sidecar import build_sidecar
 from dream.config import (
     apply_edge_crop,
     canonical_frame_path,
@@ -199,36 +199,23 @@ class DreamEngine:
         anchor: Anchor,
         seed: int,
         size: tuple[int, int],
+        *,
+        validator_scores: Mapping[str, Any] | None = None,
+        failure_mode: str | None = None,
     ) -> dict[str, Any]:
-        return {
-            "generated_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
-            "labeled": "generated",
-            "dial": params.dial,
-            "dial_params": params.as_dict(),
-            "prompt": prompt,
-            "seed": seed,
-            "width": size[0],
-            "height": size[1],
-            "edge_crop": self.gen.get("edge_crop"),
-            "anchor_frame": anchor.filename,
-            "anchor_source": anchor.source,
-            "anchor_distance": anchor.distance,
-            "models": {
-                "base": self.models["base"],
-                "vae": self.models["vae"],
-                "controlnet_depth": self.models["controlnet_depth"],
-                "controlnet_softedge": self.models["controlnet_softedge"],
-                "ip_adapter": (
-                    f"{self.models['ip_adapter_repo']}/{self.models['ip_adapter_weight']}"
-                    if getattr(self, "_use_ip_adapter", True)
-                    else None
-                ),
-                "lora": self.models.get("lora_path"),
-                "has_lora": getattr(self, "_has_lora", False),
-            },
-            "device": self.device,
-            "dtype": str(self._dtype),
-            "weather_packet": dict(pkt),
-            "validator_scores": None,
-            "failure_mode": None,
-        }
+        models = dict(self.models)
+        models["use_ip_adapter"] = getattr(self, "_use_ip_adapter", True)
+        return build_sidecar(
+            pkt=pkt,
+            params=params,
+            prompt=prompt,
+            anchor=anchor,
+            seed=seed,
+            size=size,
+            models=models,
+            device=self.device,
+            dtype=str(self._dtype),
+            edge_crop=self.gen.get("edge_crop"),
+            validator_scores=validator_scores,
+            failure_mode=failure_mode,
+        )
