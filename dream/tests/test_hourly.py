@@ -146,7 +146,7 @@ def test_weather_silence_holds_without_generating(tmp_path):
     assert engine.calls == 0
     assert "open_meteo_fetch_failed" in result.status["reasons"]
     # No current frame written on a hold.
-    assert not (tmp_path / "public" / "current.JPG").exists()
+    assert not (tmp_path / "public" / "current.webp").exists()
 
 
 def test_clean_frame_publishes_and_moves_pointer(tmp_path):
@@ -164,11 +164,11 @@ def test_clean_frame_publishes_and_moves_pointer(tmp_path):
     assert engine.calls == 1
     assert result.status["hold"] is False
     assert result.status["last_success_at"] == NOW.isoformat()
-    assert (tmp_path / "public" / "current.JPG").exists()
+    assert (tmp_path / "public" / "current.webp").exists()
     assert (tmp_path / "public" / "current.json").exists()
-    # Sidecar carries validator scores + archived copy exists.
+    # Sidecar carries validator scores + archived PNG copy exists.
     assert result.sidecar["validator_scores"]["collapse"]["action"] == "pass"
-    assert list((tmp_path / "archive").glob("*_DREAM*.JPG"))
+    assert list((tmp_path / "archive").glob("*_DREAM*.png"))
 
 
 def test_honored_dissolve_publishes_with_collapse_failure_mode(tmp_path):
@@ -200,7 +200,7 @@ def test_persistent_collapse_holds_last_good_frame(tmp_path):
     assert result.failure_mode is None
     assert result.hold_reason == "identity_collapse"
     assert engine.calls == 3  # retries=2 → 3 attempts
-    assert not (tmp_path / "public" / "current.JPG").exists()
+    assert not (tmp_path / "public" / "current.webp").exists()
 
 
 def test_persistent_season_refuse_holds(tmp_path):
@@ -245,9 +245,9 @@ def test_all_generations_fail_is_signal_lost(tmp_path):
     )
     assert result.outcome == OUTCOME_SIGNAL_LOST
     assert result.failure_mode == "signal_lost"
-    assert (tmp_path / "public" / "signal_lost.JPG").exists()
+    assert (tmp_path / "public" / "signal_lost.webp").exists()
     # A prior good frame's pointer is preserved via last_success_at.
-    assert result.status["current"] == "signal_lost.JPG"
+    assert result.status["current"] == "signal_lost.webp"
 
 
 def test_signal_lost_preserves_prior_last_success(tmp_path):
@@ -256,7 +256,7 @@ def test_signal_lost_preserves_prior_last_success(tmp_path):
     pub = tmp_path / "public"
     pub.mkdir(parents=True)
     (pub / "status.json").write_text(
-        json.dumps({"last_success_at": "2026-07-21T14:00:00+00:00", "current": "current.JPG"})
+        json.dumps({"last_success_at": "2026-07-21T14:00:00+00:00", "current": "current.webp"})
     )
     result = run_hourly(
         dial=0.0,
@@ -275,3 +275,43 @@ def test_make_noise_image_is_deterministic():
     b = make_noise_image((16, 12), seed=7)
     assert a.size == (16, 12)
     assert a.tobytes() == b.tobytes()
+
+
+def test_publish_mirrors_to_r2_store(tmp_path):
+    from dream.tests.test_storage import FakeR2
+
+    store = FakeR2()
+    engine = FakeEngine()
+    result = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=engine,
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        store=store,
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_PUBLISHED
+    assert any(k.endswith(".png") for k in store.objects)
+    assert "current/current.webp" in store.objects
+    assert "current/status.json" in store.objects
+
+
+def test_hold_updates_r2_status_only(tmp_path):
+    from dream.tests.test_storage import FakeR2
+
+    store = FakeR2()
+    # Seed a prior current frame in the fake bucket.
+    store.objects["current/current.webp"] = b"prior"
+    result = run_hourly(
+        dial=0.0,
+        packet={"open_meteo_failed": True},
+        engine=FakeEngine(),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        store=store,
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_HOLD
+    assert store.objects["current/current.webp"] == b"prior"
+    assert json.loads(store.objects["current/status.json"])["hold"] is True

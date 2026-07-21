@@ -43,6 +43,11 @@ def main() -> int:
     ap.add_argument("--no-wyi", action="store_true", help="Skip WYI enrichment on live fetch")
     ap.add_argument("--no-buoy", action="store_true", help="Skip buoy enrichment on live fetch")
     ap.add_argument(
+        "--r2",
+        action="store_true",
+        help="Also publish outcomes to Cloudflare R2 (needs CF_R2_* in .env)",
+    )
+    ap.add_argument(
         "--dry-run",
         action="store_true",
         help="Decide + print but do not write artifacts",
@@ -59,6 +64,12 @@ def main() -> int:
 
         packet = enrich_packet(packet)
 
+    store = None
+    if args.r2:
+        from dream.storage import R2Store, r2_config_from_env
+
+        store = R2Store(r2_config_from_env())
+
     # A supplied packet is an intentional replay — don't let 2017 staleness trip
     # the live-feed weather-silence gate (still honors missing core fields).
     result = run_hourly(
@@ -70,6 +81,7 @@ def main() -> int:
         skip_silence=bool(packet is not None),
         fetch_wyi=not args.no_wyi,
         fetch_buoy=not args.no_buoy,
+        store=store,
     )
 
     print(f"outcome:      {result.outcome}")

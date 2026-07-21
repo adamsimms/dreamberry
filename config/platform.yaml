@@ -1,0 +1,27 @@
+# Dreamberry M5 platform configuration (issues #16–#17).
+# Secrets stay in env / Modal Secret `dreamberry` — never commit them.
+
+r2:
+  bucket: art-adamsimms-xyz-dreamberry
+  # S3 API endpoint (Account ID). Public custom domain is CF_R2_PUBLIC_BASE_URL.
+  endpoint: https://1bf55fc4d05548d7bf541d845d3bcbb3.r2.cloudflarestorage.com
+  public_base_url: https://dreamberry.adamsimms.xyz
+  # Flat layout — no private/ nesting, no YYYY/MM/DD folders.
+  archive_prefix: archive/
+  current_prefix: current/
+
+modal:
+  app_name: dreamberry
+  gpu: L40S
+  # Five past the hour so Open-Meteo's current hour row is usually settled.
+  cron: "5 * * * *"
+  timeout_seconds: 1800
+  hf_volume: dreamberry-hf-cache
+  data_volume: dreamberry-data
+  secret_name: dreamberry
+  # Artist-only public default (DREAMBERRY.md §6).
+  dial: 0.0
+
+healthchecks:
+  # URL comes from HEALTH_PING_URL env / Modal secret.
+  ping_on: published  # also ping on hold (sensors quiet is still a completed tick)

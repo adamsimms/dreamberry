@@ -10,6 +10,7 @@ This is a **sibling** to the Cloudberry archive, not an extension of it. The arc
 
 - [Project brief](docs/DREAMBERRY.md) — concept, architecture, dial, failure modes, infra
 - [Weather → image schema](docs/DREAMBERRY-WEATHER-SCHEMA.md) — symmetric train/live conditioning
+- [M5 Platform](docs/M5-PLATFORM.md) — Modal cron + R2 delivery
 
 ## Stack (first public release)
 

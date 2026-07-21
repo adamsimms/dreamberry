@@ -13,9 +13,9 @@ validators, mapping outcomes to the three brief failure modes
 A clean frame that passes both gates is PUBLISHED, updating the public pointer,
 with validator scores + any failure_mode written into the provenance sidecar.
 
-Delivery to R2 / Pages is M5; here artifacts land locally under
-`config/hourly.yaml:paths` (data/dream/, gitignored). The engine and the frame
-evaluator are injectable so the orchestration logic is testable without models.
+Local artifacts land under `config/hourly.yaml:paths` (data/dream/, gitignored).
+When an `R2Store` is passed (M5), the same outcomes are mirrored to the dedicated
+Dreamberry bucket: archive PNG + current WebP (or status-only on hold).
 """
 
 from __future__ import annotations
@@ -33,7 +33,11 @@ from PIL import Image
 
 from dream.config import canonical_frame_path, load_dream_config, resolve_path
 from dream.gates.evaluate import FrameEvaluation, evaluate_frame
-from dream.sidecar import build_sidecar, write_sidecar
+from dream.storage import (
+    next_dream_number_from_names,
+    save_local_publish,
+    save_local_signal_lost,
+)
 from weather_schema.live import (
     build_live_packet,
     check_weather_silence,
@@ -58,7 +62,7 @@ FAILURE_WEATHER_SILENCE = "weather_silence"
 FAILURE_SIGNAL_LOST = "signal_lost"
 FAILURE_IDENTITY_COLLAPSE = "identity_collapse"
 
-_DREAM_RE = re.compile(r"_DREAM(\d+)\.JPG$")
+_DREAM_RE = re.compile(r"_DREAM(\d+)\.(?:png|PNG|jpg|JPG|jpeg|JPEG|webp|WEBP)$")
 
 # The frame evaluator contract: (image, packet, dial) -> FrameEvaluation.
 Evaluator = Callable[[Any, Mapping[str, Any], float], FrameEvaluation]
@@ -101,17 +105,20 @@ def _dream_timestamp(pkt: Mapping[str, Any], now: datetime) -> str:
     return now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-def _next_dream_number(out_dir: Path) -> int:
-    mx = 0
+def _next_dream_number(out_dir: Path, store: Any | None = None) -> int:
+    if store is not None:
+        return int(store.next_dream_number())
+    names: list[str] = []
     if out_dir.exists():
-        for p in out_dir.glob("*_DREAM*.JPG"):
-            m = _DREAM_RE.search(p.name)
-            if m:
-                mx = max(mx, int(m.group(1)))
-    return mx + 1
+        for p in out_dir.iterdir():
+            if p.is_file() and _DREAM_RE.search(p.name):
+                names.append(p.name)
+    return next_dream_number_from_names(names)
 
 
-def _read_status(path: Path) -> dict[str, Any]:
+def _read_status(path: Path, store: Any | None = None) -> dict[str, Any]:
+    if store is not None:
+        return store.read_status()
     if path.exists():
         try:
             with open(path) as f:
@@ -121,11 +128,22 @@ def _read_status(path: Path) -> dict[str, Any]:
     return {}
 
 
-def _write_status(path: Path, status: Mapping[str, Any]) -> None:
+def _write_status(
+    path: Path,
+    status: Mapping[str, Any],
+    store: Any | None = None,
+    *,
+    hold: bool = False,
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
         json.dump(dict(status), f, ensure_ascii=False, indent=2)
         f.write("\n")
+    if store is not None:
+        if hold:
+            store.publish_hold(status)
+        else:
+            store.put_json("current/status.json", status)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -176,6 +194,7 @@ def run_hourly(
     packet: Mapping[str, Any] | None = None,
     engine: Any = None,
     evaluate_fn: Evaluator | None = None,
+    store: Any | None = None,
     now: datetime | None = None,
     seed_base: int | None = None,
     retries: int | None = None,
@@ -196,6 +215,10 @@ def run_hourly(
     heavy models are only touched on the real path. `skip_silence` bypasses the
     freshness gate for intentional replays of old archive packets (the staleness
     check exists to catch dead *live* feeds, not deliberate replays).
+
+    `store` is an optional `R2Store` (M5). When set, prior status and dream
+    counters come from R2, and publish/hold/signal_lost outcomes are mirrored
+    there (PNG archive / WebP current).
     """
     now = _now(now)
     dream_cfg = dream_cfg or load_dream_config()
@@ -207,7 +230,7 @@ def run_hourly(
     public_dir = resolve_path(hourly_cfg["paths"]["public_dir"])
     archive_dir = resolve_path(hourly_cfg["paths"]["archive_dir"])
     status_path = public_dir / "status.json"
-    prior = _read_status(status_path)
+    prior = _read_status(status_path, store)
     last_success_at = prior.get("last_success_at")
 
     retries = int(hourly_cfg.get("retries", 3)) if retries is None else int(retries)
@@ -243,7 +266,7 @@ def run_hourly(
             reasons=list(silence.reasons),
         )
         if write:
-            _write_status(status_path, status)
+            _write_status(status_path, status, store, hold=True)
         return HourlyResult(
             outcome=OUTCOME_HOLD,
             failure_mode=FAILURE_WEATHER_SILENCE,
@@ -290,6 +313,7 @@ def run_hourly(
                 archive_dir=archive_dir,
                 status_path=status_path,
                 write=write,
+                store=store,
             )
         last_reject = ev.reject_reason
 
@@ -306,7 +330,7 @@ def run_hourly(
             reasons=[last_reject] if last_reject else [],
         )
         if write:
-            _write_status(status_path, status)
+            _write_status(status_path, status, store, hold=True)
         return HourlyResult(
             outcome=OUTCOME_HOLD,
             failure_mode=None,
@@ -328,6 +352,7 @@ def run_hourly(
         public_dir=public_dir,
         status_path=status_path,
         write=write,
+        store=store,
     )
 
 
@@ -369,9 +394,10 @@ def _publish(
     archive_dir: Path,
     status_path: Path,
     write: bool,
+    store: Any | None = None,
 ) -> HourlyResult:
     timestamp = _dream_timestamp(pkt, now)
-    number = _next_dream_number(archive_dir) if write else 1
+    number = _next_dream_number(archive_dir, store) if write else 1
     dream_id = f"{timestamp}_DREAM{number:03d}"
 
     sidecar = dict(result.sidecar)
@@ -379,18 +405,8 @@ def _publish(
     sidecar["validator_scores"] = evaluation.validator_scores
     sidecar["failure_mode"] = evaluation.failure_mode
 
-    current_name = "current.JPG"
+    current_name = "current.webp"
     image_path = str(public_dir / current_name)
-
-    if write:
-        archive_dir.mkdir(parents=True, exist_ok=True)
-        public_dir.mkdir(parents=True, exist_ok=True)
-        # Private hourly archive (frame + provenance).
-        result.image.save(archive_dir / f"{dream_id}.JPG", "JPEG", quality=95, subsampling=0)
-        write_sidecar(archive_dir / f"{dream_id}.json", sidecar)
-        # Public window: one current frame + its sidecar, pointer moves.
-        result.image.save(public_dir / current_name, "JPEG", quality=95, subsampling=0)
-        write_sidecar(public_dir / "current.json", sidecar)
 
     status = {
         "updated_at": now.isoformat(),
@@ -404,8 +420,26 @@ def _publish(
         "attempts": attempts,
         "reasons": [],
     }
+
     if write:
-        _write_status(status_path, status)
+        save_local_publish(
+            image=result.image,
+            sidecar=sidecar,
+            status=status,
+            dream_id=dream_id,
+            public_dir=public_dir,
+            archive_dir=archive_dir,
+        )
+        if store is not None:
+            keys = store.publish_frame(
+                dream_id=dream_id,
+                image=result.image,
+                sidecar=sidecar,
+                status=status,
+            )
+            status = {**status, **{f"r2_{k}": v for k, v in keys.items()}}
+            # refresh status.json on disk with R2 keys / public URL
+            _write_status(status_path, status)
 
     return HourlyResult(
         outcome=OUTCOME_PUBLISHED,
@@ -432,17 +466,13 @@ def _signal_lost(
     public_dir: Path,
     status_path: Path,
     write: bool,
+    store: Any | None = None,
 ) -> HourlyResult:
     gen = dream_cfg["generation"]
     size = (int(gen["width"]), int(gen["height"]))
-    noise_name = "signal_lost.JPG"
+    noise_name = "signal_lost.webp"
     image_path = str(public_dir / noise_name)
-
-    if write:
-        public_dir.mkdir(parents=True, exist_ok=True)
-        make_noise_image(size, seed=int(now.timestamp())).save(
-            public_dir / noise_name, "JPEG", quality=90
-        )
+    noise = make_noise_image(size, seed=int(now.timestamp()))
 
     status = {
         "updated_at": now.isoformat(),
@@ -457,8 +487,13 @@ def _signal_lost(
         "attempts": attempts,
         "reasons": [error] if error else [],
     }
+
     if write:
-        _write_status(status_path, status)
+        save_local_signal_lost(image=noise, status=status, public_dir=public_dir)
+        if store is not None:
+            keys = store.publish_signal_lost(image=noise, status=status)
+            status = {**status, **{f"r2_{k}": v for k, v in keys.items()}}
+            _write_status(status_path, status)
 
     return HourlyResult(
         outcome=OUTCOME_SIGNAL_LOST,
