@@ -15,7 +15,9 @@ identity_collapse:
   dino_distance_fail: 0.45
   # Horizon-line displacement vs the canonical frame, as a fraction of image
   # height. Larger = the sea/sky boundary has wandered (geometry lost).
-  horizon_displacement_fail: 0.06
+  # Calibrated against the dial-0 baseline: good frames sit at ~0.055-0.085
+  # (estimator noise floor), so 0.13 leaves margin and trips only real drift.
+  horizon_displacement_fail: 0.13
   # Below this dial the window must hold: a collapse triggers regen/hold. At or
   # above it, collapse is expected and honored (rendered as seeded defocus).
   enforced_below_dial: 3.0
