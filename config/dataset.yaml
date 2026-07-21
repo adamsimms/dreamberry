@@ -1,0 +1,50 @@
+# Dreamberry M0 dataset configuration (authoritative for curation + weather pairing)
+
+cabin:
+  latitude: 49.2026
+  longitude: -53.4859
+  timezone: America/St_Johns
+
+canonical_frame: 2017-09-18T09:59:44.000Z_GOPR2537.JPG
+canonical_frame_backup: 2017-09-15T09:59:52.000Z_GOPR2479.JPG
+
+catalog:
+  path: ../pinchards.is/data/catalog.json
+  cdn_base: https://cloudberry-images.adamsimms.xyz/
+
+curation:
+  exclude_filenames:
+    - 2018-02-26T11:54:20.000Z_GOPR4086.JPG
+  night_solar_elevation_deg: -6.0
+  dedupe_hamming_threshold: 5
+  dedupe_downweight: 0.25
+  aspect_ratio: "4:3"
+  expected_width: 4000
+  expected_height: 3000
+
+download:
+  user_agent: Dreamberry-M0-Dataset/1.0 (+https://github.com/adamsimms/dreamberry)
+  workers: 8
+  retries: 3
+
+weather:
+  archive_api: https://archive-api.open-meteo.com/v1/archive
+  hourly_variables:
+    - cloud_cover
+    - visibility
+    - weather_code
+    - relative_humidity_2m
+    - wind_speed_10m
+    - wind_direction_10m
+    - shortwave_radiation
+    - temperature_2m
+    - precipitation
+  wind_speed_unit: kmh
+
+paths:
+  raw_dir: data/raw
+  manifest: data/manifest.json
+  curated_day: data/curated/day.jsonl
+  curated_night: data/curated/night.jsonl
+  weather_dir: data/weather
+  weather_index: data/weather/index.json

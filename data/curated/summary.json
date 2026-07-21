@@ -1,0 +1,24 @@
+{
+  "night_definition": {
+    "method": "solar_elevation",
+    "threshold_deg": -6.0,
+    "description": "Night when solar elevation < \u22126\u00b0 (civil twilight end, USNO). Dawn/dusk stay in day bucket."
+  },
+  "dedupe": {
+    "method": "perceptual_hash_phash",
+    "hamming_threshold": 5,
+    "scope": "within bucket and local calendar day (America/St_Johns)",
+    "representative_weight": 1.0,
+    "duplicate_weight": 0.25
+  },
+  "counts": {
+    "eligible_exif": 1651,
+    "day_total": 1367,
+    "day_representatives": 1194,
+    "day_downweighted": 173,
+    "night_total": 284,
+    "night_representatives": 259,
+    "night_downweighted": 25,
+    "excluded": 1
+  }
+}

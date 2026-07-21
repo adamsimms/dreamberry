@@ -1,0 +1,23 @@
+{
+  "time_local": "2018-01-15T14:00",
+  "cloud_cover": 100,
+  "visibility": null,
+  "weather_code": 3,
+  "relative_humidity_2m": 64,
+  "wind_speed_10m": 15.0,
+  "wind_direction_10m": 305,
+  "shortwave_radiation": 189.0,
+  "temperature_2m": -6.0,
+  "precipitation": 0.0,
+  "wave_ht_sig": null,
+  "source": "open-meteo-era5-archive",
+  "latitude": 49.2026,
+  "longitude": -53.4859,
+  "filename": "2018-01-15T17:59:58.000Z_GOPR3742.JPG",
+  "exif_iso": "2018-01-15T17:59:59.000Z",
+  "bucket": "day",
+  "solar_elevation": 13.547,
+  "month": 1,
+  "timezone": "America/St_Johns",
+  "paired_at": "2026-07-21T13:11:26.527647+00:00"
+}

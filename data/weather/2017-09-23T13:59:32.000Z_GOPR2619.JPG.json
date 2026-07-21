@@ -1,0 +1,23 @@
+{
+  "time_local": "2017-09-23T11:00",
+  "cloud_cover": 46,
+  "visibility": null,
+  "weather_code": 1,
+  "relative_humidity_2m": 66,
+  "wind_speed_10m": 17.2,
+  "wind_direction_10m": 209,
+  "shortwave_radiation": 425.0,
+  "temperature_2m": 15.4,
+  "precipitation": 0.0,
+  "wave_ht_sig": null,
+  "source": "open-meteo-era5-archive",
+  "latitude": 49.2026,
+  "longitude": -53.4859,
+  "filename": "2017-09-23T13:59:32.000Z_GOPR2619.JPG",
+  "exif_iso": "2017-09-23T13:59:33.000Z",
+  "bucket": "day",
+  "solar_elevation": 37.131,
+  "month": 9,
+  "timezone": "America/St_Johns",
+  "paired_at": "2026-07-21T13:11:26.373168+00:00"
+}

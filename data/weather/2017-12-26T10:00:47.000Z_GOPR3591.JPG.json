@@ -1,0 +1,23 @@
+{
+  "time_local": "2017-12-26T06:00",
+  "cloud_cover": 0,
+  "visibility": null,
+  "weather_code": 0,
+  "relative_humidity_2m": 67,
+  "wind_speed_10m": 46.2,
+  "wind_direction_10m": 217,
+  "shortwave_radiation": 0.0,
+  "temperature_2m": 1.9,
+  "precipitation": 0.0,
+  "wave_ht_sig": null,
+  "source": "open-meteo-era5-archive",
+  "latitude": 49.2026,
+  "longitude": -53.4859,
+  "filename": "2017-12-26T10:00:47.000Z_GOPR3591.JPG",
+  "exif_iso": "2017-12-26T10:00:47.000Z",
+  "bucket": "night",
+  "solar_elevation": -13.363,
+  "month": 12,
+  "timezone": "America/St_Johns",
+  "paired_at": "2026-07-21T13:11:26.599772+00:00"
+}
