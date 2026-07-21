@@ -48,3 +48,5 @@ paths:
   curated_night: data/curated/night.jsonl
   weather_dir: data/weather
   weather_index: data/weather/index.json
+  captions: data/captions/captions.jsonl
+  weather_nn_index: data/captions/weather_nn_index.json
