@@ -60,10 +60,15 @@ PYTHONPATH=. .venv/bin/python scripts/dream_generate.py \
   --packet data/weather/<packet>.json --dials 0 2 5 8 10 --seed 1234
 ```
 
-Each run writes `data/dream/outputs/<stem>__dial<D>_seed<S>.png` and a JSON
-provenance sidecar (weather packet, seed, dial params, prompt, anchor id, model
-versions, device — validator scores + failure mode reserved for M3/M5). Outputs
-and cached control maps live under `data/dream/` (gitignored).
+Each run writes `data/dream/outputs/<TIMESTAMP>_DREAM<###>.JPG` and a matching JSON
+provenance sidecar. Dreams are named like the Cloudberry archive itself
+(`TIMESTAMP_GOPR####.JPG` → `TIMESTAMP_DREAM###.JPG`): `TIMESTAMP` is the instant
+being dreamed (the weather packet's `exif_iso`), and `DREAM###` is an
+auto-incrementing roll counter across the outputs dir. The sidecar carries the
+weather packet, seed, dial params, prompt, anchor id, edge-crop, model versions,
+and device (validator scores + failure mode reserved for M3/M5). Saved as JPEG
+q95 4:4:4 to match the archive medium. Outputs and cached control maps live under
+`data/dream/` (gitignored).
 
 ## Tests
 

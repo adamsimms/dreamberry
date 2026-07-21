@@ -19,8 +19,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -52,6 +53,27 @@ def enrich_packet(pkt: dict) -> dict:
     return pkt
 
 
+_DREAM_RE = re.compile(r"_DREAM(\d+)\.JPG$")
+
+
+def dream_timestamp(pkt: dict) -> str:
+    """The instant being dreamed, in the archive's ISO-Z form (matches Cloudberry)."""
+    ts = pkt.get("exif_iso") or pkt.get("timestamp")
+    if ts:
+        return str(ts)
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+def next_dream_number(out_dir: Path) -> int:
+    """Next roll counter across existing dreams (mirrors the GoPro GOPR#### counter)."""
+    mx = 0
+    for p in out_dir.glob("*_DREAM*.JPG"):
+        m = _DREAM_RE.search(p.name)
+        if m:
+            mx = max(mx, int(m.group(1)))
+    return mx + 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--packet", required=True, help="Weather packet JSON (repo-relative or absolute)")
@@ -75,17 +97,20 @@ def main() -> int:
     engine = DreamEngine(dream_cfg)
     print(f"Device: {engine.device}  |  packet: {packet_path.name}")
 
-    stem = packet_path.stem.replace(".JPG", "")
+    timestamp = dream_timestamp(pkt)
     for dial in dials:
         result = engine.generate(pkt, dial=dial, seed=args.seed, prompt=args.prompt)
-        tag = f"dial{dial:g}_seed{args.seed}"
-        png_path = out_dir / f"{stem}__{tag}.png"
-        json_path = out_dir / f"{stem}__{tag}.json"
-        result.image.save(png_path)
+        # Each dream gets its own roll number, like a consecutive shot on the camera.
+        number = next_dream_number(out_dir)
+        name = f"{timestamp}_DREAM{number:03d}"
+        jpg_path = out_dir / f"{name}.JPG"
+        json_path = out_dir / f"{name}.json"
+        result.sidecar["dream_id"] = name
+        result.image.save(jpg_path, "JPEG", quality=95, subsampling=0)
         with open(json_path, "w") as f:
             json.dump(result.sidecar, f, ensure_ascii=False, indent=2)
             f.write("\n")
-        print(f"  dial {dial:g} → {png_path.name}")
+        print(f"  dial {dial:g} → {jpg_path.name}")
         print(f"    prompt: {result.sidecar['prompt']}")
         print(f"    anchor: {result.sidecar['anchor_frame']} ({result.sidecar['anchor_source']})")
 
