@@ -1,0 +1,380 @@
+/* Dreamberry — public window + portfolio + info (M6 / #18, #22).
+   Dark, quiet, image-forward. The window is chrome-less; the portfolio and
+   info pages read like documents (same restraint as the Cloudberry archive). */
+
+:root {
+  --bg: #0a0b0d;
+  --ink: #e9e6df;
+  --ink-dim: #9a978f;
+  --ink-faint: #6b6862;
+  --line: #23242899;
+  --accent: #cdb89a;
+  --panel: #101216f2;
+  --maxw: 44rem;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-faint);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+a:hover {
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- window */
+
+.window {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  cursor: default;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+}
+
+.frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--crossfade, 5500ms) ease-in-out;
+  will-change: opacity;
+}
+
+.frame img.visible {
+  opacity: 1;
+}
+
+.frame.no-transition img {
+  transition: none;
+}
+
+/* Empty / waiting state — nothing has ever published, or first-ever hold. */
+.waiting {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.waiting.show {
+  opacity: 1;
+}
+
+/* Drawer toggle — a quiet mark, bottom-left. */
+.toggle {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  background: #0b0d10cc;
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: color 0.2s ease, border-color 0.2s ease, opacity 0.4s ease;
+}
+
+.toggle:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.toggle .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  transition: background 0.3s ease;
+}
+
+.toggle.state-live .dot {
+  background: #7fb98a;
+}
+.toggle.state-hold .dot {
+  background: var(--accent);
+}
+.toggle.state-lost .dot {
+  background: #b96b6b;
+}
+
+/* ---------------------------------------------------------------- drawer */
+
+.drawer {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 82vh;
+  overflow-y: auto;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+  transform: translateY(100%);
+  transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+  padding: 1.5rem max(1.25rem, env(safe-area-inset-left)) 2.5rem;
+}
+
+.drawer.open {
+  transform: translateY(0);
+}
+
+.drawer-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+
+.drawer h2 {
+  margin: 0 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.state-line {
+  font-size: 0.9rem;
+  color: var(--ink-dim);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.state-line strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink-dim);
+  vertical-align: middle;
+}
+
+.badge.generated {
+  color: var(--accent);
+  border-color: #4a4436;
+}
+
+section.group {
+  border-top: 1px solid var(--line);
+  padding: 1.1rem 0;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  gap: 0.35rem 1.25rem;
+  margin: 0.6rem 0 0;
+  font-size: 0.86rem;
+}
+
+dt {
+  color: var(--ink-faint);
+}
+
+dd {
+  margin: 0;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+dd.mono {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.attrib {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  line-height: 1.6;
+  margin-top: 0.75rem;
+}
+
+.drawer-foot {
+  border-top: 1px solid var(--line);
+  padding-top: 1.1rem;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ---------------------------------------------------- document pages */
+
+.doc {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vh, 6rem) 1.5rem 6rem;
+  line-height: 1.65;
+}
+
+.doc header.masthead {
+  margin-bottom: 2.5rem;
+}
+
+.doc .eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 0.75rem;
+}
+
+.doc h1 {
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
+  line-height: 1.1;
+}
+
+.doc .lede {
+  font-size: 1.1rem;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+.doc h2 {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 2.75rem 0 0.75rem;
+}
+
+.doc p {
+  margin: 0 0 1.1rem;
+  color: var(--ink);
+}
+
+.doc p.muted {
+  color: var(--ink-dim);
+}
+
+.doc ul {
+  margin: 0 0 1.1rem;
+  padding-left: 1.1rem;
+  color: var(--ink);
+}
+
+.doc li {
+  margin-bottom: 0.4rem;
+}
+
+.doc .cta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 2rem 0 0;
+}
+
+.doc .cta a {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.85rem 1.4rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+}
+
+.doc .cta a.primary {
+  border-color: #4a4436;
+  color: var(--accent);
+}
+
+.hero {
+  display: block;
+  margin: 0 0 2.5rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #000;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nav-back {
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.footer-note {
+  border-top: 1px solid var(--line);
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+/* --------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .frame img {
+    transition: opacity 0.01ms;
+  }
+  .drawer {
+    transition: transform 0.01ms;
+  }
+}

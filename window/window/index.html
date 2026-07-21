@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Dreamberry — the window</title>
+    <meta
+      name="description"
+      content="A generated live window onto Pinchard's Island — dreamed each hour from the current weather and a remembered frame. Not a photograph."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body>
+    <main class="window" aria-label="Dreamberry live window">
+      <div class="frame" id="frame">
+        <img id="layerA" alt="A generated view of Pinchard's Island under the current weather. Labeled generated — not a photograph." />
+        <img id="layerB" alt="" aria-hidden="true" />
+      </div>
+      <div class="waiting" id="waiting">waiting for the first dream…</div>
+    </main>
+
+    <button
+      type="button"
+      class="toggle state-live"
+      id="toggle"
+      aria-controls="drawer"
+      aria-expanded="false"
+    >
+      <span class="dot" aria-hidden="true"></span>
+      <span id="toggleLabel">generated</span>
+      <span aria-hidden="true">· details ↑</span>
+    </button>
+
+    <aside class="drawer" id="drawer" role="region" aria-label="Frame details">
+      <div class="drawer-inner" id="drawerBody"></div>
+    </aside>
+
+    <script src="../assets/config.js"></script>
+    <script src="../assets/wmo.js"></script>
+    <script src="../assets/window.js"></script>
+  </body>
+</html>

@@ -163,13 +163,27 @@ class R2Store:
 
     # -- primitives ----------------------------------------------------------
 
-    def put_bytes(self, key: str, data: bytes, *, content_type: str) -> None:
-        self._client.put_object(
-            Bucket=self.cfg.bucket,
-            Key=key,
-            Body=data,
-            ContentType=content_type,
-        )
+    def put_bytes(
+        self,
+        key: str,
+        data: bytes,
+        *,
+        content_type: str,
+        cache_control: str | None = None,
+    ) -> None:
+        # Live pointer under current/ changes hourly — short edge cache so a
+        # hard refresh never keeps a stale hour (client also busts with ?v=).
+        if cache_control is None and key.startswith(CURRENT_PREFIX):
+            cache_control = "public, max-age=300"
+        kwargs: dict[str, Any] = {
+            "Bucket": self.cfg.bucket,
+            "Key": key,
+            "Body": data,
+            "ContentType": content_type,
+        }
+        if cache_control:
+            kwargs["CacheControl"] = cache_control
+        self._client.put_object(**kwargs)
 
     def put_json(self, key: str, obj: Mapping[str, Any]) -> None:
         body = (json.dumps(dict(obj), ensure_ascii=False, indent=2) + "\n").encode(

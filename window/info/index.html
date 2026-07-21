@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Dreamberry — About</title>
+    <meta
+      name="description"
+      content="About Dreamberry: a generated window onto Pinchard's Island. How it works, why the weather is the only true signal, data attributions, and the ground it stands on."
+    />
+    <link rel="stylesheet" href="../assets/style.css" />
+  </head>
+  <body>
+    <main class="doc">
+      <header class="masthead">
+        <p class="eyebrow">Dreamberry</p>
+        <h1>About</h1>
+        <p class="lede">
+          A machine present at a place it can no longer photograph — and the
+          question of whether that presence is a gift or a consolation prize.
+        </p>
+      </header>
+
+      <h2>What it is</h2>
+      <p>
+        Dreamberry is a live generative window onto a view of Pinchard's Island,
+        Newfoundland, from a small family cabin. It is the successor to
+        <a href="/cloudberry/archive/">Cloudberry</a>, an off-the-grid,
+        solar-powered camera that photographed the same frame once an hour from
+        2017 until it failed in the winter of 2018. That archive is closed and
+        sacred. Dreamberry does not add to it — it dreams from it.
+      </p>
+      <p>
+        Every hour, Dreamberry reads the current weather at the island and
+        generates a single image of the remembered window under that weather,
+        anchored to the real Cloudberry frames so the rocks, horizon, and
+        cabin-edge stay recognizable. The result is real atmosphere haunting a
+        remembered frame — the last genuine live signal animating a fiction.
+      </p>
+
+      <h2>Every frame is generated</h2>
+      <p>
+        This is not a camera and not a photograph. There is no live feed from the
+        island. Each image is synthesized by a model (SDXL with ControlNet and a
+        real-frame anchor) and is labeled <span class="badge generated">generated</span>
+        in the details drawer, always. The bar is honesty, not
+        indistinguishable-from-a-photograph: a viewer who knows Cloudberry should
+        recognize the same window under plausible current weather, and know that
+        a machine imagined it.
+      </p>
+
+      <h2>The weather is the only thing still true</h2>
+      <p>
+        The single genuinely-live signal is the atmosphere at the island right
+        now — cloud, wind, fog, visibility, sea state, the angle of the sun.
+        Everything visual is memory or invention; only the weather is real and
+        current. That asymmetry is the honest core of the piece. The condition
+        packet used for each frame is shown in the drawer.
+      </p>
+
+      <h2>When it cannot dream</h2>
+      <p>
+        Dreamberry inherits Cloudberry's honesty about failure rather than hiding
+        it:
+      </p>
+      <ul>
+        <li>
+          <strong>Weather silence.</strong> If the weather feeds go quiet or
+          stale, Dreamberry does not invent a frame. It holds the last dream and
+          waits — presence stuck in time, like the camera that never woke.
+        </li>
+        <li>
+          <strong>Signal lost.</strong> If the generator itself fails, the window
+          shows static — a dead channel, honestly, until the next hour returns.
+        </li>
+        <li>
+          <strong>Identity collapse.</strong> When the model cannot hold the
+          window, the image dissolves rather than inventing a false, sharp place.
+          At its most dreamed, that dissolve is the truest state, not an error.
+        </li>
+      </ul>
+
+      <h2>Data &amp; attributions</h2>
+      <ul>
+        <li>Weather at the cabin — <a href="https://open-meteo.com/">Open-Meteo</a> (CC-BY 4.0).</li>
+        <li>Nearby observations — Environment and Climate Change Canada, Wesleyville station (open data).</li>
+        <li>Sea state — <a href="https://www.smartatlantic.ca/">SmartAtlantic</a> / CIOOS buoy, significant wave height (CC-BY 4.0).</li>
+      </ul>
+      <p class="muted">
+        Full provenance for any given hour — model, seed, dial, anchor frame,
+        validator scores, and the exact weather packet — lives in the window's
+        details drawer.
+      </p>
+
+      <h2>The ground it stands on</h2>
+      <p>
+        Pinchard's Island sits on the island of Newfoundland — Ktaqmkuk — the
+        unceded, ancestral territory of the Beothuk and the Mi'kmaq. It was
+        resettled by the artist's family in the mid-twentieth century, and
+        Dreamberry is a settler apparatus trained to synthetically re-occupy that
+        colonized ground. A machine hallucinating presence there is not neutral;
+        it carries a debt that this work names and does not pretend to resolve.
+      </p>
+
+      <h2>Who</h2>
+      <p>
+        Dreamberry is by <a href="/">Adam Simms</a>, extending a long
+        collaboration with his family in documenting the return to Pinchard's
+        Island. The dream dial — how hard the machine is allowed to dream the
+        place — is held by the artist for now; the door stays open for the family
+        whose story this is to hold it in future.
+      </p>
+
+      <p class="footer-note">
+        <a class="nav-back" href="../">← Dreamberry</a>
+        &nbsp;·&nbsp;
+        <a class="nav-back" href="../window/">the window</a>
+        &nbsp;·&nbsp;
+        <a class="nav-back" href="/">art.adamsimms.xyz</a>
+      </p>
+    </main>
+  </body>
+</html>

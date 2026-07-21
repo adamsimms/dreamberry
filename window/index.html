@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Dreamberry</title>
+    <meta
+      name="description"
+      content="Dreamberry is a generated window onto Pinchard's Island — a machine present at a place it can no longer photograph. Real weather, a remembered frame, dreamed anew each hour."
+    />
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <main class="doc">
+      <header class="masthead">
+        <p class="eyebrow">Adam Simms · generated window</p>
+        <h1>Dreamberry</h1>
+        <p class="lede">
+          A machine present at a place it can no longer photograph. Real
+          weather, a remembered frame, dreamed anew each hour.
+        </p>
+      </header>
+
+      <a class="hero" href="window/" aria-label="Enter the live window">
+        <img id="hero" alt="The current generated view of Pinchard's Island." />
+      </a>
+
+      <p>
+        When the Cloudberry camera failed on the island in 2018, the hourly view
+        it kept went dark. Dreamberry picks the signal back up — not with a
+        photograph, but with an inference. Every hour it reads the live weather
+        at Pinchard's Island and dreams the window the camera used to hold,
+        anchored to the real archive it left behind.
+      </p>
+      <p class="muted">
+        The weather is the only thing still true. The rocks are remembered and
+        invented; the wind, cloud, fog, and sea are real, right now, at the
+        island. Every frame is labeled generated.
+      </p>
+
+      <div class="cta">
+        <a class="primary" href="window/">Enter the window →</a>
+        <a href="info/">About &amp; attributions</a>
+      </div>
+
+      <p class="footer-note">
+        <a class="nav-back" href="/">← art.adamsimms.xyz</a>
+      </p>
+    </main>
+
+    <script src="assets/config.js"></script>
+    <script>
+      // Hero mirrors the live pointer. An <img> is cross-origin-safe, so point it
+      // straight at the current frame first (works without CORS / status.json);
+      // then best-effort refine to the exact dream + cache-bust if status is
+      // reachable. Falls back to signal_lost if that's what's current.
+      (function () {
+        const base = window.DREAMBERRY.base;
+        const hero = document.getElementById("hero");
+        hero.src = base + "/current/current.webp";
+        fetch(base + "/current/status.json?t=" + Date.now(), { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((s) => {
+            if (!s || !s.current) return;
+            const v = s.dream_id || s.updated_at || "0";
+            hero.src = base + "/current/" + s.current + "?v=" + encodeURIComponent(v);
+          })
+          .catch(() => {});
+      })();
+    </script>
+  </body>
+</html>
