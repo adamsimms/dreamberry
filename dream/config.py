@@ -45,6 +45,36 @@ def resolve_path(rel: str | Path) -> Path:
     return p if p.is_absolute() else REPO_ROOT / p
 
 
+def crop_signature(edge_crop: dict[str, Any] | None) -> str:
+    """Short stable tag for cache filenames, e.g. 't9r12'."""
+    if not edge_crop:
+        return "full"
+    parts = []
+    for k in ("top", "right", "bottom", "left"):
+        v = float(edge_crop.get(k, 0.0) or 0.0)
+        if v:
+            parts.append(f"{k[0]}{int(round(v * 100))}")
+    return "".join(parts) if parts else "full"
+
+
+def apply_edge_crop(image, edge_crop: dict[str, Any] | None):
+    """Trim fractional insets from each edge (GoPro fisheye / window-edge border).
+
+    Applied identically to the anchor init and the canonical control source so the
+    two stay geometrically aligned. No-op when edge_crop is empty/zero.
+    """
+    if not edge_crop:
+        return image
+    w, h = image.size
+    left = int(round(w * float(edge_crop.get("left", 0.0) or 0.0)))
+    top = int(round(h * float(edge_crop.get("top", 0.0) or 0.0)))
+    right = w - int(round(w * float(edge_crop.get("right", 0.0) or 0.0)))
+    bottom = h - int(round(h * float(edge_crop.get("bottom", 0.0) or 0.0)))
+    if (left, top, right, bottom) == (0, 0, w, h):
+        return image
+    return image.crop((left, top, right, bottom))
+
+
 def canonical_frame_path(dream_cfg: dict[str, Any]) -> Path:
     ds = load_dataset_config(dream_cfg)
     raw_dir = resolve_path(ds["paths"]["raw_dir"])

@@ -27,6 +27,14 @@ generation:
   # SDXL-native ~1MP at exact 4:3 (Cloudberry is 4000x3000). SUPIR upscales at M4.
   width: 1024
   height: 768
+  # GoPro fisheye / cabin-window-edge trim. Fractions removed from each edge BEFORE
+  # resize, applied uniformly to the anchor init AND the canonical control source so
+  # geometry stays aligned. Removes the dark window-edge vignette in the top-right.
+  edge_crop:
+    top: 0.09
+    right: 0.12
+    bottom: 0.0
+    left: 0.0
   steps: 30
   guidance_scale: 6.0
   # Base ControlNet strengths; the dial scales these (see dream/dial.py).

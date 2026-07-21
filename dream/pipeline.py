@@ -17,6 +17,7 @@ from PIL import Image, ImageFilter
 
 from dream.anchor import Anchor, select_anchor
 from dream.config import (
+    apply_edge_crop,
     canonical_frame_path,
     resolve_device,
     resolve_dtype,
@@ -140,12 +141,16 @@ class DreamEngine:
         h = int(self.gen["height"])
         size = (w, h)
 
-        init_image = Image.open(anchor.path).convert("RGB").resize(size, Image.BICUBIC)
+        edge_crop = self.gen.get("edge_crop")
+        init_image = Image.open(anchor.path).convert("RGB")
+        init_image = apply_edge_crop(init_image, edge_crop)
+        init_image = init_image.resize(size, Image.BICUBIC)
 
         depth_img, edge_img = build_control_images(
             canonical_frame_path(self.cfg),
             size,
             self.gen.get("controls_dir") or self.cfg["paths"]["controls_dir"],
+            edge_crop=edge_crop,
         )
 
         depth_scale = float(self.gen["controlnet_depth_base"]) * params.controlnet_scale
@@ -203,6 +208,7 @@ class DreamEngine:
             "seed": seed,
             "width": size[0],
             "height": size[1],
+            "edge_crop": self.gen.get("edge_crop"),
             "anchor_frame": anchor.filename,
             "anchor_source": anchor.source,
             "anchor_distance": anchor.distance,
