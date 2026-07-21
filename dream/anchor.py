@@ -36,8 +36,13 @@ def _canonical(dream_cfg: dict[str, Any]) -> tuple[str, Path]:
 def select_anchor(
     pkt: Mapping[str, Any],
     dream_cfg: dict[str, Any],
+    *,
+    exclude: set[str] | None = None,
 ) -> Anchor:
-    """Pick the weather-nearest same-season archive frame for `pkt`."""
+    """Pick the weather-nearest same-season archive frame for `pkt`.
+
+    `exclude` drops candidate filenames (leave-one-out for held-out eval).
+    """
     ds = load_dataset_config(dream_cfg)
     raw_dir = _raw_dir(dream_cfg)
     index_path = resolve_path(ds["paths"]["weather_nn_index"])
@@ -46,7 +51,7 @@ def select_anchor(
         from weather_schema.retrieve import WeatherNNIndex
 
         index = WeatherNNIndex.load(index_path)
-        hits = index.query(pkt, k=5)
+        hits = index.query(pkt, k=5, exclude=exclude)
         for hit in hits:
             candidate = raw_dir / hit["filename"]
             if candidate.exists():

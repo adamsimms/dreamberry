@@ -12,6 +12,8 @@ data/raw/
 data/processed/
 # Generated dream stills, sidecars, and cached control maps (M2 artifacts, not committed).
 data/dream/
+# M3 gate references (DINOv2 index, calibration) + eval outputs — regenerable, not committed.
+data/gates/
 # Manifests, curated lists, and weather packets ARE committed (M0 deliverables).
 *.safetensors
 *.ckpt

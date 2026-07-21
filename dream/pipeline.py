@@ -123,6 +123,7 @@ class DreamEngine:
         seed: int | None = None,
         prompt: str | None = None,
         anchor: Anchor | None = None,
+        exclude_anchors: set[str] | None = None,
     ) -> DreamResult:
         import torch
 
@@ -135,7 +136,7 @@ class DreamEngine:
             prompt = compose_prompt(pkt)
 
         if anchor is None:
-            anchor = select_anchor(pkt, self.cfg)
+            anchor = select_anchor(pkt, self.cfg, exclude=exclude_anchors)
 
         w = int(self.gen["width"])
         h = int(self.gen["height"])

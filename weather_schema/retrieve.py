@@ -114,16 +114,23 @@ class WeatherNNIndex:
         k: int = 5,
         *,
         include_prompt: bool = False,
+        exclude: set[str] | None = None,
     ) -> list[dict[str, Any]]:
-        """Return top-k same-season anchors sorted by weighted distance."""
+        """Return top-k same-season anchors sorted by weighted distance.
+
+        `exclude` drops candidate filenames (leave-one-out for held-out eval).
+        """
         if k <= 0:
             return []
 
         query_month = int(pkt["month"])
         q_vals, _ = feature_vector(pkt, theta_shore_deg=self.theta_shore_deg)
+        excluded = exclude or set()
 
         scored: list[tuple[float, IndexEntry]] = []
         for entry in self.entries:
+            if entry.filename in excluded:
+                continue
             if not self._season_allowed(query_month, entry.month):
                 continue
             dist = weighted_distance(q_vals, entry.feature_vector, self.weights)

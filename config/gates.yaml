@@ -1,0 +1,46 @@
+# Dreamberry M3 quality-gate configuration (issues #9-#11).
+# Thresholds are DEFAULTS to be tuned against the dial-0 baseline report — they
+# encode the two failure modes (identity collapse, season mismatch) from
+# DREAMBERRY.md §"Validators". Collapse is dial-aware: enforced at low dial,
+# expected and honored at high dial.
+
+models:
+  dino: facebook/dinov2-base
+  clip: openai/clip-vit-base-patch32
+  lpips_net: alex
+
+identity_collapse:
+  # DINOv2 cosine distance (1 - cos_sim) from the generated frame to its nearest
+  # real archive neighbor. Larger = drifted from the real-frame distribution.
+  dino_distance_fail: 0.45
+  # Horizon-line displacement vs the canonical frame, as a fraction of image
+  # height. Larger = the sea/sky boundary has wandered (geometry lost).
+  horizon_displacement_fail: 0.06
+  # Below this dial the window must hold: a collapse triggers regen/hold. At or
+  # above it, collapse is expected and honored (rendered as seeded defocus).
+  enforced_below_dial: 3.0
+  # k neighbors averaged for the DINOv2 kNN distance.
+  knn: 3
+
+season_lock:
+  # Refuse when the CLIP-predicted season family is disjoint from the expected
+  # family AND its margin over the expected family exceeds this (calibrated).
+  refuse_margin: 0.05
+  # Season prompt template for CLIP zero-shot.
+  prompt_template: "a photo of a {season} coastal landscape in Newfoundland"
+
+eval:
+  # Held-out baseline: stratified by season family x precip class, seeded.
+  n_frames: 8
+  seed: 20260721
+  dial: 0.0
+  # Reference/report bars (informational in v1 — surfaced, not enforced).
+  clip_similarity_min: 0.60
+  lpips_max: 0.60
+
+paths:
+  dino_index: data/gates/dino_index.npz
+  season_calibration: data/gates/season_calibration.json
+  eval_dir: data/gates/eval
+  # DINOv2 reference build: stratified sample cap across seasons (0 = all day frames).
+  dino_index_cap: 0

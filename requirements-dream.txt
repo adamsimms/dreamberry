@@ -12,3 +12,5 @@ huggingface_hub>=0.24
 controlnet-aux>=0.0.9
 opencv-python-headless>=4.9
 python-dotenv>=1.0
+numpy>=1.26
+lpips>=0.1.4
