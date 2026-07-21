@@ -1,0 +1,46 @@
+# Dreamberry M2 dream-engine configuration.
+# The dial schedule itself lives in dream/dial.py (brief §6, single source of truth).
+# This file holds model IDs, device/precision, and generation defaults.
+
+models:
+  base: stabilityai/stable-diffusion-xl-base-1.0
+  vae: madebyollin/sdxl-vae-fp16-fix
+  controlnet_depth: diffusers/controlnet-depth-sdxl-1.0-small
+  controlnet_softedge: alimama-creative/EcomXL_controlnet_softedge
+  ip_adapter_repo: h94/IP-Adapter
+  ip_adapter_subfolder: sdxl_models
+  ip_adapter_weight: ip-adapter_sdxl.bin
+  # Optional trained LoRA (M2 follow-on). null → base only (dial-0 lock relies on
+  # anchor + ControlNet, not LoRA, by design).
+  lora_path: null
+
+runtime:
+  # device: auto | cuda | mps | cpu
+  device: auto
+  # dtype: auto | float16 | float32  (auto: fp16 on cuda/mps, fp32 on cpu)
+  dtype: auto
+  attention_slicing: false
+  vae_slicing: true
+  use_ip_adapter: true
+
+generation:
+  # SDXL-native ~1MP at exact 4:3 (Cloudberry is 4000x3000). SUPIR upscales at M4.
+  width: 1024
+  height: 768
+  steps: 30
+  guidance_scale: 6.0
+  # Base ControlNet strengths; the dial scales these (see dream/dial.py).
+  controlnet_depth_base: 1.0
+  controlnet_softedge_base: 0.7
+  trigger: "cldbry window view of Pinchard's Island, Newfoundland"
+  negative_prompt: >-
+    text, watermark, signage, people, boats, wildlife, buildings other than the
+    cabin, oversaturated, cartoon, illustration, painting, lens flare, jpeg
+    artifacts, frame border
+
+paths:
+  controls_dir: data/dream/controls
+  outputs_dir: data/dream/outputs
+  # Reuse the M0/M1 dataset config for cabin coords, canonical frame, raw dir,
+  # curated lists, and the weather-NN index.
+  dataset_config: config/dataset.yaml

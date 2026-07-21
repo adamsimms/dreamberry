@@ -1,0 +1,14 @@
+# Dreamberry M2 dream engine (SDXL + ControlNet + IP-Adapter).
+# Heavy GPU/ML stack; kept separate from the light M0/M1 dataset deps.
+# Install: .venv/bin/pip install -r requirements-dream.txt
+
+torch>=2.3
+torchvision>=0.18
+diffusers>=0.30
+transformers>=4.44
+accelerate>=0.33
+safetensors>=0.4
+huggingface_hub>=0.24
+controlnet-aux>=0.0.9
+opencv-python-headless>=4.9
+python-dotenv>=1.0
