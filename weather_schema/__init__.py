@@ -5,6 +5,12 @@ packets (captioning) and live forecast packets (inference).
 """
 
 from weather_schema.compose import TRIGGER, compose_prompt, normalize_packet
+from weather_schema.live import (
+    WeatherSilenceResult,
+    build_live_packet,
+    check_weather_silence,
+    is_weather_silence,
+)
 from weather_schema.retrieve import WeatherNNIndex
 from weather_schema.vocabulary import CLOSED_VOCABULARY
 from weather_schema.vector import feature_vector, precip_class, season_family, weighted_distance
@@ -13,9 +19,13 @@ __all__ = [
     "TRIGGER",
     "CLOSED_VOCABULARY",
     "WeatherNNIndex",
+    "WeatherSilenceResult",
+    "build_live_packet",
+    "check_weather_silence",
     "compose_prompt",
-    "normalize_packet",
     "feature_vector",
+    "is_weather_silence",
+    "normalize_packet",
     "precip_class",
     "season_family",
     "weighted_distance",

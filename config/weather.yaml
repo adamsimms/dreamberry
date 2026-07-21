@@ -1,0 +1,22 @@
+# Dreamberry M4 live weather agent (issue #13)
+# Archive pairing settings remain in config/dataset.yaml.
+
+live:
+  staleness_hours: 3.0
+  forecast_api: https://api.open-meteo.com/v1/forecast
+  forecast_days: 2
+
+  # ECCC Pool's Island — station code WYI (~12 km from cabin)
+  wyi:
+    station_code: wyi
+    past_conditions_url: https://weather.gc.ca/past_conditions/index_e.html
+
+  # SmartAtlantic Bonavista Bay buoy (~59 km) — ERDDAP tabledap
+  buoy:
+    dataset: SMA_bonavista
+    erddap_base: https://www.smartatlantic.ca/erddap/tabledap
+    lookback_hours: 6
+
+paths:
+  live_dir: data/live
+  live_current: data/live/current.json
