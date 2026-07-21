@@ -1,7 +1,7 @@
 # Dreamberry M5 — Platform (Modal + R2)
 
-Issues **#16** (Modal cron + L40S) and **#17** (R2 storage).  
-Issue **#19** (hold honesty review) is intentionally deferred.
+Issues **#16** (Modal cron + L40S), **#17** (R2 storage), and **#19** (graceful
+failure / hold honesty).
 
 ---
 
@@ -99,8 +99,39 @@ PYTHONPATH=. .venv/bin/python scripts/dream_hourly.py --packet data/weather/<fra
 
 ---
 
+## #19 — graceful failure / hold honesty
+
+The locked contract (issue #19): **weather silence → hold the last frame;
+GPU/provider outage → white-noise `signal_lost`. Do not merge the two aesthetics.**
+
+Two distinct failure aesthetics, mapped in `dream/hourly.py`:
+
+| Trigger | Aesthetic | `current` pointer | `status` |
+|---|---|---|---|
+| Weather silence (stale/dead feeds) | **hold** — the dream stays | last dream (`current.webp`) | `hold: true`, `failure_mode: weather_silence` |
+| Gate exhaustion (collapse/season) | **hold** — the dream stays | last dream (`current.webp`) | `hold: true`, `hold_reason` set |
+| Every generation attempt throws | **signal lost** — noise field | `signal_lost.webp` | `hold: false`, `failure_mode: signal_lost` |
+
+Honesty guarantees enforced (and unit-tested in `test_hourly.py` / `test_storage.py`):
+
+- A hold **never overwrites** `current.webp` — only `status.json` is rewritten
+  (R2 `publish_hold` touches status only).
+- `current.webp` is only ever written by a *publish*; `signal_lost` writes a
+  **separate** `signal_lost.webp` key and merely repoints `status.current`. So a
+  hold that follows a signal_lost **reverts** the pointer from noise back to the
+  last real dream — noise never masquerades as a held dream.
+- `status.json` carries `last_success_at` **and** `last_success_dream_id`, both
+  preserved across holds and signal-lost hours, so the next good hour — or a
+  later hold — always restores the correct dream and its provenance.
+- First-ever hold (nothing published yet): `current` and `dream_id` are `null` —
+  there is no honest frame to show.
+- Dead-man switch (`modal_app.py`): a completed tick, **including a hold**, pings
+  healthy — silence is a legitimate honored state, not a system fault. Only
+  `signal_lost` (channel dead) hits `/fail` and pages.
+
+---
+
 ## Not in this slice
 
-- **#19** Opus review of hold / signal_lost honesty
 - **#18 / #20** public window UI on Pages
 - **#12** SUPIR upscale

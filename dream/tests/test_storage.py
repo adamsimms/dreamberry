@@ -91,6 +91,43 @@ def test_save_local_publish_layout(tmp_path):
     assert json.loads((pub / "status.json").read_text())["current"] == "current.webp"
 
 
+def _store_without_boto():
+    from dream.storage import R2Config, R2Store
+
+    store = R2Store.__new__(R2Store)  # bypass boto3 client construction
+    store.cfg = R2Config(
+        bucket="b",
+        endpoint_url="https://x.r2.cloudflarestorage.com",
+        access_key_id="a",
+        secret_access_key="s",
+        public_base_url="https://dreamberry.example",
+    )
+    captured: dict[str, dict] = {}
+    store.put_json = lambda key, obj: captured.__setitem__(key, dict(obj))
+    return store, captured
+
+
+def test_publish_hold_refreshes_current_url_to_dream():
+    # A hold that follows a signal_lost must repoint the URL at the dream, not noise.
+    store, captured = _store_without_boto()
+    store.publish_hold(
+        {
+            "hold": True,
+            "current": "current.webp",
+            "current_url": "https://dreamberry.example/current/signal_lost.webp",
+        }
+    )
+    assert captured[STATUS_KEY]["current_url"] == (
+        f"https://dreamberry.example/{CURRENT_IMAGE_KEY}"
+    )
+
+
+def test_publish_hold_drops_url_when_no_dream_yet():
+    store, captured = _store_without_boto()
+    store.publish_hold({"hold": True, "current": None})
+    assert "current_url" not in captured[STATUS_KEY]
+
+
 class FakeR2:
     """Minimal stand-in for R2Store used by hourly integration tests."""
 

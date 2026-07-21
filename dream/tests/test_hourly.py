@@ -270,6 +270,95 @@ def test_signal_lost_preserves_prior_last_success(tmp_path):
     assert result.status["last_success_at"] == "2026-07-21T14:00:00+00:00"
 
 
+def test_publish_records_last_success_dream_id(tmp_path):
+    result = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=FakeEngine(),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_PUBLISHED
+    assert result.status["last_success_dream_id"] == result.dream_id
+    assert result.status["current"] == "current.webp"
+
+
+def test_first_ever_hold_shows_nothing(tmp_path):
+    # No prior success on disk → a hold has no honest frame to point at.
+    result = run_hourly(
+        dial=0.0,
+        packet={"open_meteo_failed": True},
+        engine=FakeEngine(),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_HOLD
+    assert result.status["current"] is None
+    assert result.status["dream_id"] is None
+
+
+def test_hold_after_signal_lost_reverts_to_dream_not_noise(tmp_path):
+    # The locked #19 contract: hold restores the last *dream*, never noise.
+    pub = tmp_path / "public"
+    pub.mkdir(parents=True)
+    (pub / "status.json").write_text(
+        json.dumps(
+            {
+                "hold": False,
+                "failure_mode": "signal_lost",
+                "last_success_at": "2026-07-21T14:00:00+00:00",
+                "last_success_dream_id": "2026-07-21T14:00:00Z_DREAM007",
+                "current": "signal_lost.webp",
+                "dream_id": None,
+            }
+        )
+    )
+    result = run_hourly(
+        dial=0.0,
+        packet={"open_meteo_failed": True},
+        engine=FakeEngine(),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_HOLD
+    assert result.failure_mode == "weather_silence"
+    # Pointer must move OFF the noise field back to the held dream.
+    assert result.status["current"] == "current.webp"
+    assert result.status["dream_id"] == "2026-07-21T14:00:00Z_DREAM007"
+    assert result.status["last_success_dream_id"] == "2026-07-21T14:00:00Z_DREAM007"
+
+
+def test_signal_lost_preserves_last_success_dream_id(tmp_path):
+    pub = tmp_path / "public"
+    pub.mkdir(parents=True)
+    (pub / "status.json").write_text(
+        json.dumps(
+            {
+                "last_success_at": "2026-07-21T14:00:00+00:00",
+                "last_success_dream_id": "2026-07-21T14:00:00Z_DREAM007",
+                "current": "current.webp",
+                "dream_id": "2026-07-21T14:00:00Z_DREAM007",
+            }
+        )
+    )
+    result = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=FakeEngine(n_raise=99),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_SIGNAL_LOST
+    assert result.status["current"] == "signal_lost.webp"
+    assert result.status["dream_id"] is None
+    # The dream is preserved for the next good hour / a later hold.
+    assert result.status["last_success_dream_id"] == "2026-07-21T14:00:00Z_DREAM007"
+
+
 def test_make_noise_image_is_deterministic():
     a = make_noise_image((16, 12), seed=7)
     b = make_noise_image((16, 12), seed=7)

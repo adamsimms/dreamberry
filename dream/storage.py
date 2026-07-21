@@ -252,8 +252,19 @@ class R2Store:
         }
 
     def publish_hold(self, status: Mapping[str, Any]) -> dict[str, str]:
-        """Weather silence / gate hold — status only; leave current.webp untouched."""
-        self.put_json(STATUS_KEY, dict(status))
+        """Weather silence / gate hold — status only; leave current.webp untouched.
+
+        The pointer stays on the last successful dream (`current.webp`), so the
+        public URL is refreshed to match — a hold must never keep a stale
+        signal_lost URL from the previous hour.
+        """
+        status_out = dict(status)
+        if self.cfg.public_base_url:
+            if status_out.get("current") == "current.webp":
+                status_out["current_url"] = self.cfg.public_url(CURRENT_IMAGE_KEY)
+            else:
+                status_out.pop("current_url", None)
+        self.put_json(STATUS_KEY, status_out)
         return {"status": STATUS_KEY}
 
     def publish_signal_lost(

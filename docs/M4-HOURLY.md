@@ -99,7 +99,9 @@ February). Published frames get `validator_scores` (DINOv2 kNN distance, horizon
 displacement, nearest real frames, collapse + season verdicts) in the sidecar.
 
 `status.json` (public): `updated_at`, `hold`, `failure_mode`, `hold_reason`,
-`last_success_at`, `current`, `dream_id`, `dial`, `attempts`, `reasons`.
+`last_success_at`, `last_success_dream_id`, `current`, `dream_id`, `dial`,
+`attempts`, `reasons`. A hold points `current` at the last successful dream
+(`current.webp`), never at a `signal_lost` noise field — see M5-PLATFORM §#19.
 
 ### CLI
 

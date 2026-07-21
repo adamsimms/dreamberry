@@ -232,6 +232,10 @@ def run_hourly(
     status_path = public_dir / "status.json"
     prior = _read_status(status_path, store)
     last_success_at = prior.get("last_success_at")
+    # The last *successful dream* pointer — never a noise frame. `current.webp`
+    # is only ever overwritten by a publish (signal_lost writes a separate key),
+    # so a hold restores the real dream even if the previous hour was noise.
+    last_success_dream_id = prior.get("last_success_dream_id")
 
     retries = int(hourly_cfg.get("retries", 3)) if retries is None else int(retries)
     seed_base = int(hourly_cfg.get("base_seed", 0)) if seed_base is None else int(seed_base)
@@ -260,7 +264,7 @@ def run_hourly(
             failure_mode=FAILURE_WEATHER_SILENCE,
             hold_reason=FAILURE_WEATHER_SILENCE,
             last_success_at=last_success_at,
-            prior=prior,
+            last_success_dream_id=last_success_dream_id,
             dial=dial,
             attempts=0,
             reasons=list(silence.reasons),
@@ -324,7 +328,7 @@ def run_hourly(
             failure_mode=None,
             hold_reason=last_reject or "gate_rejected",
             last_success_at=last_success_at,
-            prior=prior,
+            last_success_dream_id=last_success_dream_id,
             dial=dial,
             attempts=attempts,
             reasons=[last_reject] if last_reject else [],
@@ -347,6 +351,7 @@ def run_hourly(
         attempts=attempts,
         now=now,
         last_success_at=last_success_at,
+        last_success_dream_id=last_success_dream_id,
         error=last_error,
         dream_cfg=dream_cfg,
         public_dir=public_dir,
@@ -362,19 +367,24 @@ def _status_hold(
     failure_mode: str | None,
     hold_reason: str | None,
     last_success_at: str | None,
-    prior: Mapping[str, Any],
+    last_success_dream_id: str | None,
     dial: float,
     attempts: int,
     reasons: list[str],
 ) -> dict[str, Any]:
+    # Hold shows the last successful *dream* (current.webp), not the last write —
+    # so a hold that follows a signal_lost reverts from noise back to the dream.
+    # If nothing has ever succeeded there is nothing honest to show yet.
+    has_success = bool(last_success_at)
     return {
         "updated_at": now.isoformat(),
         "hold": True,
         "failure_mode": failure_mode,
         "hold_reason": hold_reason,
         "last_success_at": last_success_at,
-        "current": prior.get("current"),
-        "dream_id": prior.get("dream_id"),
+        "last_success_dream_id": last_success_dream_id,
+        "current": "current.webp" if has_success else None,
+        "dream_id": last_success_dream_id if has_success else None,
         "dial": float(dial),
         "attempts": attempts,
         "reasons": reasons,
@@ -414,6 +424,7 @@ def _publish(
         "failure_mode": evaluation.failure_mode,
         "hold_reason": None,
         "last_success_at": now.isoformat(),
+        "last_success_dream_id": dream_id,
         "current": current_name,
         "dream_id": dream_id,
         "dial": float(dial),
@@ -461,6 +472,7 @@ def _signal_lost(
     attempts: int,
     now: datetime,
     last_success_at: str | None,
+    last_success_dream_id: str | None,
     error: str | None,
     dream_cfg: Mapping[str, Any],
     public_dir: Path,
@@ -479,8 +491,10 @@ def _signal_lost(
         "hold": False,
         "failure_mode": FAILURE_SIGNAL_LOST,
         "hold_reason": None,
-        # last_success_at is preserved so the next good hour restores the window.
+        # Success pointers are preserved so the next good hour — or a later hold —
+        # restores the dream. current is the noise field; no dream is on screen.
         "last_success_at": last_success_at,
+        "last_success_dream_id": last_success_dream_id,
         "current": noise_name,
         "dream_id": None,
         "dial": float(dial),
