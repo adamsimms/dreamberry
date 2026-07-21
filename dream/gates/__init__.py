@@ -9,6 +9,7 @@ baseline. Heavy models (DINOv2, CLIP, LPIPS) are imported lazily so the pure
 logic here stays unit-testable without downloads.
 """
 
+from dream.gates.evaluate import FrameEvaluation, evaluate_frame, frame_decision
 from dream.gates.identity import (
     IdentityScores,
     collapse_verdict,
@@ -22,4 +23,7 @@ __all__ = [
     "horizon_displacement",
     "SeasonVerdict",
     "season_verdict",
+    "FrameEvaluation",
+    "evaluate_frame",
+    "frame_decision",
 ]

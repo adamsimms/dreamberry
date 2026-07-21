@@ -1,0 +1,16 @@
+# Dreamberry M4 hourly-path configuration (issue #14).
+# Wires the live weather packet through generate + gates into publish/hold/noise,
+# mapping to the three brief failure modes (weather silence, identity collapse,
+# signal lost). Actual R2/Pages delivery is M5; here artifacts land locally under
+# data/dream/ (gitignored).
+
+# How many extra generation attempts (fresh seeds) before giving up on a frame
+# that the gates reject or that fails to generate. Total tries = retries + 1.
+retries: 3
+base_seed: 0
+
+paths:
+  # Public window surface (one current frame + status), mirrors R2 public/ in M5.
+  public_dir: data/dream/public
+  # Private hourly archive (frame + provenance sidecar), mirrors R2 private/ in M5.
+  archive_dir: data/dream/archive
