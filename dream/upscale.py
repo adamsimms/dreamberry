@@ -1,4 +1,4 @@
-"""SUPIR upscale to Cloudberry resolution (~4000×3000) — M4 / issue #12.
+"""SUPIR upscale to Cloudberry resolution (~4000×3000).
 
 Gates run on SDXL-native frames (1024×768). Accepted frames are upscaled here
 *before* archive PNG / public WebP publish so the window is sharp at full bleed.
@@ -195,7 +195,7 @@ def _resolve_weights(up: Mapping[str, Any]) -> tuple[Path, Path, Path]:
         _hf_download(repo, sdxl_name, sdxl)
         _hf_download(repo, f_name, ckpt_f)
         # Q is optional for sign=F; download when requested or already configured.
-        if up.get("sign", "F") == "Q" or up.get("download_q", False):
+        if str(up.get("sign", "F")).upper() == "Q" or up.get("download_q", False):
             _hf_download(repo, q_name, ckpt_q)
         elif not ckpt_q.exists():
             # create_SUPIR_model only loads the selected sign; point Q at F.
@@ -331,67 +331,72 @@ def _upscale_supir(
         if sign not in ("F", "Q"):
             raise ValueError(f"upscale.sign must be F or Q, got {sign}")
 
-        model = create_SUPIR_model(str(opt_path), SUPIR_sign=sign)
-        if up.get("loading_half_params", True):
-            model = model.half()
-        # Fanghua-Yu tile VAE hard-calls xformers.ops; skip when CUDA ops are missing.
-        want_tile = bool(up.get("use_tile_vae", True))
-        if want_tile and use_xformers:
-            model.init_tile_vae(
-                encoder_tile_size=int(up.get("encoder_tile_size", 512)),
-                decoder_tile_size=int(up.get("decoder_tile_size", 64)),
-            )
-        elif want_tile and not use_xformers:
-            log.warning("skipping tile VAE (requires working xformers CUDA)")
-        model.ae_dtype = convert_dtype(str(up.get("ae_dtype", "bf16")))
-        model.model.dtype = convert_dtype(str(up.get("diff_dtype", "fp16")))
-        device = "cuda"
-        model = model.to(device)
-
+        model = None
+        samples = None
+        LQ_img = None
         factor = int(up.get("factor", 4))
-        min_size = int(up.get("min_size", 1024))
-        LQ_img, h0, w0 = PIL2Tensor(image, upsacle=factor, min_size=min_size)
-        LQ_img = LQ_img.unsqueeze(0).to(device)[:, :3, :, :]
+        h0 = w0 = 0
+        try:
+            model = create_SUPIR_model(str(opt_path), SUPIR_sign=sign)
+            if up.get("loading_half_params", True):
+                model = model.half()
+            # Fanghua-Yu tile VAE hard-calls xformers.ops; skip when CUDA ops are missing.
+            want_tile = bool(up.get("use_tile_vae", True))
+            if want_tile and use_xformers:
+                model.init_tile_vae(
+                    encoder_tile_size=int(up.get("encoder_tile_size", 512)),
+                    decoder_tile_size=int(up.get("decoder_tile_size", 64)),
+                )
+            elif want_tile and not use_xformers:
+                log.warning("skipping tile VAE (requires working xformers CUDA)")
+            model.ae_dtype = convert_dtype(str(up.get("ae_dtype", "bf16")))
+            model.model.dtype = convert_dtype(str(up.get("diff_dtype", "fp16")))
+            device = "cuda"
+            model = model.to(device)
 
-        # No LLaVA — the dream's weather prompt is the only honest caption.
-        captions = [prompt or ""]
-        # Restrained aesthetic — avoid "Canon / skin pores" live-camera fiction.
-        a_prompt = up.get(
-            "a_prompt",
-            "photograph, natural outdoor light, sharp rocks and horizon, "
-            "authentic wide-angle window view, fine natural detail",
-        )
-        n_prompt = up.get(
-            "n_prompt",
-            "painting, illustration, cartoon, CGI, over-smooth, plastic, "
-            "watermark, text, people, boats, deformed, lowres, blur",
-        )
+            min_size = int(up.get("min_size", 1024))
+            LQ_img, h0, w0 = PIL2Tensor(image, upsacle=factor, min_size=min_size)
+            LQ_img = LQ_img.unsqueeze(0).to(device)[:, :3, :, :]
 
-        samples = model.batchify_sample(
-            LQ_img,
-            captions,
-            num_steps=int(up.get("edm_steps", 50)),
-            restoration_scale=float(up.get("s_stage1", -1)),
-            s_churn=int(up.get("s_churn", 5)),
-            s_noise=float(up.get("s_noise", 1.01)),
-            cfg_scale=float(up.get("s_cfg", 4.0)),
-            control_scale=float(up.get("s_stage2", 1.0)),
-            seed=int(seed),
-            num_samples=1,
-            p_p=a_prompt,
-            n_p=n_prompt,
-            color_fix_type=str(up.get("color_fix_type", "Wavelet")),
-            # Fanghua-Yu current API (kwargs must not leak into denoiser).
-            use_linear_CFG=bool(up.get("linear_CFG", True)),
-            use_linear_control_scale=bool(up.get("linear_s_stage2", False)),
-            cfg_scale_start=float(up.get("spt_linear_CFG", 1.0)),
-            control_scale_start=float(up.get("spt_linear_s_stage2", 0.0)),
-        )
-        out = Tensor2PIL(samples[0], h0, w0)
+            # No LLaVA — the dream's weather prompt is the only honest caption.
+            captions = [prompt or ""]
+            # Restrained aesthetic — avoid "Canon / skin pores" live-camera fiction.
+            a_prompt = up.get(
+                "a_prompt",
+                "photograph, natural outdoor light, sharp rocks and horizon, "
+                "authentic wide-angle window view, fine natural detail",
+            )
+            n_prompt = up.get(
+                "n_prompt",
+                "painting, illustration, cartoon, CGI, over-smooth, plastic, "
+                "watermark, text, people, boats, deformed, lowres, blur",
+            )
 
-        # Free SUPIR before returning so the next hour can reload the dream stack.
-        del model, samples, LQ_img
-        unload_torch_cuda()
+            samples = model.batchify_sample(
+                LQ_img,
+                captions,
+                num_steps=int(up.get("edm_steps", 50)),
+                restoration_scale=float(up.get("s_stage1", -1)),
+                s_churn=int(up.get("s_churn", 5)),
+                s_noise=float(up.get("s_noise", 1.01)),
+                cfg_scale=float(up.get("s_cfg", 4.0)),
+                control_scale=float(up.get("s_stage2", 1.0)),
+                seed=int(seed),
+                num_samples=1,
+                p_p=a_prompt,
+                n_p=n_prompt,
+                color_fix_type=str(up.get("color_fix_type", "Wavelet")),
+                # Fanghua-Yu current API (kwargs must not leak into denoiser).
+                use_linear_CFG=bool(up.get("linear_CFG", True)),
+                use_linear_control_scale=bool(up.get("linear_s_stage2", False)),
+                cfg_scale_start=float(up.get("spt_linear_CFG", 1.0)),
+                control_scale_start=float(up.get("spt_linear_s_stage2", 0.0)),
+            )
+            out = Tensor2PIL(samples[0], h0, w0)
+        finally:
+            # Free SUPIR even on failure so the next hour can reload the dream stack.
+            del model, samples, LQ_img
+            unload_torch_cuda()
 
     tw, th = target
     if out.size != (tw, th):

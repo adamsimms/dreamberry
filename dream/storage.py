@@ -1,4 +1,4 @@
-"""Cloudflare R2 delivery for Dreamberry hourly artifacts (M5 / issues #16–#17).
+"""Cloudflare R2 delivery for Dreamberry hourly artifacts.
 
 Layout (flat, dedicated bucket `art-adamsimms-xyz-dreamberry` — never Cloudberry):
 
@@ -31,7 +31,10 @@ __all__ = [
     "R2Store",
     "encode_archive_png",
     "encode_current_webp",
+    "encode_signal_lost_webp",
     "next_dream_number_from_names",
+    "save_local_publish",
+    "save_local_signal_lost",
     "load_r2_config",
     "r2_config_from_env",
 ]
@@ -130,6 +133,15 @@ def encode_current_webp(image: Image.Image) -> bytes:
     """Lossless WebP for the public window pointer."""
     buf = io.BytesIO()
     image.convert("RGB").save(buf, format="WEBP", lossless=True, method=6)
+    return buf.getvalue()
+
+
+def encode_signal_lost_webp(image: Image.Image, *, quality: int = 80) -> bytes:
+    """Lossy WebP for the channel-dead noise field (small + cheap)."""
+    buf = io.BytesIO()
+    image.convert("RGB").save(
+        buf, format="WEBP", lossless=False, quality=int(quality), method=4
+    )
     return buf.getvalue()
 
 
@@ -289,7 +301,7 @@ class R2Store:
     ) -> dict[str, str]:
         """Channel dead — noise field as current pointer."""
         self.put_bytes(
-            SIGNAL_LOST_KEY, encode_current_webp(image), content_type="image/webp"
+            SIGNAL_LOST_KEY, encode_signal_lost_webp(image), content_type="image/webp"
         )
         status_out = dict(status)
         status_out["current"] = "signal_lost.webp"
@@ -336,7 +348,11 @@ def save_local_signal_lost(
 ) -> None:
     public_dir.mkdir(parents=True, exist_ok=True)
     image.convert("RGB").save(
-        public_dir / "signal_lost.webp", format="WEBP", lossless=True, method=6
+        public_dir / "signal_lost.webp",
+        format="WEBP",
+        lossless=False,
+        quality=80,
+        method=4,
     )
     with open(public_dir / "status.json", "w") as f:
         json.dump(dict(status), f, ensure_ascii=False, indent=2)

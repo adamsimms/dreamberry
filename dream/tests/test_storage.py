@@ -1,4 +1,4 @@
-"""Unit tests for R2 storage helpers (M5 / issues #16–#17).
+"""Unit tests for R2 storage helpers.
 
 Uses an in-memory fake store — no network. Encoding tests check PNG/WebP
 round-trips stay lossless at the pixel level for tiny images.
@@ -162,9 +162,9 @@ class FakeR2:
         return {"archive_png": png_key, "current": CURRENT_IMAGE_KEY, "status": STATUS_KEY}
 
     def publish_signal_lost(self, *, image, status):
-        from dream.storage import SIGNAL_LOST_KEY, encode_current_webp
+        from dream.storage import SIGNAL_LOST_KEY, encode_signal_lost_webp
 
-        self.objects[SIGNAL_LOST_KEY] = encode_current_webp(image)
+        self.objects[SIGNAL_LOST_KEY] = encode_signal_lost_webp(image)
         self.objects[STATUS_KEY] = (json.dumps(dict(status)) + "\n").encode()
         return {"signal_lost": SIGNAL_LOST_KEY, "status": STATUS_KEY}
 
