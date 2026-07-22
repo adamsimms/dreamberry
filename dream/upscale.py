@@ -256,6 +256,25 @@ def _write_runtime_yaml(
     return out
 
 
+def _xformers_cuda_ok() -> bool:
+    """True only if xformers can run memory_efficient_attention on CUDA.
+
+    A PyPI-only xformers wheel often imports but has no CUDA ops — SUPIR's
+    tile VAE then crashes mid-encode.
+    """
+    try:
+        import torch
+        import xformers.ops as xops
+
+        if not torch.cuda.is_available():
+            return False
+        q = torch.zeros(1, 16, 1, 64, device="cuda", dtype=torch.float16)
+        xops.memory_efficient_attention(q, q, q)
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def _upscale_supir(
     image: Image.Image,
     up: Mapping[str, Any],
@@ -294,11 +313,9 @@ def _upscale_supir(
     if not template.exists():
         raise FileNotFoundError(f"missing SUPIR config at {template}")
 
-    use_xformers = True
-    try:
-        import xformers  # noqa: F401
-    except Exception:  # noqa: BLE001
-        use_xformers = False
+    use_xformers = _xformers_cuda_ok()
+    if not use_xformers:
+        log.warning("xformers CUDA attention unavailable; using softmax (+ no tile VAE)")
 
     with tempfile.TemporaryDirectory(prefix="dreamberry-supir-") as tmp:
         opt_path = _write_runtime_yaml(
@@ -317,11 +334,15 @@ def _upscale_supir(
         model = create_SUPIR_model(str(opt_path), SUPIR_sign=sign)
         if up.get("loading_half_params", True):
             model = model.half()
-        if up.get("use_tile_vae", True):
+        # Fanghua-Yu tile VAE hard-calls xformers.ops; skip when CUDA ops are missing.
+        want_tile = bool(up.get("use_tile_vae", True))
+        if want_tile and use_xformers:
             model.init_tile_vae(
                 encoder_tile_size=int(up.get("encoder_tile_size", 512)),
                 decoder_tile_size=int(up.get("decoder_tile_size", 64)),
             )
+        elif want_tile and not use_xformers:
+            log.warning("skipping tile VAE (requires working xformers CUDA)")
         model.ae_dtype = convert_dtype(str(up.get("ae_dtype", "bf16")))
         model.model.dtype = convert_dtype(str(up.get("diff_dtype", "fp16")))
         device = "cuda"

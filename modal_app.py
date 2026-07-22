@@ -55,6 +55,14 @@ _IGNORE = [
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("libgl1", "libglib2.0-0", "git")
+    # CUDA torch + xformers must come from the PyTorch index (PyPI xformers is
+    # CPU-only and breaks SUPIR tile VAE).
+    .pip_install(
+        "torch==2.10.0",
+        "torchvision==0.25.0",
+        "xformers==0.0.35",
+        index_url="https://download.pytorch.org/whl/cu128",
+    )
     .pip_install(
         # Light deps
         "Pillow>=10.0.0",
@@ -65,9 +73,7 @@ image = (
         "python-dotenv>=1.0",
         "boto3>=1.34",
         "numpy>=1.26",
-        # GPU / diffusion stack (CUDA wheels resolve on Modal's Linux)
-        "torch>=2.3",
-        "torchvision>=0.18",
+        # Diffusion stack (torch already pinned above)
         "diffusers>=0.30",
         "transformers>=4.44",
         "accelerate>=0.33",
@@ -84,7 +90,6 @@ image = (
         "kornia>=0.6.9",
         "timm>=0.9",
         "openai-clip>=1.0.1",
-        "xformers>=0.0.20",
         # Runtime deps for k_diffusion.sampling only (full k-diffusion pulls
         # wandb/clean-fid/etc. and blows up Modal's pip resolver).
         "scipy>=1.11.0",
@@ -93,8 +98,8 @@ image = (
     )
     .run_commands(
         # SUPIR's RestoreEDMSampler imports k_diffusion.sampling — install the
-        # package without its heavy optional deps, then slim __init__.py so
-        # `import k_diffusion.sampling` does not pull training extras.
+        # package without its heavy optional deps, then empty __init__.py so
+        # `from k_diffusion.sampling import …` does not pull training extras.
         "pip install --no-deps 'k-diffusion==0.1.1.post1'",
         "python -c \"from pathlib import Path; import site; "
         "p = Path(site.getsitepackages()[0]) / 'k_diffusion' / '__init__.py'; "
