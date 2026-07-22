@@ -50,7 +50,9 @@ generation:
 upscale:
   enabled: true
   # auto → SUPIR on CUDA when Fanghua-Yu/SUPIR + weights exist; else Lanczos.
+  # require_supir: refuse soft Lanczos publish if SUPIR cannot run (Modal production).
   backend: auto
+  require_supir: true
   target_width: 4000
   target_height: 3000
   factor: 4

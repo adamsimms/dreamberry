@@ -305,22 +305,29 @@ def run_hourly(
         produced_any = True
         ev = evaluate_fn(result.image, pkt, dial)
         if ev.accept:
-            return _publish(
-                result=result,
-                evaluation=ev,
-                pkt=pkt,
-                dial=dial,
-                seed=seed,
-                attempts=attempts,
-                now=now,
-                public_dir=public_dir,
-                archive_dir=archive_dir,
-                status_path=status_path,
-                write=write,
-                store=store,
-                dream_cfg=dream_cfg,
-                engine=engine,
-            )
+            try:
+                return _publish(
+                    result=result,
+                    evaluation=ev,
+                    pkt=pkt,
+                    dial=dial,
+                    seed=seed,
+                    attempts=attempts,
+                    now=now,
+                    public_dir=public_dir,
+                    archive_dir=archive_dir,
+                    status_path=status_path,
+                    write=write,
+                    store=store,
+                    dream_cfg=dream_cfg,
+                    engine=engine,
+                )
+            except RuntimeError as exc:
+                # require_supir: true — refuse soft Lanczos publish; hold last good.
+                if "SUPIR required" not in str(exc):
+                    raise
+                last_reject = f"upscale_failed: {exc}"
+                break
         last_reject = ev.reject_reason
 
     # 4a) Frames generated but every one was rejected by a gate → HOLD last good.

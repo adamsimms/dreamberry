@@ -85,6 +85,8 @@ image = (
         "timm>=0.9",
         "openai-clip>=1.0.1",
         "xformers>=0.0.20",
+        # SUPIR's RestoreEDMSampler imports k_diffusion.sampling
+        "k-diffusion>=0.1.1",
     )
     .run_commands(
         # Official SUPIR code (LLaVA optional — we pass the weather prompt instead).

@@ -90,16 +90,29 @@ def upscale_for_publish(
     tw, th = target_size(dream_cfg)
     backend = str(up.get("backend", "auto")).lower()
     rgb = image.convert("RGB")
+    require = bool(up.get("require_supir", False))
+    err: str | None = None
 
     if backend == "auto":
-        backend = "supir" if _supir_available(up) else "lanczos"
+        if _supir_available(up):
+            backend = "supir"
+        elif require:
+            raise RuntimeError(
+                "SUPIR required but unavailable (CUDA / weights / SUPIR_ROOT missing)"
+            )
+        else:
+            backend = "lanczos"
 
-    err: str | None = None
     if backend == "supir":
         try:
             return _upscale_supir(rgb, up, prompt=prompt, seed=seed, target=(tw, th))
         except Exception as exc:  # noqa: BLE001
-            log.exception("SUPIR failed; falling back to Lanczos: %s", exc)
+            log.exception("SUPIR failed: %s", exc)
+            if require:
+                raise RuntimeError(
+                    "SUPIR required but failed — refusing Lanczos soft publish"
+                ) from exc
+            log.warning("falling back to Lanczos (require_supir=false)")
             backend = "lanczos"
             err = f"{type(exc).__name__}: {exc}"
 

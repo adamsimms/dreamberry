@@ -39,6 +39,27 @@ def test_lanczos_to_cloudberry_size():
     assert out.meta["upscale"]["native_height"] == 768
 
 
+def test_require_supir_refuses_soft_fallback(monkeypatch):
+    """Production must not publish a Lanczos stretch when SUPIR is required."""
+    import pytest
+
+    from dream import upscale as up_mod
+
+    monkeypatch.setattr(up_mod, "_supir_available", lambda _up: False)
+    img = Image.new("RGB", (64, 48), (1, 2, 3))
+    cfg = {
+        "upscale": {
+            "enabled": True,
+            "backend": "auto",
+            "require_supir": True,
+            "target_width": 128,
+            "target_height": 96,
+        }
+    }
+    with pytest.raises(RuntimeError, match="SUPIR required"):
+        upscale_for_publish(img, cfg)
+
+
 def test_hourly_publish_upscales_when_enabled(tmp_path):
     """Accepted frames are published at target size (Lanczos backend)."""
     from types import SimpleNamespace
