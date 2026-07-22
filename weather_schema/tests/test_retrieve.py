@@ -49,7 +49,7 @@ def test_season_gate_blocks_summer_to_winter():
 
 
 def test_season_gate_late_winter_adjacency():
-    """Late-winter query may match winter and spring, not summer."""
+    """Thin late-winter pool widens to winter; summer stays blocked."""
     index = _index(
         [
             IndexEntry("jan.jpg", month=1, feature_vector=_vec()),
@@ -65,7 +65,7 @@ def test_season_gate_late_winter_adjacency():
 
 
 def test_season_gate_autumn_late_autumn():
-    """Autumn and late autumn are mutually reachable; summer is not."""
+    """Thin autumn pool widens to late autumn; summer is not."""
     index = _index(
         [
             IndexEntry("oct.jpg", month=10, feature_vector=_vec()),
@@ -77,6 +77,22 @@ def test_season_gate_autumn_late_autumn():
     hits = index.query(pkt, k=5)
     names = {h["filename"] for h in hits}
     assert names == {"oct.jpg", "nov.jpg"}
+
+
+def test_season_thick_pool_does_not_widen():
+    """Same-season pool with ≥k candidates must not pull adjacent months."""
+    index = _index(
+        [
+            IndexEntry("oct_a.jpg", month=10, feature_vector=_vec(cloud_cover=0.50)),
+            IndexEntry("oct_b.jpg", month=10, feature_vector=_vec(cloud_cover=0.51)),
+            IndexEntry("nov.jpg", month=11, feature_vector=_vec(cloud_cover=0.50)),
+        ]
+    )
+    pkt = {"month": 10, "solar_elevation": 25.0, "cloud_cover": 50.0, "weather_code": 0}
+    hits = index.query(pkt, k=2)
+    names = {h["filename"] for h in hits}
+    assert names == {"oct_a.jpg", "oct_b.jpg"}
+    assert "nov.jpg" not in names
 
 
 def test_query_distance_ordering():

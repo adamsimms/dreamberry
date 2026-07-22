@@ -104,9 +104,14 @@ class WeatherNNIndex:
                     seen.add(fn)
         return cls(entries, theta_shore_deg=theta_shore_deg)
 
-    def _season_allowed(self, query_month: int, anchor_month: int) -> bool:
-        allowed = season_family(query_month)
-        return season_token(anchor_month) in allowed
+    def _season_allowed(
+        self, query_month: int, anchor_month: int, *, widen: bool
+    ) -> bool:
+        q = season_token(query_month)
+        a = season_token(anchor_month)
+        if not widen:
+            return a == q
+        return a in season_family(query_month)
 
     def query(
         self,
@@ -118,6 +123,8 @@ class WeatherNNIndex:
     ) -> list[dict[str, Any]]:
         """Return top-k same-season anchors sorted by weighted distance.
 
+        Same-season candidates are preferred. If that pool has fewer than `k`
+        entries, widen to the adjacent season family (§4.3 thin-pool rule).
         `exclude` drops candidate filenames (leave-one-out for held-out eval).
         """
         if k <= 0:
@@ -127,16 +134,22 @@ class WeatherNNIndex:
         q_vals, _ = feature_vector(pkt, theta_shore_deg=self.theta_shore_deg)
         excluded = exclude or set()
 
-        scored: list[tuple[float, IndexEntry]] = []
-        for entry in self.entries:
-            if entry.filename in excluded:
-                continue
-            if not self._season_allowed(query_month, entry.month):
-                continue
-            dist = weighted_distance(q_vals, entry.feature_vector, self.weights)
-            scored.append((dist, entry))
+        def _score(*, widen: bool) -> list[tuple[float, IndexEntry]]:
+            scored: list[tuple[float, IndexEntry]] = []
+            for entry in self.entries:
+                if entry.filename in excluded:
+                    continue
+                if not self._season_allowed(query_month, entry.month, widen=widen):
+                    continue
+                dist = weighted_distance(q_vals, entry.feature_vector, self.weights)
+                scored.append((dist, entry))
+            scored.sort(key=lambda item: item[0])
+            return scored
 
-        scored.sort(key=lambda item: item[0])
+        scored = _score(widen=False)
+        if len(scored) < k:
+            scored = _score(widen=True)
+
         results: list[dict[str, Any]] = []
         for dist, entry in scored[:k]:
             row: dict[str, Any] = {
