@@ -35,9 +35,6 @@ def _get(pkt: Mapping[str, Any], *keys: str, default=None):
     for k in keys:
         if k in pkt and pkt[k] is not None:
             return pkt[k]
-        # allow explicit None to mean missing for optional fields
-        if k in pkt:
-            return pkt[k]
     return default
 
 

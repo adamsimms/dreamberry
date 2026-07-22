@@ -335,3 +335,31 @@ def test_weighted_distance_null_drop():
     a2[4] = None
     d = weighted_distance(a2, b)
     assert d == 0.0
+
+
+def test_solar_feature_clamped_for_deep_night():
+    from weather_schema.vector import _solar_feature
+
+    assert _solar_feature(-18.0) == pytest.approx(0.0, abs=1e-9)
+    assert _solar_feature(-90.0) == 0.0
+    assert 0.0 <= _solar_feature(65.0) <= 1.0
+    assert _solar_feature(90.0) == 1.0
+
+
+def test_compose_alias_fallback_skips_present_none():
+    from weather_schema.compose import normalize_packet
+
+    pkt = {
+        "month": 8,
+        "solar_elevation": 30.0,
+        "relative_humidity_2m": None,
+        "rh": 72,
+        "wind_speed_10m": None,
+        "wind": 18.5,
+        "temperature_2m": None,
+        "temp": 12.0,
+    }
+    norm = normalize_packet(pkt)
+    assert norm["relative_humidity_2m"] == 72.0
+    assert norm["wind_speed_10m"] == 18.5
+    assert norm["temperature_2m"] == 12.0

@@ -1,4 +1,4 @@
-"""Unit tests for live weather agent + weather silence (M4 / issue #13)."""
+"""Unit tests for live weather agent + weather silence."""
 
 from __future__ import annotations
 
@@ -250,6 +250,14 @@ def test_build_live_packet_mock_compose_ready():
             },
             False,
             "",
+        ),
+        (
+            {
+                "open_meteo_failed": False,
+                "cloud_cover": 50,
+            },
+            True,
+            "open_meteo_hour_unknown",
         ),
     ],
 )

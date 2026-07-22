@@ -1,4 +1,4 @@
-"""Live weather packet builder + weather-silence detection (M4 / issue #13).
+"""Live weather packet builder + weather-silence detection.
 
 Symmetry contract: output matches archive packet field names so compose_prompt,
 feature_vector, and WeatherNNIndex work unchanged at inference time.
@@ -441,9 +441,7 @@ def check_weather_silence(
         reasons.append("open_meteo_fetch_failed")
     if stale_hours is not None and stale_hours > staleness_hours:
         reasons.append(f"open_meteo_stale>{staleness_hours}h")
-    elif open_meteo_failed:
-        pass
-    elif stale_hours is None and open_meteo_failed:
+    elif stale_hours is None:
         reasons.append("open_meteo_hour_unknown")
     if core_missing:
         reasons.append("core_fields_missing")

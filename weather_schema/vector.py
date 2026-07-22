@@ -36,7 +36,8 @@ FEATURE_NAMES: tuple[str, ...] = (
     "temperature_2m",
 )
 
-# Season families for hard retrieval gate (§4.3)
+# Season families for thin-pool widen (§4.3). Same-season is tried first;
+# these sets are only used when that pool has fewer than k candidates.
 SEASON_FAMILY: dict[str, frozenset[str]] = {
     "winter": frozenset({"winter", "late winter"}),
     "late winter": frozenset({"winter", "late winter", "spring"}),
@@ -72,11 +73,11 @@ def season_family(month: int) -> frozenset[str]:
 
 
 def _solar_feature(elev: float) -> float:
-    # sin(elev) then min-max over elev ∈ [−18°, +65°]
+    # sin(elev) then min-max over elev ∈ [−18°, +65°]; clamp to [0, 1].
     lo = math.sin(math.radians(-18.0))
     hi = math.sin(math.radians(65.0))
     s = math.sin(math.radians(float(elev)))
-    return (s - lo) / (hi - lo)
+    return max(0.0, min(1.0, (s - lo) / (hi - lo)))
 
 
 def _vis_feature(visibility: float | None, weather_code: int | None, rh: float | None) -> float | None:
