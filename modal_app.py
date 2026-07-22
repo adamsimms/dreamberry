@@ -96,8 +96,9 @@ image = (
         # package without its heavy optional deps, then slim __init__.py so
         # `import k_diffusion.sampling` does not pull training extras.
         "pip install --no-deps 'k-diffusion==0.1.1.post1'",
-        "python -c \"from pathlib import Path; import k_diffusion; "
-        "Path(k_diffusion.__file__).write_text('from . import sampling\\n')\"",
+        "python -c \"from pathlib import Path; import site; "
+        "p = Path(site.getsitepackages()[0]) / 'k_diffusion' / '__init__.py'; "
+        "p.write_text('from . import sampling\\n')\"",
         # Official SUPIR code (LLaVA optional — we pass the weather prompt instead).
         "git clone --depth 1 https://github.com/Fanghua-Yu/SUPIR.git /opt/SUPIR",
     )
