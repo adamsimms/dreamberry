@@ -1,4 +1,4 @@
-"""SDXL + ControlNet + IP-Adapter dream engine (brief §3, issue #7).
+"""SDXL + ControlNet + IP-Adapter dream engine.
 
 Dial-0 lock: a weather-nearest real frame is the img2img init; ControlNet
 (depth + soft-edge) from the canonical geometry frame holds the rocks / horizon /
@@ -33,7 +33,7 @@ class DreamResult:
     sidecar: dict[str, Any]
 
 
-def _seeded_defocus(image: Image.Image, strength: float) -> Image.Image:
+def _dial_defocus(image: Image.Image, strength: float) -> Image.Image:
     """Deliberate defocus for high-dial dissolve (brief §5). No-op at strength 0."""
     if strength <= 0:
         return image
@@ -56,7 +56,7 @@ class DreamEngine:
         self._dtype = None
 
     def unload(self) -> None:
-        """Drop the SDXL stack from VRAM so SUPIR can load (issue #12)."""
+        """Drop the SDXL stack from VRAM so SUPIR can load."""
         self._pipe = None
         from dream.upscale import unload_torch_cuda
 
@@ -168,6 +168,13 @@ class DreamEngine:
         if use_ip:
             self._pipe.set_ip_adapter_scale(params.ip_adapter_scale)
 
+        if getattr(self, "_has_lora", False):
+            # Dial schedule owns LoRA weight; without this, adapters stay at 1.0.
+            try:
+                self._pipe.set_adapters(["default"], adapter_weights=[params.lora_scale])
+            except Exception:  # noqa: BLE001 — older diffusers: fall through to kwargs
+                pass
+
         if seed is None:
             seed = 0
         generator = torch.Generator(device="cpu").manual_seed(int(seed))
@@ -188,10 +195,12 @@ class DreamEngine:
         if use_ip:
             # IP-Adapter carries the weather anchor's palette/atmosphere.
             call_kwargs["ip_adapter_image"] = init_image
+        if getattr(self, "_has_lora", False):
+            call_kwargs["cross_attention_kwargs"] = {"scale": params.lora_scale}
 
         out = self._pipe(**call_kwargs)
         image = out.images[0]
-        image = _seeded_defocus(image, params.defocus_strength)
+        image = _dial_defocus(image, params.defocus_strength)
 
         sidecar = self._build_sidecar(
             pkt, params, prompt, anchor, seed, size
