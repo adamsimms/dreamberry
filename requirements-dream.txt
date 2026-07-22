@@ -17,7 +17,7 @@ lpips>=0.1.4
 # SUPIR (Fanghua-Yu) — also installed on Modal; local only if you run SUPIR here.
 einops>=0.7
 omegaconf>=2.3
-open-clip-torch>=2.17
+open-clip-torch==2.24.0
 pytorch-lightning>=2.1
 kornia>=0.6.9
 # Modal installs k-diffusion --no-deps + scipy/torchsde/torchdiffeq (see modal_app.py).

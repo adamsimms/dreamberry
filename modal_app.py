@@ -85,7 +85,7 @@ image = (
         # SUPIR (Fanghua-Yu) — do NOT pin their frozen transformers==4.28
         "einops>=0.7",
         "omegaconf>=2.3",
-        "open-clip-torch>=2.17",
+        "open-clip-torch==2.24.0",  # >2.24 breaks SUPIR CLIP attn_mask (77×77 vs 1×1)
         "pytorch-lightning>=2.1",
         "kornia>=0.6.9",
         "timm>=0.9",
