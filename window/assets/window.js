@@ -108,9 +108,11 @@
       if (!iso) return null;
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return String(iso);
-      return d.toLocaleString(undefined, {
+      // Cabin local time — not the viewer's browser zone (EDT ≠ NDT).
+      return d.toLocaleString("en-CA", {
         year: "numeric", month: "short", day: "numeric",
         hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+        timeZone: "America/St_Johns",
       });
     },
     wind: (deg) => {
