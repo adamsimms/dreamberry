@@ -381,10 +381,11 @@ def _upscale_supir(
             p_p=a_prompt,
             n_p=n_prompt,
             color_fix_type=str(up.get("color_fix_type", "Wavelet")),
-            linear_CFG=bool(up.get("linear_CFG", True)),
-            linear_s_stage2=bool(up.get("linear_s_stage2", False)),
-            spt_linear_CFG=float(up.get("spt_linear_CFG", 1.0)),
-            spt_linear_s_stage2=float(up.get("spt_linear_s_stage2", 0.0)),
+            # Fanghua-Yu current API (kwargs must not leak into denoiser).
+            use_linear_CFG=bool(up.get("linear_CFG", True)),
+            use_linear_control_scale=bool(up.get("linear_s_stage2", False)),
+            cfg_scale_start=float(up.get("spt_linear_CFG", 1.0)),
+            control_scale_start=float(up.get("spt_linear_s_stage2", 0.0)),
         )
         out = Tensor2PIL(samples[0], h0, w0)
 
