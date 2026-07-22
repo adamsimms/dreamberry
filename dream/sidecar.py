@@ -1,6 +1,6 @@
-"""Provenance sidecar schema for Dreamberry generations (M4 / issue #15).
+"""Provenance sidecar schema for Dreamberry generations.
 
-Every generated still writes a JSON sidecar beside the JPG. The sidecar powers
+Every generated still writes a JSON sidecar beside the PNG. The sidecar powers
 the public details drawer and the private forgetting dataset.
 """
 

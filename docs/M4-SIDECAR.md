@@ -1,6 +1,6 @@
 # Dreamberry M4 — Provenance sidecar schema (issue #15)
 
-Every generated still writes a JSON sidecar beside the JPG (`<TIMESTAMP>_DREAM###.json`).
+Every generated still writes a JSON sidecar beside the PNG (`<TIMESTAMP>_DREAM###.json`).
 The sidecar is the canonical provenance record for the public details drawer and the
 private forgetting dataset.
 

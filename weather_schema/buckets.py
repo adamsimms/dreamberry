@@ -148,7 +148,6 @@ def solar_tokens(
 ) -> tuple[str, str | None]:
     """Return (time_of_day, light_token)."""
     e = float(solar_elevation)
-    morning = not after_solar_noon
 
     if e < -18:
         tod, light = "night", None
