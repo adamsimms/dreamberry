@@ -1,14 +1,5 @@
-// Dreamberry live window (M6 / issue #18).
-//
-// Observes the hourly pointer the Modal cron writes to R2 and renders one live
-// frame with a Cloudberry-grammar details drawer. The dream only moves hourly;
-// polling just catches the swap for anyone watching across the top of the hour.
-//
-// Honesty contract (DREAMBERRY.md §7, issue #19):
-//   published    → crossfade old → new dream (~5.5s, weather behind glass)
-//   hold         → do NOT touch the image; the dream stays, sensors went quiet
-//   signal_lost  → crossfade INTO the noise field; the channel is dead
-// No toast, no "updated" chrome — a transition, not a notification.
+// Dreamberry live window — observes R2 pointer; drawer for provenance.
+// Hold / signal_lost: DREAMBERRY.md §7. No toast — transition only.
 
 (function () {
   "use strict";
@@ -27,6 +18,11 @@
     drawerBody: document.getElementById("drawerBody"),
   };
 
+  const ALT_DREAM =
+    "A generated view of Pinchard's Island under the current weather. Labeled generated — not a photograph.";
+  const ALT_NOISE =
+    "Signal lost — white noise. No dream was generated this hour.";
+
   let front = 0; // index of the currently-visible layer
   let shownKey = null; // "<current-name>@<version>" of the frame on screen
   let firstPaint = true;
@@ -42,13 +38,35 @@
   function imageUrlFor(status) {
     const name = status && status.current;
     if (!name) return null;
-    // Version by dream_id when we have one; fall back to updated_at so a fresh
-    // noise field (dream_id null) still busts hourly.
-    const version = status.dream_id || status.last_success_dream_id || status.updated_at || "0";
+    // Dreams version by dream_id; noise has dream_id null — always use updated_at
+    // so a regenerated signal_lost.webp still busts hourly.
+    const version =
+      status.failure_mode === "signal_lost"
+        ? status.updated_at || Date.now()
+        : status.dream_id || status.last_success_dream_id || status.updated_at || "0";
     return bust(url(`current/${name}`), version);
   }
 
+  function frameKey(status) {
+    if (!status.current) return null;
+    if (status.failure_mode === "signal_lost") {
+      return `${status.current}@${status.updated_at || "0"}`;
+    }
+    return `${status.current}@${status.dream_id || status.updated_at || "0"}`;
+  }
+
   // -- crossfade -------------------------------------------------------------
+
+  function setVisibleAlt(status) {
+    const visible = el.layers[front];
+    const hidden = el.layers[1 - front];
+    const alt =
+      status && status.failure_mode === "signal_lost" ? ALT_NOISE : ALT_DREAM;
+    visible.alt = alt;
+    visible.removeAttribute("aria-hidden");
+    hidden.alt = "";
+    hidden.setAttribute("aria-hidden", "true");
+  }
 
   function paint(src, { instant } = {}) {
     return new Promise((resolve) => {
@@ -67,10 +85,10 @@
           if (instant) {
             requestAnimationFrame(() => el.frame.classList.remove("no-transition"));
           }
-          resolve();
+          resolve(true);
         });
       };
-      img.onerror = () => resolve();
+      img.onerror = () => resolve(false);
       img.src = src;
     });
   }
@@ -121,7 +139,7 @@
       const since = fmt.when(status.last_success_at);
       return `Holding the last dream — ${reason}. Nothing new was generated; the frame stays until the feed returns.${since ? ` Last moved <strong>${since}</strong>.` : ""} <span class="badge">hold</span>`;
     }
-    return `A live view of Pinchard's Island, dreamed from the current weather and the remembered window. Not a photograph. <span class="badge generated">generated</span>`;
+    return `Dreamed from the island's weather and the remembered window — not a photograph. <span class="badge generated">generated</span>`;
   }
 
   function generationGroup(status, sc) {
@@ -157,7 +175,7 @@
       row("Observed", fmt.when(w.open_meteo_hour_utc)),
     ].join("");
     return `<section class="group"><h2>Weather — the only live signal</h2><dl>${rows}</dl>
-      <p class="attrib">Open-Meteo (CC-BY 4.0) at the cabin · Environment and Climate Change Canada, Wesleyville (open data) · SmartAtlantic / CIOOS buoy waves (CC-BY 4.0). The atmosphere is real, now, at the island; the view is remembered.</p></section>`;
+      <p class="attrib">Open-Meteo (CC-BY 4.0) at the cabin · ECCC Wesleyville (open data) · SmartAtlantic / CIOOS buoy (CC-BY 4.0).</p></section>`;
   }
 
   function imageGroup(status, sc) {
@@ -227,26 +245,33 @@
     setStatePill(status);
 
     const imgSrc = imageUrlFor(status);
-    const key = status.current ? `${status.current}@${status.dream_id || status.updated_at}` : null;
+    const key = frameKey(status);
 
     if (!imgSrc) {
       // Nothing has ever published (or first-ever hold): honest emptiness.
       showWaiting(true);
     } else if (status.hold) {
-      // Hold: the frame must not move. It already points at the last dream
-      // (current.webp); ensure it's shown but never crossfade on a hold.
-      if (shownKey === null) {
-        await paint(imgSrc, { instant: firstPaint });
-        shownKey = key;
-        firstPaint = false;
+      // Hold: show last dream. Must also recover from a prior signal_lost noise
+      // frame (shownKey is non-null but points at signal_lost.webp).
+      const onDream = shownKey && shownKey.startsWith("current.webp@");
+      if (!onDream || key !== shownKey) {
+        const ok = await paint(imgSrc, { instant: firstPaint || !onDream });
+        if (ok) {
+          shownKey = key;
+          firstPaint = false;
+          setVisibleAlt(status);
+        }
       }
       showWaiting(false);
     } else if (key !== shownKey) {
       // Published or signal_lost: move the pointer with a crossfade.
       showWaiting(false);
-      await paint(imgSrc, { instant: firstPaint });
-      shownKey = key;
-      firstPaint = false;
+      const ok = await paint(imgSrc, { instant: firstPaint });
+      if (ok) {
+        shownKey = key;
+        firstPaint = false;
+        setVisibleAlt(status);
+      }
     }
 
     // Refresh drawer provenance (sidecar is untouched on hold/lost, so this is
@@ -264,10 +289,25 @@
 
   // -- drawer open/close -----------------------------------------------------
 
+  let focusBeforeDrawer = null;
+
   function toggleDrawer(force) {
     const open = force === undefined ? !el.drawer.classList.contains("open") : force;
     el.drawer.classList.toggle("open", open);
     el.toggle.setAttribute("aria-expanded", String(open));
+    if (open) {
+      focusBeforeDrawer = document.activeElement;
+      el.drawer.setAttribute("tabindex", "-1");
+      el.drawer.focus({ preventScroll: true });
+    } else {
+      el.drawer.removeAttribute("tabindex");
+      if (focusBeforeDrawer && typeof focusBeforeDrawer.focus === "function") {
+        focusBeforeDrawer.focus({ preventScroll: true });
+      } else {
+        el.toggle.focus({ preventScroll: true });
+      }
+      focusBeforeDrawer = null;
+    }
   }
 
   el.toggle.addEventListener("click", () => toggleDrawer());
