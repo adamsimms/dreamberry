@@ -399,15 +399,25 @@ d(a, b) = sqrt( Σ_i  w_i · (a_i − b_i)² )
 - Circular features (wind direction) use the `cos` encoding above so 350° and 10° are near.
 - `precip_class` distance is ordinal (family gap), intentionally treating snow↔rain as far.
 
-### 4.3 Season gate (hard constraint)
+### 4.3 Season + day/night gates (hard constraints)
 
-Retrieval candidates are filtered to the **same season family** *before* distance is computed:
+Retrieval candidates are filtered **before** distance is computed:
+
+**Season**
 
 - Allowed set = `{same season}`. Adjacency: `late winter` ↔ {`winter`,`spring`}; otherwise
   no cross-season matching (no summer frame for a winter query — season ethics).
 - If the same-season candidate pool is too thin (thin-winter problem, see corpus), widen to
   the adjacent season **only within the same thermal regime** (winter↔late winter, autumn↔late
   autumn), never into summer.
+
+**Day / night** (same boundary as curation: `solar_elevation < −6°`)
+
+- Night/twilight queries (`elev < −6`) may only retrieve night-bucket anchors; day/dawn
+  queries may only retrieve day-bucket anchors.
+- Soft solar weight alone is not enough: at dial 0 the weather-NN anchor dominates via
+  img2img + IP-Adapter, so a dawn frame for a twilight packet reads as daylight.
+- Thin night pools **do not** widen into day (season widen still applies within night).
 
 ### 4.4 Missing-buoy / missing-data handling in retrieval
 

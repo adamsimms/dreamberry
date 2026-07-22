@@ -23,16 +23,24 @@ from weather_schema.retrieve import WeatherNNIndex  # noqa: E402
 
 
 def build_index(cfg: dict, *, from_weather: bool) -> WeatherNNIndex:
+    night_thresh = float(cfg["curation"]["night_solar_elevation_deg"])
     if from_weather:
         weather_dir = resolve_path(cfg["paths"]["weather_dir"])
         curated = [
             resolve_path(cfg["paths"]["curated_day"]),
             resolve_path(cfg["paths"]["curated_night"]),
         ]
-        return WeatherNNIndex.build_from_weather(weather_dir, curated_paths=curated)
+        return WeatherNNIndex.build_from_weather(
+            weather_dir,
+            curated_paths=curated,
+            night_solar_elevation_deg=night_thresh,
+        )
 
     captions_path = resolve_path(cfg["paths"]["captions"])
-    return WeatherNNIndex.build_from_captions(captions_path)
+    return WeatherNNIndex.build_from_captions(
+        captions_path,
+        night_solar_elevation_deg=night_thresh,
+    )
 
 
 def main() -> int:

@@ -5,6 +5,8 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- Weather-NN: hard day/night gate at `solar_elevation < −6°` so twilight/night
+  packets cannot anchor on dawn/day frames (dial-0 daylight leak)
 - Repo docs: README architecture diagram, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT,
   LICENSE, CHANGELOG, AGENTS
 

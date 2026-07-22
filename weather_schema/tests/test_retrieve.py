@@ -187,8 +187,114 @@ def test_build_from_captions_line(tmp_path: Path):
         "month": 8,
         "feature_vector": _vec(),
         "prompt": "summer prompt",
+        "solar_elevation": -4.743,
     }
     captions.write_text(json.dumps(row) + "\n")
     index = WeatherNNIndex.build_from_captions(captions)
     assert len(index) == 1
     assert index.entries[0].filename == row["filename"]
+    assert index.entries[0].solar_elevation == pytest.approx(-4.743)
+
+
+def test_night_gate_blocks_dawn_for_twilight_query():
+    """Night/twilight query must not retrieve day-bucket dawn (DREAM013 bug)."""
+    index = _index(
+        [
+            IndexEntry(
+                "dawn_close.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.89),
+                solar_elevation=-5.855,
+            ),
+            IndexEntry(
+                "twilight_far.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.50),
+                solar_elevation=-8.287,
+            ),
+        ]
+    )
+    pkt = {
+        "month": 7,
+        "solar_elevation": -6.726,
+        "cloud_cover": 89.0,
+        "weather_code": 3,
+    }
+    hits = index.query(pkt, k=5)
+    assert [h["filename"] for h in hits] == ["twilight_far.jpg"]
+
+
+def test_day_gate_blocks_night_for_day_query():
+    """Day query must not retrieve night-bucket anchors even when closer."""
+    index = _index(
+        [
+            IndexEntry(
+                "night_close.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.50),
+                solar_elevation=-12.0,
+            ),
+            IndexEntry(
+                "day_far.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.90),
+                solar_elevation=30.0,
+            ),
+        ]
+    )
+    pkt = {"month": 8, "solar_elevation": 30.0, "cloud_cover": 50.0, "weather_code": 0}
+    hits = index.query(pkt, k=5)
+    assert [h["filename"] for h in hits] == ["day_far.jpg"]
+
+
+def test_night_gate_does_not_widen_into_day():
+    """Thin night pool stays night-only; season widen still applies."""
+    index = _index(
+        [
+            IndexEntry(
+                "oct_night.jpg",
+                month=10,
+                feature_vector=_vec(),
+                solar_elevation=-7.0,
+            ),
+            IndexEntry(
+                "oct_dawn.jpg",
+                month=10,
+                feature_vector=_vec(),
+                solar_elevation=-5.0,
+            ),
+            IndexEntry(
+                "nov_night.jpg",
+                month=11,
+                feature_vector=_vec(),
+                solar_elevation=-10.0,
+            ),
+        ]
+    )
+    # Only one autumn night; k=2 widens → late-autumn night, not dawn.
+    pkt = {"month": 10, "solar_elevation": -8.0, "weather_code": 0}
+    hits = index.query(pkt, k=2)
+    names = {h["filename"] for h in hits}
+    assert names == {"oct_night.jpg", "nov_night.jpg"}
+    assert "oct_dawn.jpg" not in names
+
+
+def test_save_load_preserves_solar_elevation(tmp_path: Path):
+    index = _index(
+        [
+            IndexEntry(
+                "n.jpg",
+                month=8,
+                feature_vector=_vec(),
+                solar_elevation=-7.5,
+                prompt="twilight",
+            )
+        ]
+    )
+    path = tmp_path / "index.json"
+    index.save(path)
+    loaded = WeatherNNIndex.load(path)
+    assert loaded.entries[0].solar_elevation == pytest.approx(-7.5)
+    assert loaded.night_solar_elevation_deg == pytest.approx(-6.0)
+    payload = json.loads(path.read_text())
+    assert payload["version"] == 2

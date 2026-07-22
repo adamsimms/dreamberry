@@ -1,8 +1,9 @@
 """Weather-nearest real-frame anchor selection (brief §3, step 1).
 
-A real morning underlies every dream: the weather-NN index picks a same-season
-Cloudberry frame matching the packet, used as the img2img init AND the IP-Adapter
-atmosphere source. Falls back to the canonical frame if no index / no match.
+A real morning underlies every dream: the weather-NN index picks a same-season,
+same-day/night Cloudberry frame matching the packet, used as the img2img init AND
+the IP-Adapter atmosphere source. Falls back to the canonical frame if no index /
+no match.
 """
 
 from __future__ import annotations

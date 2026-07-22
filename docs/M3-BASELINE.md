@@ -38,5 +38,5 @@ records the baseline and the threshold calibration decision.
 ## Follow-up noted (not blocking)
 
 Some winter "day" frames are extremely dark (low sun / dusk) and dream near-black.
-The gate now withholds them at dial-0; a later pass may tighten the day/night
-solar-elevation split or exclude them from the anchor pool.
+The gate now withholds them at dial-0. Day/night retrieval is hard-gated at
+`solar_elevation < −6°` (schema §4.3) so twilight packets cannot anchor on dawn.
