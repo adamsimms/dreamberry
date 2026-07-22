@@ -1,4 +1,4 @@
-"""Unit tests for the hourly path decision logic (M4 / issue #14).
+"""Unit tests for the hourly path decision logic.
 
 The heavy engine and gate models are faked so the orchestration — weather
 silence → hold, generate + gate with retries, publish/hold/signal-lost mapping —
@@ -19,6 +19,8 @@ from dream.hourly import (
     OUTCOME_HOLD,
     OUTCOME_PUBLISHED,
     OUTCOME_SIGNAL_LOST,
+    SIGNAL_LOST_SIZE,
+    crash_to_signal_lost,
     make_noise_image,
     run_hourly,
 )
@@ -408,3 +410,64 @@ def test_hold_updates_r2_status_only(tmp_path):
     assert result.outcome == OUTCOME_HOLD
     assert store.objects["current/current.webp"] == b"prior"
     assert json.loads(store.objects["current/status.json"])["hold"] is True
+
+
+def test_gate_exception_holds_after_producing_frames(tmp_path):
+    engine = FakeEngine()
+
+    def boom(*_a):
+        raise RuntimeError("dino offline")
+
+    result = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=engine,
+        evaluate_fn=boom,
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_HOLD
+    assert result.hold_reason and "gate:" in result.hold_reason
+
+
+def test_publish_exception_holds_last_good(tmp_path):
+    engine = FakeEngine()
+
+    class BoomStore:
+        def read_status(self):
+            return {}
+
+        def next_dream_number(self):
+            return 1
+
+        def publish_frame(self, **_kw):
+            raise RuntimeError("R2 down")
+
+        def publish_hold(self, status):
+            return {"status": "current/status.json"}
+
+    result = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=engine,
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        store=BoomStore(),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_HOLD
+    assert result.hold_reason and "publish_failed" in result.hold_reason
+
+
+def test_crash_to_signal_lost_writes_small_noise(tmp_path):
+    cfgs = _cfgs(tmp_path)
+    result = crash_to_signal_lost(
+        dial=0.0,
+        error="boom",
+        now=NOW,
+        dream_cfg=cfgs["dream_cfg"],
+        hourly_cfg=cfgs["hourly_cfg"],
+    )
+    assert result.outcome == OUTCOME_SIGNAL_LOST
+    noise = Image.open(tmp_path / "public" / "signal_lost.webp")
+    assert noise.size == SIGNAL_LOST_SIZE

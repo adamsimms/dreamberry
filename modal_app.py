@@ -1,4 +1,4 @@
-"""Dreamberry Modal app — hourly GPU cron + R2 delivery (M5 / issues #16–#17, #12).
+"""Dreamberry Modal app — hourly GPU cron + R2 delivery.
 
 Modal owns schedule + L40S. Cloudflare owns R2 (this app writes) and Pages (M6).
 
@@ -134,11 +134,40 @@ def _run_tick(*, dial: float = 0.0) -> dict:
     os.chdir("/root/dreamberry")
 
     from dream.healthcheck import ping_healthcheck
-    from dream.hourly import OUTCOME_SIGNAL_LOST, run_hourly
+    from dream.hourly import (
+        OUTCOME_SIGNAL_LOST,
+        crash_to_signal_lost,
+        run_hourly,
+    )
     from dream.storage import R2Store, r2_config_from_env
 
-    store = R2Store(r2_config_from_env())
-    result = run_hourly(dial=dial, store=store, write=True)
+    store = None
+    try:
+        store = R2Store(r2_config_from_env())
+        result = run_hourly(dial=dial, store=store, write=True)
+    except Exception as exc:  # noqa: BLE001 — tick must never exit without a status write
+        err = f"{type(exc).__name__}: {exc}"
+        try:
+            result = crash_to_signal_lost(dial=dial, store=store, error=err)
+        except Exception as exc2:  # noqa: BLE001
+            ping = ping_healthcheck(failed=True)
+            return {
+                "outcome": "crash",
+                "error": err,
+                "fallback_error": f"{type(exc2).__name__}: {exc2}",
+                "healthcheck": ping,
+            }
+        ping = ping_healthcheck(failed=True)
+        return {
+            "outcome": result.outcome,
+            "failure_mode": result.failure_mode,
+            "hold_reason": result.hold_reason,
+            "dream_id": result.dream_id,
+            "attempts": result.attempts,
+            "status": result.status,
+            "error": err,
+            "healthcheck": ping,
+        }
 
     # Dead-man: a completed tick (including weather-silence hold) is healthy.
     # Only signal_lost (channel dead) fails the check.

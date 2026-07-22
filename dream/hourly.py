@@ -1,27 +1,12 @@
-"""Hourly path: weather → generate → gate → publish/hold/noise (issue #14).
+"""Hourly path: weather → generate → gate → publish/hold/noise.
 
-Wires the live weather packet (issue #13) through the M2 dream engine and the M3
-validators, mapping outcomes to the three brief failure modes
-(DREAMBERRY.md §7):
-
-  - weather silence  → HOLD: never generate; keep the last frame; status only.
-  - identity collapse → dial-aware. At dial-0 (public default) a collapse forces
-    a fresh-seed retry and, if it still won't grip, a HOLD of the last good
-    frame. At high dial the collapse is honored and PUBLISHED (the pointer moves).
-  - signal lost      → every attempt to generate threw: publish a NOISE field.
-
-A clean frame that passes both gates is PUBLISHED, updating the public pointer,
-with validator scores + any failure_mode written into the provenance sidecar.
-
-Local artifacts land under `config/hourly.yaml:paths` (data/dream/, gitignored).
-When an `R2Store` is passed (M5), the same outcomes are mirrored to the dedicated
-Dreamberry bucket: archive PNG + current WebP (or status-only on hold).
+Maps outcomes per DREAMBERRY.md §7 (hold / honored collapse / signal_lost).
+Local artifacts under `config/hourly.yaml:paths`; optional `R2Store` mirrors to R2.
 """
 
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -48,11 +33,15 @@ from weather_schema.live import (
 __all__ = [
     "HourlyResult",
     "run_hourly",
+    "crash_to_signal_lost",
     "make_noise_image",
     "OUTCOME_PUBLISHED",
     "OUTCOME_HOLD",
     "OUTCOME_SIGNAL_LOST",
 ]
+
+# Public noise field is small + lossy — channel-dead aesthetic, not print archive.
+SIGNAL_LOST_SIZE = (1280, 960)
 
 OUTCOME_PUBLISHED = "published"
 OUTCOME_HOLD = "hold"
@@ -61,8 +50,6 @@ OUTCOME_SIGNAL_LOST = "signal_lost"
 FAILURE_WEATHER_SILENCE = "weather_silence"
 FAILURE_SIGNAL_LOST = "signal_lost"
 FAILURE_IDENTITY_COLLAPSE = "identity_collapse"
-
-_DREAM_RE = re.compile(r"_DREAM(\d+)\.(?:png|PNG|jpg|JPG|jpeg|JPEG|webp|WEBP)$")
 
 # The frame evaluator contract: (image, packet, dial) -> FrameEvaluation.
 Evaluator = Callable[[Any, Mapping[str, Any], float], FrameEvaluation]
@@ -108,11 +95,9 @@ def _dream_timestamp(pkt: Mapping[str, Any], now: datetime) -> str:
 def _next_dream_number(out_dir: Path, store: Any | None = None) -> int:
     if store is not None:
         return int(store.next_dream_number())
-    names: list[str] = []
-    if out_dir.exists():
-        for p in out_dir.iterdir():
-            if p.is_file() and _DREAM_RE.search(p.name):
-                names.append(p.name)
+    names = (
+        [p.name for p in out_dir.iterdir() if p.is_file()] if out_dir.exists() else []
+    )
     return next_dream_number_from_names(names)
 
 
@@ -241,16 +226,38 @@ def run_hourly(
     seed_base = int(hourly_cfg.get("base_seed", 0)) if seed_base is None else int(seed_base)
 
     # 1) Assemble the only genuinely-live signal.
-    if packet is None:
-        pkt = build_live_packet(
-            dataset_cfg=dataset_cfg,
-            weather_cfg=weather_cfg,
+    try:
+        if packet is None:
+            pkt = build_live_packet(
+                dataset_cfg=dataset_cfg,
+                weather_cfg=weather_cfg,
+                now=now,
+                fetch_wyi=fetch_wyi,
+                fetch_buoy=fetch_buoy,
+            )
+        else:
+            pkt = dict(packet)
+    except Exception as exc:  # noqa: BLE001 — dead sensors → hold, never crash the tick
+        status = _status_hold(
             now=now,
-            fetch_wyi=fetch_wyi,
-            fetch_buoy=fetch_buoy,
+            failure_mode=FAILURE_WEATHER_SILENCE,
+            hold_reason=FAILURE_WEATHER_SILENCE,
+            last_success_at=last_success_at,
+            last_success_dream_id=last_success_dream_id,
+            dial=dial,
+            attempts=0,
+            reasons=[f"weather_fetch_failed: {type(exc).__name__}: {exc}"],
         )
-    else:
-        pkt = dict(packet)
+        if write:
+            _write_status(status_path, status, store, hold=True)
+        return HourlyResult(
+            outcome=OUTCOME_HOLD,
+            failure_mode=FAILURE_WEATHER_SILENCE,
+            hold_reason=FAILURE_WEATHER_SILENCE,
+            attempts=0,
+            status=status,
+            packet={},
+        )
 
     # 2) Weather silence → HOLD. The dream stays; the sensors went quiet.
     silence = check_weather_silence(
@@ -303,7 +310,12 @@ def run_hourly(
             continue
 
         produced_any = True
-        ev = evaluate_fn(result.image, pkt, dial)
+        try:
+            ev = evaluate_fn(result.image, pkt, dial)
+        except Exception as exc:  # noqa: BLE001 — gate hiccup → retry / hold, not crash
+            last_error = f"gate:{type(exc).__name__}: {exc}"
+            last_reject = last_error
+            continue
         if ev.accept:
             try:
                 return _publish(
@@ -322,11 +334,8 @@ def run_hourly(
                     dream_cfg=dream_cfg,
                     engine=engine,
                 )
-            except RuntimeError as exc:
-                # require_supir: true — refuse soft Lanczos publish; hold last good.
-                if "SUPIR required" not in str(exc):
-                    raise
-                last_reject = f"upscale_failed: {exc}"
+            except Exception as exc:  # noqa: BLE001 — SUPIR / R2 / disk → hold last good
+                last_reject = f"publish_failed: {type(exc).__name__}: {exc}"
                 break
         last_reject = ev.reject_reason
 
@@ -366,6 +375,38 @@ def run_hourly(
         public_dir=public_dir,
         status_path=status_path,
         write=write,
+        store=store,
+    )
+
+
+def crash_to_signal_lost(
+    *,
+    dial: float = 0.0,
+    store: Any | None = None,
+    error: str,
+    now: datetime | None = None,
+    dream_cfg: Mapping[str, Any] | None = None,
+    hourly_cfg: Mapping[str, Any] | None = None,
+) -> HourlyResult:
+    """Last-resort noise write when the tick body crashed before a normal outcome."""
+    now = _now(now)
+    dream_cfg = dream_cfg or load_dream_config()
+    hourly_cfg = hourly_cfg or _load_yaml(resolve_path("config/hourly.yaml"))
+    public_dir = resolve_path(hourly_cfg["paths"]["public_dir"])
+    status_path = public_dir / "status.json"
+    prior = _read_status(status_path, store)
+    return _signal_lost(
+        pkt={},
+        dial=dial,
+        attempts=0,
+        now=now,
+        last_success_at=prior.get("last_success_at"),
+        last_success_dream_id=prior.get("last_success_dream_id"),
+        error=error,
+        dream_cfg=dream_cfg,
+        public_dir=public_dir,
+        status_path=status_path,
+        write=True,
         store=store,
     )
 
@@ -510,13 +551,8 @@ def _signal_lost(
     write: bool,
     store: Any | None = None,
 ) -> HourlyResult:
-    from dream.upscale import target_size
-
-    size = target_size(dream_cfg)
-    # Fall back to generation size if upscale is disabled / missing.
-    if (dream_cfg.get("upscale") or {}).get("enabled", True) is False:
-        gen = dream_cfg["generation"]
-        size = (int(gen["width"]), int(gen["height"]))
+    # Small lossy noise — channel-dead aesthetic, not a print-size archive frame.
+    size = SIGNAL_LOST_SIZE
     noise_name = "signal_lost.webp"
     image_path = str(public_dir / noise_name)
     noise = make_noise_image(size, seed=int(now.timestamp()))
