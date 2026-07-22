@@ -98,7 +98,9 @@ image = (
         "pip install --no-deps 'k-diffusion==0.1.1.post1'",
         "python -c \"from pathlib import Path; import site; "
         "p = Path(site.getsitepackages()[0]) / 'k_diffusion' / '__init__.py'; "
-        "p.write_text('from . import sampling\\n')\"",
+        "p.write_text('')\"",
+        # Verify sampling imports without the training extras.
+        "python -c \"from k_diffusion.sampling import get_sigmas_karras; print('k_diffusion.sampling ok')\"",
         # Official SUPIR code (LLaVA optional — we pass the weather prompt instead).
         "git clone --depth 1 https://github.com/Fanghua-Yu/SUPIR.git /opt/SUPIR",
     )
