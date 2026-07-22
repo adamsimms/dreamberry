@@ -135,7 +135,7 @@ Gates run at SDXL-native **1024×768**. On accept, `dream/upscale.py` runs
 caption) to ~4× then fits to **4000×3000** before PNG/WebP publish. Modal clones
 SUPIR into `/opt/SUPIR`; weights live on the HF Volume (`camenduru/SUPIR`).
 Prefetch: `.venv/bin/modal run modal_app.py::prefetch_supir`.
-Modal image includes `k-diffusion` (SUPIR's `RestoreEDMSampler` imports it).
+Modal image installs `k-diffusion` sampling-only (`--no-deps` + scipy/torchsde/torchdiffeq).
 Production sets `upscale.require_supir: true` so a SUPIR failure holds the last
 good frame instead of silently publishing a soft Lanczos stretch. With
 `require_supir: false`, `backend: auto` still falls back to Lanczos for local

@@ -85,10 +85,19 @@ image = (
         "timm>=0.9",
         "openai-clip>=1.0.1",
         "xformers>=0.0.20",
-        # SUPIR's RestoreEDMSampler imports k_diffusion.sampling
-        "k-diffusion>=0.1.1",
+        # Runtime deps for k_diffusion.sampling only (full k-diffusion pulls
+        # wandb/clean-fid/etc. and blows up Modal's pip resolver).
+        "scipy>=1.11.0",
+        "torchsde>=0.2.6",
+        "torchdiffeq>=0.2.3",
     )
     .run_commands(
+        # SUPIR's RestoreEDMSampler imports k_diffusion.sampling — install the
+        # package without its heavy optional deps, then slim __init__.py so
+        # `import k_diffusion.sampling` does not pull training extras.
+        "pip install --no-deps 'k-diffusion==0.1.1.post1'",
+        "python -c \"from pathlib import Path; import k_diffusion; "
+        "Path(k_diffusion.__file__).write_text('from . import sampling\\n')\"",
         # Official SUPIR code (LLaVA optional — we pass the weather prompt instead).
         "git clone --depth 1 https://github.com/Fanghua-Yu/SUPIR.git /opt/SUPIR",
     )
