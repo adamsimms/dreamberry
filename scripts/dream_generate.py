@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a Dreamberry still from a weather packet (Dreamberry M2 / issue #7).
+"""Generate a Dreamberry still from a weather packet.
 
 Runs the dial-0 lock by default: weather-nearest real frame (img2img init) +
 ControlNet depth+soft-edge from the canonical geometry frame + IP-Adapter

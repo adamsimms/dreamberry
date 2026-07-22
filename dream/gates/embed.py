@@ -1,4 +1,4 @@
-"""DINOv2 embeddings + real-frame reference index (issue #9).
+"""DINOv2 embeddings + real-frame reference index.
 
 Identity collapse is measured as distance from a generated frame to the *real*
 Cloudberry-frame distribution. We embed archive frames once (DINOv2 CLS token,

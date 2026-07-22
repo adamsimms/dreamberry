@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prefetch SUPIR + SDXL checkpoint weights into HF_HOME/supir (issue #12).
+"""Prefetch SUPIR + SDXL checkpoint weights into HF_HOME/supir.
 
 On Modal the HF volume is mounted at /models (= HF_HOME). Run once after deploy
 or from a GPU machine with HF_TOKEN set:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply CORS on the Dreamberry R2 bucket so art.adamsimms.xyz can fetch JSON (M6 / #20).
+"""Apply CORS on the Dreamberry R2 bucket so art.adamsimms.xyz can fetch JSON.
 
 Prefer Wrangler (account auth) — S3 API tokens often lack PutBucketCors:
 

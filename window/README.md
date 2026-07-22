@@ -1,7 +1,7 @@
 # Dreamberry public window (`window/`)
 
 Self-contained static bundle for `art.adamsimms.xyz/dreamberry`. No build step —
-copy verbatim to `dist/dreamberry/` (see [docs/M6-WINDOW.md](../docs/M6-WINDOW.md)).
+copy verbatim to `dist/dreamberry/`.
 
 ```
 window/

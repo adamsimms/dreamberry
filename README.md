@@ -6,9 +6,7 @@ The dead [Cloudberry](https://art.adamsimms.xyz/cloudberry/archive/) camera **dr
 **Live window:** [art.adamsimms.xyz/dreamberry/window](https://art.adamsimms.xyz/dreamberry/window/)  
 **Artist:** [Adam Simms](https://adamsimms.xyz)
 
-A **sibling** to the Cloudberry archive, not an extension of it. The archive stays sacred and separate.
-
-> Dreamberry asks: can a machine be present at a place it can no longer photograph — and is that a gift or a consolation prize?
+A **sibling** to the Cloudberry archive, not an extension of it. The archive stays sacred and separate. Concept and ethics: [docs/DREAMBERRY.md](docs/DREAMBERRY.md).
 
 ## How it works
 
@@ -50,7 +48,7 @@ Hold (weather silence): leave current.webp; update status.json only
 Signal lost (GPU/channel): publish static / noise; failure_mode set
 ```
 
-**Weather is the only thing still true.** Rocks and cabin-edge are memory or invention; wind, fog, and sea are real, right now, at the island.
+Failure modes (hold vs signal lost vs identity collapse): [docs/DREAMBERRY.md](docs/DREAMBERRY.md) §7.
 
 ## Stack
 
@@ -72,7 +70,7 @@ Signal lost (GPU/channel): publish static / noise; failure_mode set
 | `window/` | Static public bundle (landing, live window, about) |
 | `scripts/` | Dataset, weather, Modal, eval, R2 helpers |
 | `config/` | YAML locks (dream, gates, hourly, platform, weather) |
-| `docs/` | Project brief, schema, and per-milestone notes |
+| `docs/` | Project brief + weather schema (see `.cursor/rules/docs.mdc`) |
 | `modal_app.py` | Modal cron + one-shot entrypoints |
 | `data/` | Local corpus / indexes (gitignored bulk; fixtures as needed) |
 
@@ -112,18 +110,6 @@ Platform deploy (after secrets + Modal Volume sync) — see [docs/M5-PLATFORM.md
 
 Never commit `.env` or R2 credentials. See [SECURITY.md](SECURITY.md).
 
-## Docs
-
-| Doc | What |
-|-----|------|
-| [docs/DREAMBERRY.md](docs/DREAMBERRY.md) | Concept, architecture, dial, failure modes, infra |
-| [docs/DREAMBERRY-WEATHER-SCHEMA.md](docs/DREAMBERRY-WEATHER-SCHEMA.md) | Symmetric train/live conditioning |
-| [docs/M5-PLATFORM.md](docs/M5-PLATFORM.md) | Modal cron + R2 delivery |
-| [docs/M6-WINDOW.md](docs/M6-WINDOW.md) | `/dreamberry` window + drawer + about |
-| [window/README.md](window/README.md) | Static bundle layout |
-
-Milestone notes: [M0](docs/M0-DATASET.md) · [M1](docs/M1-WEATHER.md) · [M2](docs/M2-DREAM-ENGINE.md) · [M3](docs/M3-QUALITY-GATES.md) · [M4](docs/M4-HOURLY.md)
-
 ## Related
 
 | Repo | Role |
@@ -132,11 +118,3 @@ Milestone notes: [M0](docs/M0-DATASET.md) · [M1](docs/M1-WEATHER.md) · [M2](do
 | [cloudberry](https://github.com/adamsimms/cloudberry) | Field rig that captured the originals |
 | [art.adamsimms.xyz](https://github.com/adamsimms/art.adamsimms.xyz) | Portfolio host; assembles `/dreamberry` |
 | [adrift](https://github.com/adamsimms/adrift) · [waves](https://github.com/adamsimms/waves) · [dory](https://github.com/adamsimms/dory) | Sibling art experiences on the same island weather |
-
-## Contribute
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).  
-Security reports: [SECURITY.md](SECURITY.md).  
-Changes: [CHANGELOG.md](CHANGELOG.md).
-
-MIT — see [LICENSE](LICENSE).

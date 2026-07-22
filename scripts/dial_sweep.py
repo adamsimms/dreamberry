@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Private dream-dial sweep for local review (M6 / issue #21).
+"""Private dream-dial sweep for local review.
 
 The public window is locked to **artist-only, dial 0** (DREAMBERRY.md §6). Dial
 experiments happen here, privately, and must never touch the public pointer:

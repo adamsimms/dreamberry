@@ -1,4 +1,4 @@
-"""Per-frame gate evaluation for the hourly path (issue #14).
+"""Per-frame gate evaluation for the hourly path.
 
 Combines the two M3 validators — identity collapse (DINOv2 kNN + horizon
 displacement, dial-aware) and season lock (calibrated CLIP zero-shot) — into a

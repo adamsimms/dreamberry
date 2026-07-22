@@ -1,4 +1,4 @@
-"""Healthchecks.io dead-man ping (M5 / issue #16)."""
+"""Healthchecks.io dead-man ping."""
 
 from __future__ import annotations
 

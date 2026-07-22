@@ -39,16 +39,16 @@
 
 ### 1.1 Included — drive tokens AND the retrieval vector
 
-| Field | Source | Unit | Role | Why included |
-|---|---|---|---|---|
-| `cloud_cover` (total) | Open-Meteo @ cabin | % | sky token | Dominant look of a coastal sky; maps cleanly to oktas. |
-| `visibility` | Open-Meteo @ cabin | m | fog/mist/haze token | The whole scene is "how far can you see the islands." High art value. |
-| `weather_code` | Open-Meteo @ cabin | WMO 4677 | precip token | Authoritative precip type+intensity in one field. |
-| `relative_humidity_2m` | Open-Meteo @ cabin | % | disambiguates mist vs haze | Needed to separate BR (wet) from HZ (dry) at same visibility. |
-| `wave_ht_sig` | SmartAtlantic buoy | m | sea-state token | Ocean fills the lower frame; sea state is a primary subject. |
-| `wind_speed_10m` | Open-Meteo @ cabin (fallback WYI) | km/h | wind token | Whitecaps, spray, motion cues; Beaufort-standard. |
-| `solar_elevation` | computed | deg | time/light token | The single strongest driver of scene appearance; also season-coherent. |
-| `month` (+ hemisphere) | timestamp | — | season token | Hard season lock. NL harsh seasonality handled below. |
+| Field | Source | Unit | Role |
+|---|---|---|---|
+| `cloud_cover` (total) | Open-Meteo @ cabin | % | sky token (oktas / METAR) |
+| `visibility` | Open-Meteo @ cabin | m | fog/mist/haze token |
+| `weather_code` | Open-Meteo @ cabin | WMO 4677 | precip token |
+| `relative_humidity_2m` | Open-Meteo @ cabin | % | mist vs haze (with visibility) |
+| `wave_ht_sig` | SmartAtlantic buoy | m | sea-state token |
+| `wind_speed_10m` | Open-Meteo @ cabin (fallback WYI) | km/h | wind token (Beaufort) |
+| `solar_elevation` | computed | deg | time/light token |
+| `month` (+ hemisphere) | timestamp | — | season token (hard lock) |
 
 ### 1.2 Included — modifiers / retrieval only
 
@@ -531,15 +531,3 @@ A unit test should assert every `compose_prompt` output token ∈ this set.
 - **Golden hour / blue hour elevation window (sun −4°…+6° / −6°…−4°):** https://en.wikipedia.org/wiki/Golden_hour_(photography)
 - **SmartAtlantic Bonavista Bay buoy (ERDDAP `SMA_bonavista`):** https://www.smartatlantic.ca/erddap/
 - **ECCC Pool's Island (WYI) climate/obs:** https://climate.weather.gc.ca/
-
----
-
-## 9. Implementation checklist
-
-- [ ] Implement bucket functions §2.1–2.8 as pure functions with unit tests at every boundary value.
-- [ ] Implement `compose_prompt` §3.3; assert output tokens ⊆ §7 vocabulary.
-- [ ] One packet-builder for ERA5-archive (captioning) and Forecast (live) with identical field names/units (`wind_speed_unit=kmh`, `timezone=America/St_Johns`).
-- [ ] Solar elevation via a vetted ephemeris (e.g. `astral`/NOAA algorithm) from lat/lon + UTC.
-- [ ] Feature-vector builder §4.1 + weighted-Euclidean §4.2 + season gate §4.3, with null-drop renormalization §4.4.
-- [ ] Weather-silence detector §6.2 wired to the generator's hold behavior.
-- [ ] Golden test: 5 worked packets in §3.4 must reproduce their exact strings.

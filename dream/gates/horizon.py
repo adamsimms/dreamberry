@@ -1,4 +1,4 @@
-"""Horizon-line extraction + stability vs the canonical frame (issue #9 / #11).
+"""Horizon-line extraction + stability vs the canonical frame.
 
 The whole scene is "how far can you see the islands," so the sea/sky boundary is
 the single most identity-bearing edge. We estimate a per-column horizon profile

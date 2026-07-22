@@ -1,4 +1,4 @@
-"""Shared utilities for Dreamberry M0 dataset pipeline."""
+"""Dataset paths, manifest helpers, and common I/O for the M0 pipeline."""
 
 from __future__ import annotations
 

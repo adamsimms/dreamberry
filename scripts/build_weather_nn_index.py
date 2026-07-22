@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and query the weather nearest-neighbor index (Dreamberry M1 / issue #6).
+"""Build and query the weather nearest-neighbor index.
 
 Usage:
   PYTHONPATH=. python scripts/build_weather_nn_index.py

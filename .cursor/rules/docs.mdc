@@ -1,0 +1,58 @@
+---
+description: Keep docs sparse — contracts and decisions only, no AI milestone diaries
+alwaysApply: true
+---
+
+# Documentation hygiene
+
+## Canonical docs (only these under `docs/` by default)
+
+| File | Role |
+|------|------|
+| `docs/DREAMBERRY.md` | Art brief — concept, ethics, dial, failure modes, infra decisions |
+| `docs/DREAMBERRY-WEATHER-SCHEMA.md` | Conditioning contract — buckets, tokens, train≡live symmetry |
+
+Add another `docs/*.md` only if it is a **decision record** or **ops contract** the code cannot own (e.g. eval baseline numbers). Default: **do not add a new doc**.
+
+Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATFORM.md`. Do not revive deleted `M*.md` status notes.
+
+## Never commit
+
+- Milestone / issue status diaries (“landed ✅”, “not in this slice”)
+- Agent routing, Cursor prompt patterns, model pickers → `AGENTS.md` only
+- Setup already covered by README, CONTRIBUTING, or GitHub repo tabs
+- Re-tables of hold / signal_lost / collapse — one home: `DREAMBERRY.md` §7; link it
+- “Why included” padding, implementation checklists, AI-review changelogs that restate the brief
+- README docs indexes or Contribute footers that duplicate GitHub header tabs
+
+## Writing rules
+
+1. **One source of truth** — if it lives in the brief, schema, code, or an issue, do not paste it again.
+2. **Delta only** — decisions logs record what changed, not a re-summary of architecture.
+3. **Contracts over narration** — thresholds, field lists, R2 layout yes; process essays no (ethics/concept stay in the brief).
+4. **Ship status → Issues/PRs**, not `docs/`.
+5. **No module docstring stamps** (`M4 / issue #14`) — one-line purpose; tracking in git.
+6. **README stays short** — how it works + local run; no docs catalog.
+
+## Keep in sync (same PR)
+
+When a change touches any of the following, update the matching surface in the **same PR** — edit the existing file; do not invent a new one:
+
+| Change touches… | Update… |
+|-----------------|---------|
+| Public behavior, stack, or how to run locally | `README.md` |
+| Dev setup, artistic boundaries, or PR expectations | `CONTRIBUTING.md` |
+| Secrets, credentials, or vulnerability reporting | `SECURITY.md` / `.env.example` |
+| Concept, ethics, dial, failure modes, infra decisions | `docs/DREAMBERRY.md` |
+| Weather buckets, tokens, or train≡live symmetry | `docs/DREAMBERRY-WEATHER-SCHEMA.md` |
+| R2 layout, Modal deploy, or hold delivery | `docs/M5-PLATFORM.md` (or README if one line) |
+| Sidecar fields | `docs/M4-SIDECAR.md` + code/tests |
+| User- or ops-visible shipping note | `CHANGELOG.md` |
+
+Stale docs that contradict the code are a bug. Prefer a one-line fix over a new section.
+
+## Before adding or expanding a doc
+
+> Does this encode a decision or contract someone must follow later — or does it narrate that work happened?
+
+If the latter → update the issue/PR, not `docs/`.

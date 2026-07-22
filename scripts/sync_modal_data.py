@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync local Dreamberry corpus into the Modal data Volume (M5).
+"""Sync local Dreamberry corpus into the Modal data Volume.
 
 Uploads the pieces the hourly tick needs on L40S:
   data/raw/          — Cloudberry originals (anchor + ControlNet source)

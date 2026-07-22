@@ -1,4 +1,4 @@
-"""Season-lock validator: calibrated CLIP zero-shot (issue #10).
+"""Season-lock validator: calibrated CLIP zero-shot.
 
 Layer 1 (hard) is already enforced upstream by same-season retrieval (M1). This
 is layer 2: a CLIP zero-shot check on the *rendered* frame that trips a refusal

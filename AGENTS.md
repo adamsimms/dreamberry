@@ -5,12 +5,17 @@ per chat** when the work is mechanical.
 
 ## Model routing
 
-Full table: [docs/DREAMBERRY.md](docs/DREAMBERRY.md) §10.
+| Prefer | When | Typical issues |
+|--------|------|----------------|
+| **Opus** (judgment) | Concept, dial semantics, validators encoding failure modes, about/ethics copy, hold vs signal-lost, anything that could quietly resurrect a live-camera fiction | #5, #7–#11, #14, #18–#19, #21–#22, #24 |
+| **Composer** (mechanical) | Spec already decided; scripts, wiring, tests against fixed tables, Modal/R2 boilerplate | #2–#4, #6 (after vector frozen), #12–#13, #15–#17, #20 |
+| **Composer → Opus review** | Composer implements; Opus reviews honesty / season lock / hold before merge | #14, #18, #19 especially |
 
-| Prefer | When |
-|--------|------|
-| **Opus** (judgment) | Concept, dial semantics, validators encoding failure modes, about/ethics copy, hold vs signal-lost, anything that could quietly resurrect a live-camera fiction |
-| **Composer** (mechanical) | Spec already decided; scripts, wiring, tests against fixed tables, Modal/R2 boilerplate |
+**Rules of thumb**
+
+- Brief already names the tool and acceptance criteria → **Composer**.
+- Wrong choice would change the *artwork* (elegy, identity collapse, weather-as-truth, labeling) → **Opus**.
+- One milestone (or one issue) per chat for mechanical work; keep Opus chats for judgment-heavy milestones (M2–M3, M6 honesty).
 
 Pattern: `Build milestone M7 — … Follow docs/DREAMBERRY.md.`
 
@@ -26,5 +31,8 @@ Pattern: `Build milestone M7 — … Follow docs/DREAMBERRY.md.`
 
 1. [docs/DREAMBERRY.md](docs/DREAMBERRY.md) — brief
 2. [docs/DREAMBERRY-WEATHER-SCHEMA.md](docs/DREAMBERRY-WEATHER-SCHEMA.md) — conditioning contract
-3. Milestone notes under `docs/M*.md`
-4. [CONTRIBUTING.md](CONTRIBUTING.md)
+
+Do not add milestone status notes under `docs/`. Full policy (sparse docs + keep in sync):
+[`.cursor/rules/docs.mdc`](.cursor/rules/docs.mdc).
+
+Also: [CONTRIBUTING.md](CONTRIBUTING.md).

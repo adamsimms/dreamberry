@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch a live weather condition packet for Dreamberry inference (M4 / issue #13).
+"""Fetch a live weather condition packet for Dreamberry inference.
 
 Examples:
   PYTHONPATH=. .venv/bin/python scripts/fetch_live_weather.py

@@ -1,4 +1,4 @@
-"""Perceptual metrics for the eval harness (issue #11).
+"""Perceptual metrics for the eval harness.
 
 CLIP image-image similarity (is the dream near the real morning?) and LPIPS
 (perceptual distance). Both lazy-imported. Horizon stability comes from

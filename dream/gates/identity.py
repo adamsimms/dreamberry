@@ -1,18 +1,8 @@
-"""Identity-collapse detector + dial-aware verdict (issue #9).
+"""Identity-collapse detector + dial-aware verdict.
 
-Collapse = the ghost cannot grip the rocks. Measured two ways:
-  1. DINOv2 kNN distance to the real-frame distribution (dream/gates/embed.py)
-  2. horizon-line displacement vs the canonical frame (dream/gates/horizon.py)
-
-Dial-aware verdict (DREAMBERRY.md §Primary — Identity collapse):
-  - below `enforced_below_dial`: the window must hold. A collapse → action
-    "regen_or_hold" (the caller regenerates with a new seed or holds the last
-    good frame). This is the honest refusal, never a false sharp place.
-  - at/above that dial: collapse is *expected and honored* — action
-    "honored_dissolve" (the seeded defocus in dream/dial.py renders it).
-
-The dissolve renderer itself already lives in dream/dial.py; this module only
-detects and decides.
+See DREAMBERRY.md §7. DINOv2 kNN + horizon displacement → `collapse_verdict`
+(`regen_or_hold` below the enforced dial; `honored_dissolve` at/above it).
+Dissolve rendering lives in dream/dial.py.
 """
 
 from __future__ import annotations

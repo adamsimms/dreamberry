@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""M3 eval harness: dial-0 baseline over held-out frames (issue #11).
+"""Eval harness: dial-0 baseline over held-out frames.
 
 Holds out a stratified set of real frames (season x precip), generates a dream
 from each frame's *own* weather packet with leave-one-out anchor selection (the

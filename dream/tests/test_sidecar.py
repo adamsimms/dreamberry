@@ -1,4 +1,4 @@
-"""Unit tests for provenance sidecar schema (M4 / issue #15)."""
+"""Unit tests for provenance sidecar schema."""
 
 from __future__ import annotations
 

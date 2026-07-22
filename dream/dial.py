@@ -1,13 +1,7 @@
-"""Dream dial (0-10) parameter schedule — brief DREAMBERRY.md §6.
+"""Dream dial (0–10) parameter schedule — DREAMBERRY.md §6.
 
-As the dial rises the real-frame anchor lets go and the learned "Cloudberry
-memory" (LoRA) takes over — the ghost drifting off the rocks. At dial 10 the
-window dissolves via a deliberate, seeded, structure-weighted defocus (never
-emergent high-denoise mush).
-
-The anchor points below are the *indicative* schedule from the pipeline spike;
-they are the single source of truth for the schedule and are meant to be tuned
-during dial experiments. Values between anchors are piecewise-linear.
+Piecewise-linear anchors for denoise / ControlNet / IP-Adapter / LoRA.
+Dial 10 adds seeded structure-weighted defocus. Tune during dial experiments.
 """
 
 from __future__ import annotations

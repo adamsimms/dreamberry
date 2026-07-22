@@ -1,4 +1,4 @@
-// Dreamberry public window configuration (M6 / issue #18).
+// Dreamberry public window configuration.
 //
 // The window is a static bundle mounted at art.adamsimms.xyz/dreamberry.
 // It reads the live pointer that the Modal hourly cron writes to R2 —

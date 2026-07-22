@@ -1,12 +1,12 @@
 # Changelog
 
 Notable changes to Dreamberry. The public artwork uses milestones **M0–M7**, not
-semver — this file tracks shipping notes for humans and agents.
+semver — this file tracks shipping notes.
 
 ## Unreleased
 
-- Exemplary repo docs: README architecture diagram, CONTRIBUTING, SECURITY,
-  CODE_OF_CONDUCT, LICENSE, CHANGELOG, AGENTS
+- Repo docs: README architecture diagram, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT,
+  LICENSE, CHANGELOG, AGENTS
 
 ## M0–M6 (first public path)
 

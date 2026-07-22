@@ -1,4 +1,4 @@
-"""Dreamberry M2 dream engine — SDXL + ControlNet + real-frame anchor.
+"""Dreamberry dream engine — SDXL + ControlNet + real-frame anchor.
 
 The dead Cloudberry camera dreaming: a weather-nearest real frame is the img2img
 init, ControlNet (depth + soft-edge) from the canonical geometry frame locks the

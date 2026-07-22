@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build M3 gate references: DINOv2 real-frame index + CLIP season calibration.
+"""Build gate references: DINOv2 real-frame index + CLIP season calibration.
 
 - DINOv2 index: embed archive day frames → data/gates/dino_index.npz. This is the
   "real-frame distribution" the identity-collapse detector measures against (#9).

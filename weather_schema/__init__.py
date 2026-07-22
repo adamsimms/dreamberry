@@ -1,4 +1,4 @@
-"""Deterministic weather → prompt + feature vector (Dreamberry M1).
+"""Deterministic weather → prompt + feature vector.
 
 Symmetry contract: the same compose_prompt / feature_vector run on ERA5 archive
 packets (captioning) and live forecast packets (inference).

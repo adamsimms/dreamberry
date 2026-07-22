@@ -1,4 +1,4 @@
-"""Unit tests for publish upscale helpers (M4 / issue #12)."""
+"""Unit tests for publish upscale helpers."""
 
 from __future__ import annotations
 

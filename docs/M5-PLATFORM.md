@@ -49,7 +49,7 @@ Ensure `.env` has (see `.env.example`):
 ### 2. Modal secret
 
 ```bash
-cd ~/Documents/GitHub/dreamberry
+cd dreamberry   # repo root
 .venv/bin/python scripts/create_modal_secret.py
 ```
 
@@ -108,16 +108,9 @@ PYTHONPATH=. .venv/bin/python scripts/dream_hourly.py --packet data/weather/<fra
 
 ## #19 — graceful failure / hold honesty
 
-The locked contract (issue #19): **weather silence → hold the last frame;
-GPU/provider outage → white-noise `signal_lost`. Do not merge the two aesthetics.**
-
-Two distinct failure aesthetics, mapped in `dream/hourly.py`:
-
-| Trigger | Aesthetic | `current` pointer | `status` |
-|---|---|---|---|
-| Weather silence (stale/dead feeds) | **hold** — the dream stays | last dream (`current.webp`) | `hold: true`, `failure_mode: weather_silence` |
-| Gate exhaustion (collapse/season) | **hold** — the dream stays | last dream (`current.webp`) | `hold: true`, `hold_reason` set |
-| Every generation attempt throws | **signal lost** — noise field | `signal_lost.webp` | `hold: false`, `failure_mode: signal_lost` |
+Normative contract: [DREAMBERRY.md §7](DREAMBERRY.md). Mapped in `dream/hourly.py`.
+Weather silence / gate exhaustion → **hold**; every generation attempt throws →
+**signal_lost**. Do not merge the two aesthetics.
 
 Honesty guarantees enforced (and unit-tested in `test_hourly.py` / `test_storage.py`):
 

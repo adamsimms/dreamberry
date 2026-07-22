@@ -48,7 +48,7 @@ weather_schema/     # compose_prompt + retrieval (train ≡ live)
 window/             # static public bundle for art Pages
 scripts/            # dataset, weather, Modal, eval helpers
 config/             # locked YAML (dream, gates, platform, …)
-docs/               # brief + milestone notes
+docs/               # brief + weather schema (+ sparse contracts only)
 modal_app.py        # Modal cron entrypoint
 ```
 
@@ -59,7 +59,10 @@ modal_app.py        # Modal cron entrypoint
 3. Match existing Python / window style; prefer clarity over cleverness.
 4. Add or update tests when changing schema, gates, or storage contracts.
 5. Update [CHANGELOG.md](CHANGELOG.md) for user-visible or ops-visible changes.
-6. Open a PR describing **what** changed, **why**, and how you tested it.
+6. Keep README / CONTRIBUTING / SECURITY / canonical `docs/` in sync when the change
+   touches public behavior, setup, secrets, or a contract — same PR; no new doc files
+   (see [`.cursor/rules/docs.mdc`](.cursor/rules/docs.mdc)).
+7. Open a PR describing **what** changed, **why**, and how you tested it.
 
 Concept, dial semantics, validators, about copy, and hold/signal-lost behavior are judgment-heavy — expect careful review against [docs/DREAMBERRY.md](docs/DREAMBERRY.md).
 

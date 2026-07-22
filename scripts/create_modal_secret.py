@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create / update the Modal Secret `dreamberry` from local `.env` (M5).
+"""Create / update the Modal Secret `dreamberry` from local `.env`.
 
 Reads only the keys Modal needs — never prints secret values.
 

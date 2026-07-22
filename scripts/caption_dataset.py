@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Caption curated frames with compose_prompt (Dreamberry M1 / issue #5).
+"""Caption curated frames with compose_prompt.
 
 Reads weather packets + curated day/night lists, writes JSONL captions.
 Also records after_solar_noon from astral solar noon (symmetry with live path).

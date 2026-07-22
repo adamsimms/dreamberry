@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
 """Run one Dreamberry hourly tick: weather → generate → gate → publish/hold/noise.
 
-This is the M4 hourly path (issue #14). It fetches the live weather packet (or
-replays a supplied packet), generates at the given dial, runs the identity +
-season gates, and maps the outcome to the three brief failure modes, writing
-public/status.json (+ current frame) and the private hourly archive locally.
-R2 / Pages delivery is M5.
-
 Examples:
-  # live weather, dial-0 public default
   PYTHONPATH=. .venv/bin/python scripts/dream_hourly.py
-
-  # replay an archive weather packet (no network), keep artifacts in a temp dir
   PYTHONPATH=. .venv/bin/python scripts/dream_hourly.py \
     --packet data/weather/<frame>.json
-
-  # simulate weather silence handling without hitting the GPU
   PYTHONPATH=. .venv/bin/python scripts/dream_hourly.py --dry-run
 """
 
