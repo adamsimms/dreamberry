@@ -5,6 +5,13 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- **Cost cut:** hourly Modal path is **A10 + SDXL-native** (no SUPIR on cron);
+  SUPIR ~4000×3000 via on-demand `upscale_archive`. Gate/publish failures →
+  `signal_lost` noise for that hour (weather silence still holds)
+- Public window: mid-join crossfade — `previous.webp` + wall-clock progress so a
+  cold load at :30 is ~50/50; dream→dream ~1h; signal_lost in/out ~10s
+- Hourly path: first-attempt seed is hour-derived (hash of the weather hour) so
+  dial-0 frames can micro-vary between hours; same hour stays replayable
 - Weather-NN: hard day/night gate at `solar_elevation < −6°` so twilight/night
   packets cannot anchor on dawn/day frames (dial-0 daylight leak)
 - Repo docs: README architecture diagram, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT,

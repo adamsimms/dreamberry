@@ -21,7 +21,7 @@ via `write_sidecar()`.
 | `dial_params` | object | yes | never | Full dial schedule output (see below) |
 | `prompt` | string | yes | never | Exact `compose_prompt()` string fed to the model |
 | `seed` | integer | yes | never | Torch generator seed |
-| `width` | integer | yes | never | Output pixels (SDXL stage, pre-SUPIR) |
+| `width` | integer | yes | never | Output pixels (published frame; SDXL-native when hourly upscale is off) |
 | `height` | integer | yes | never | Output pixels |
 | `edge_crop` | object | no | when zero | Fractional insets applied before resize (GoPro fisheye trim) |
 | `anchor_frame` | string | yes | never | Cloudberry filename used as img2img / IP-Adapter init |

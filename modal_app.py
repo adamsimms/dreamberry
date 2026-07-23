@@ -1,12 +1,16 @@
 """Dreamberry Modal app — hourly GPU cron + R2 delivery.
 
-Modal owns schedule + L40S. Cloudflare owns R2 (this app writes) and Pages (M6).
+Modal owns schedule + A10 (native SDXL). SUPIR keepers are on-demand on L40S.
+Cloudflare owns R2 (this app writes) and Pages (M6).
 
 Deploy:
   .venv/bin/modal deploy modal_app.py
 
 One-shot (no cron wait):
   .venv/bin/modal run modal_app.py::hourly_tick
+
+On-demand Cloudberry-res SUPIR (does not touch current/):
+  .venv/bin/modal run modal_app.py::upscale_archive --dream-id '…_DREAM001'
 
 Sync corpus to the data Volume first (see docs/M5-PLATFORM.md):
   .venv/bin/python scripts/sync_modal_data.py
@@ -198,37 +202,112 @@ _VOLUMES = {
     "/root/dreamberry/data": data_vol,
 }
 
-# SUPIR + SDXL need headroom beyond the dream stack alone.
-_TIMEOUT = 45 * 60
-_MEMORY = 65536
+# Hourly = native SDXL on A10. SUPIR keepers = separate L40S function.
+_HOURLY_TIMEOUT = 20 * 60
+_HOURLY_MEMORY = 32768
+_UPSCALE_TIMEOUT = 45 * 60
+_UPSCALE_MEMORY = 65536
 
 
 @app.function(
     image=image,
-    gpu="L40S",
-    timeout=_TIMEOUT,
-    memory=_MEMORY,
+    gpu="A10",
+    timeout=_HOURLY_TIMEOUT,
+    memory=_HOURLY_MEMORY,
     volumes=_VOLUMES,
     secrets=secrets,
     # :05 past each hour — Open-Meteo current-hour row usually present.
     schedule=modal.Cron("5 * * * *"),
 )
 def hourly_tick() -> dict:
-    """Scheduled live hour: weather → generate → gate → SUPIR → R2."""
+    """Scheduled live hour: weather → generate → gate → native publish → R2."""
     return _run_tick(dial=0.0)
 
 
 @app.function(
     image=image,
-    gpu="L40S",
-    timeout=_TIMEOUT,
-    memory=_MEMORY,
+    gpu="A10",
+    timeout=_HOURLY_TIMEOUT,
+    memory=_HOURLY_MEMORY,
     volumes=_VOLUMES,
     secrets=secrets,
 )
 def run_once(dial: float = 0.0) -> dict:
     """Manual one-shot for smoke tests (`modal run modal_app.py::run_once`)."""
     return _run_tick(dial=dial)
+
+
+@app.function(
+    image=image,
+    gpu="L40S",
+    timeout=_UPSCALE_TIMEOUT,
+    memory=_UPSCALE_MEMORY,
+    volumes=_VOLUMES,
+    secrets=secrets,
+)
+def upscale_archive(dream_id: str) -> dict:
+    """On-demand SUPIR to ~4000×3000 for one archive frame (print/keepers).
+
+    Reads ``archive/<dream_id>.png`` (+ sidecar) from R2, writes
+    ``archive/<dream_id>_4k.png`` and merges upscale fields into the sidecar.
+    Does **not** move ``current/``.
+    """
+    import io
+    import os
+    import sys
+
+    sys.path.insert(0, "/root/dreamberry")
+    os.chdir("/root/dreamberry")
+    os.environ.setdefault("HF_HOME", "/models")
+
+    from PIL import Image
+
+    from dream.config import load_dream_config
+    from dream.storage import ARCHIVE_PREFIX, R2Store, encode_archive_png, r2_config_from_env
+    from dream.upscale import upscale_for_publish
+
+    dream_id = str(dream_id).strip()
+    if not dream_id or "/" in dream_id or ".." in dream_id:
+        raise ValueError(f"invalid dream_id: {dream_id!r}")
+
+    store = R2Store(r2_config_from_env())
+    png_key = f"{ARCHIVE_PREFIX}{dream_id}.png"
+    json_key = f"{ARCHIVE_PREFIX}{dream_id}.json"
+    out_key = f"{ARCHIVE_PREFIX}{dream_id}_4k.png"
+
+    raw = store.get_bytes(png_key)
+    if raw is None:
+        raise FileNotFoundError(f"missing R2 object: {png_key}")
+    image = Image.open(io.BytesIO(raw)).convert("RGB")
+    sidecar = store.get_json(json_key) or {}
+
+    dream_cfg = dict(load_dream_config())
+    up_cfg = dict(dream_cfg.get("upscale") or {})
+    up_cfg["enabled"] = True
+    up_cfg["require_supir"] = True
+    up_cfg["backend"] = "supir"
+    dream_cfg["upscale"] = up_cfg
+
+    seed = int(sidecar.get("seed") or 0)
+    prompt = str(sidecar.get("prompt") or "")
+    result = upscale_for_publish(image, dream_cfg, prompt=prompt, seed=seed)
+
+    store.put_bytes(out_key, encode_archive_png(result.image), content_type="image/png")
+    sidecar_out = dict(sidecar)
+    sidecar_out.update(result.meta)
+    sidecar_out["width"] = int(result.image.size[0])
+    sidecar_out["height"] = int(result.image.size[1])
+    sidecar_out["print_archive_key"] = out_key
+    store.put_json(json_key, sidecar_out)
+
+    return {
+        "dream_id": dream_id,
+        "source": png_key,
+        "output": out_key,
+        "width": result.image.size[0],
+        "height": result.image.size[1],
+        "upscale": result.meta.get("upscale"),
+    }
 
 
 @app.function(

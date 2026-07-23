@@ -4,11 +4,16 @@ Layout (flat, dedicated bucket `art-adamsimms-xyz-dreamberry` — never Cloudber
 
   archive/<TIMESTAMP>_DREAM###.png   + .json   (PNG lossless — print / InDesign)
   current/current.webp               + .json   (WebP lossless — public window)
+  current/previous.webp                        (prior dream — mid-join crossfade)
   current/status.json
   current/signal_lost.webp                     (channel dead only)
 
-Hold (weather silence / gate exhaustion): update `current/status.json` only —
-never overwrite `current/current.webp` (DREAMBERRY.md §7).
+Hold (weather silence only): update `current/status.json` only — never
+overwrite `current/current.webp` (DREAMBERRY.md §7). Dream/channel breaks
+publish `signal_lost.webp` instead of holding the last good frame.
+
+Window fade (status.fade_ms / fade_started_at / previous):
+  dream→dream ~1h; signal_lost in/out ~10s (coming in and out of a dream).
 """
 
 from __future__ import annotations
@@ -17,6 +22,7 @@ import io
 import json
 import os
 import re
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -29,6 +35,9 @@ from dream.config import REPO_ROOT
 __all__ = [
     "R2Config",
     "R2Store",
+    "FADE_MS_DREAM",
+    "FADE_MS_SIGNAL",
+    "PREVIOUS_IMAGE_KEY",
     "encode_archive_png",
     "encode_current_webp",
     "encode_signal_lost_webp",
@@ -44,9 +53,14 @@ _DREAM_RE = re.compile(r"_DREAM(\d+)\.(?:png|PNG|jpg|JPG|jpeg|JPEG|webp|WEBP)$")
 ARCHIVE_PREFIX = "archive/"
 CURRENT_PREFIX = "current/"
 CURRENT_IMAGE_KEY = f"{CURRENT_PREFIX}current.webp"
+PREVIOUS_IMAGE_KEY = f"{CURRENT_PREFIX}previous.webp"
 CURRENT_JSON_KEY = f"{CURRENT_PREFIX}current.json"
 STATUS_KEY = f"{CURRENT_PREFIX}status.json"
 SIGNAL_LOST_KEY = f"{CURRENT_PREFIX}signal_lost.webp"
+
+# Public window crossfade durations (mirrored in window/assets/config.js).
+FADE_MS_DREAM = 60 * 60 * 1000  # dream → dream: hour-scale morph
+FADE_MS_SIGNAL = 10 * 1000  # signal_lost in/out: snap in/out of the dream
 
 
 @dataclass(frozen=True)
@@ -203,18 +217,23 @@ class R2Store:
         )
         self.put_bytes(key, body, content_type="application/json")
 
-    def get_json(self, key: str) -> dict[str, Any] | None:
+    def get_bytes(self, key: str) -> bytes | None:
         try:
             resp = self._client.get_object(Bucket=self.cfg.bucket, Key=key)
         except self._client.exceptions.NoSuchKey:
             return None
         except Exception as exc:  # noqa: BLE001
-            # botocore ClientError 404
             code = getattr(exc, "response", {}).get("Error", {}).get("Code")
             if code in ("404", "NoSuchKey", "NotFound"):
                 return None
             raise
-        return json.loads(resp["Body"].read().decode("utf-8"))
+        return resp["Body"].read()
+
+    def get_json(self, key: str) -> dict[str, Any] | None:
+        raw = self.get_bytes(key)
+        if raw is None:
+            return None
+        return json.loads(raw.decode("utf-8"))
 
     def list_keys(self, prefix: str) -> list[str]:
         keys: list[str] = []
@@ -247,6 +266,14 @@ class R2Store:
 
     # -- outcome writers -----------------------------------------------------
 
+    def promote_current_to_previous(self) -> bool:
+        """Copy current.webp → previous.webp for mid-join crossfade. False if missing."""
+        data = self.get_bytes(CURRENT_IMAGE_KEY)
+        if data is None:
+            return False
+        self.put_bytes(PREVIOUS_IMAGE_KEY, data, content_type="image/webp")
+        return True
+
     def publish_frame(
         self,
         *,
@@ -255,16 +282,24 @@ class R2Store:
         sidecar: Mapping[str, Any],
         status: Mapping[str, Any],
     ) -> dict[str, str]:
-        """Archive PNG + public WebP + status. Pointer moves."""
+        """Archive PNG + public WebP + status. Pointer moves.
+
+        When ``status["previous"] == "previous.webp"``, promotes the existing
+        current frame to ``previous.webp`` before overwrite so cold loads can
+        mid-join the hour-scale crossfade.
+        """
         archive_png = f"{ARCHIVE_PREFIX}{dream_id}.png"
         archive_json = f"{ARCHIVE_PREFIX}{dream_id}.json"
         self.put_bytes(archive_png, encode_archive_png(image), content_type="image/png")
         self.put_json(archive_json, sidecar)
+        status_out = dict(status)
+        if status_out.get("previous") == "previous.webp":
+            if not self.promote_current_to_previous():
+                status_out["previous"] = None
         self.put_bytes(
             CURRENT_IMAGE_KEY, encode_current_webp(image), content_type="image/webp"
         )
         self.put_json(CURRENT_JSON_KEY, sidecar)
-        status_out = dict(status)
         status_out["current"] = "current.webp"
         status_out["archive_key"] = archive_png
         if self.cfg.public_base_url:
@@ -278,7 +313,7 @@ class R2Store:
         }
 
     def publish_hold(self, status: Mapping[str, Any]) -> dict[str, str]:
-        """Weather silence / gate hold — status only; leave current.webp untouched.
+        """Weather silence — status only; leave current.webp untouched.
 
         The pointer stays on the last successful dream (`current.webp`), so the
         public URL is refreshed to match — a hold must never keep a stale
@@ -319,8 +354,12 @@ def save_local_publish(
     dream_id: str,
     public_dir: Path,
     archive_dir: Path,
-) -> None:
-    """Mirror R2 layout on disk (dev / Modal scratch before upload)."""
+) -> dict[str, Any]:
+    """Mirror R2 layout on disk (dev / Modal scratch before upload).
+
+    Returns the status dict actually written (``previous`` may be cleared if
+    there was no prior ``current.webp`` to promote).
+    """
     from dream.sidecar import write_sidecar
 
     archive_dir.mkdir(parents=True, exist_ok=True)
@@ -329,6 +368,14 @@ def save_local_publish(
     image.convert("RGB").save(archive_dir / f"{dream_id}.png", format="PNG", optimize=True)
     write_sidecar(archive_dir / f"{dream_id}.json", sidecar)
 
+    status_out = dict(status)
+    cur = public_dir / "current.webp"
+    if status_out.get("previous") == "previous.webp":
+        if cur.exists():
+            shutil.copy2(cur, public_dir / "previous.webp")
+        else:
+            status_out["previous"] = None
+
     image.convert("RGB").save(
         public_dir / "current.webp", format="WEBP", lossless=True, method=6
     )
@@ -336,8 +383,9 @@ def save_local_publish(
 
     status_path = public_dir / "status.json"
     with open(status_path, "w") as f:
-        json.dump(dict(status), f, ensure_ascii=False, indent=2)
+        json.dump(status_out, f, ensure_ascii=False, indent=2)
         f.write("\n")
+    return status_out
 
 
 def save_local_signal_lost(

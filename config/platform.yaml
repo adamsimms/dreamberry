@@ -12,15 +12,21 @@ r2:
 
 modal:
   app_name: dreamberry
-  gpu: L40S
+  # Hourly cron: native SDXL only. SUPIR keepers use L40S via upscale_archive.
+  gpu: A10
+  memory_mb: 32768
+  timeout_seconds: 1200
   # Five past the hour so Open-Meteo's current hour row is usually settled.
   cron: "5 * * * *"
-  timeout_seconds: 1800
   hf_volume: dreamberry-hf-cache
   data_volume: dreamberry-data
   secret_name: dreamberry
   # Artist-only public default (DREAMBERRY.md §6).
   dial: 0.0
+  # On-demand Cloudberry-res SUPIR (not on the hourly cron).
+  upscale_gpu: L40S
+  upscale_memory_mb: 65536
+  upscale_timeout_seconds: 2700
 
 healthchecks:
   # URL comes from HEALTH_PING_URL env / Modal secret.

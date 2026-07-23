@@ -1,6 +1,6 @@
 # Dreamberry M5 — Platform (Modal + R2)
 
-Issues **#16** (Modal cron + L40S), **#17** (R2 storage), and **#19** (graceful
+Issues **#16** (Modal cron + GPU), **#17** (R2 storage), and **#19** (graceful
 failure / hold honesty).
 
 ---
@@ -9,12 +9,15 @@ failure / hold honesty).
 
 | Topic | Choice |
 |---|---|
-| Orchestrator / GPU | **Modal** `L40S`, cron `5 * * * *` |
+| Orchestrator / GPU (hourly) | **Modal** `A10`, cron `5 * * * *`, ~32 GiB |
+| Hourly output | **SDXL-native** (~1024×768); no SUPIR on cron |
+| SUPIR keepers / print | On-demand `upscale_archive` on **L40S** → `archive/<id>_4k.png` |
 | Bucket | `art-adamsimms-xyz-dreamberry` (dedicated — never Cloudberry) |
 | Archive | `archive/<TIMESTAMP>_DREAM###.png` + `.json` (**PNG lossless**) |
-| Public pointer | `current/current.webp` + `.json` + `status.json` (**WebP lossless**) |
+| Public pointer | `current/current.webp` + `.json` + `previous.webp` + `status.json` (**WebP lossless**) |
 | Signal lost | `current/signal_lost.webp` |
-| Hold | update `status.json` only — leave `current.webp` untouched |
+| Hold | update `status.json` only — leave `current.webp` untouched (**weather silence only**) |
+| Window fade | dream→dream **1h** mid-join; signal_lost in/out **~10s** (`fade_ms` / `fade_started_at` / `previous`) |
 | LoRA | not required for dial-0; train later |
 | Dead-man | healthchecks.io via `HEALTH_PING_URL` |
 
@@ -26,12 +29,21 @@ failure / hold honesty).
 archive/2017-08-16T08:00:37.000Z_DREAM001.png
 archive/2017-08-16T08:00:37.000Z_DREAM001.json
 current/current.webp
+current/previous.webp      # prior dream for mid-join crossfade
 current/current.json
 current/status.json
 current/signal_lost.webp   # only when channel is dead
 ```
 
 Public URL example: `https://dreamberry.adamsimms.xyz/current/current.webp`
+
+`status.json` fade fields for the public window:
+
+| Field | Role |
+|---|---|
+| `previous` | Basename under `current/` to blend from (`previous.webp`, `current.webp`, or `signal_lost.webp`) |
+| `fade_ms` | Crossfade duration — `3600000` dream→dream; `10000` signal_lost in/out |
+| `fade_started_at` | ISO time the transition began — cold loads mid-join via wall clock |
 
 ---
 
@@ -65,7 +77,7 @@ cd dreamberry   # repo root
 .venv/bin/modal deploy modal_app.py
 ```
 
-Modal requires a **payment method** on the account before L40S functions will run
+Modal requires a **payment method** on the account before GPU functions will run
 (even for a one-shot `modal run`). Add one at https://modal.com/settings/billing
 
 ### 5. Smoke one tick
@@ -76,7 +88,13 @@ Modal requires a **payment method** on the account before L40S functions will ru
 .venv/bin/modal run modal_app.py::run_once --dial 0
 ```
 
-Prefetch SUPIR weights onto the HF Volume once (large download):
+On-demand SUPIR for one archive keeper (does not move `current/`):
+
+```bash
+.venv/bin/modal run modal_app.py::upscale_archive --dream-id '2017-08-16T08:00:37.000Z_DREAM001'
+```
+
+Prefetch SUPIR weights onto the HF Volume once (large download; only needed for keepers):
 
 ```bash
 .venv/bin/modal run modal_app.py::prefetch_supir
@@ -109,8 +127,10 @@ PYTHONPATH=. .venv/bin/python scripts/dream_hourly.py --packet data/weather/<fra
 ## #19 — graceful failure / hold honesty
 
 Normative contract: [DREAMBERRY.md §7](DREAMBERRY.md). Mapped in `dream/hourly.py`.
-Weather silence / gate exhaustion → **hold**; every generation attempt throws →
-**signal_lost**. Do not merge the two aesthetics.
+**Weather silence** → **hold**; dream/channel breaks (generation throws after
+retries, gates reject every attempt, publish/R2 fails) → **signal_lost** noise
+for that hour. Do not merge the two aesthetics — do not hold the previous dream
+over a broken hour.
 
 Honesty guarantees enforced (and unit-tested in `test_hourly.py` / `test_storage.py`):
 
@@ -134,4 +154,4 @@ Honesty guarantees enforced (and unit-tested in `test_hourly.py` / `test_storage
 ## Not in this slice
 
 - **#18 / #20** public window UI on Pages (M6 — done)
-- Print-resolution beyond the hourly 4000×3000 SUPIR path (on-demand only)
+- Forecast batch / weather-bucket cache (cost follow-ons; deferred)

@@ -13,7 +13,7 @@ Thanks for your interest. Dreamberry is a personal artwork — the dead Cloudber
 
 - This is **not** Cloudberry II. Do not restore a live-camera fiction.
 - Generated frames are labeled **generated** in the drawer — never mixed into the Cloudberry archive.
-- **Weather silence → hold**; **GPU/channel failure → signal lost**. Do not merge those aesthetics.
+- **Weather silence → hold**; **GPU/channel/dream-path failure → signal lost**. Do not merge those aesthetics.
 - Season must not lie (no summer green in February). Prefer refusal over a pretty lie.
 - Off-limits: NFT framing, climate-campaign framing, tourism bait.
 

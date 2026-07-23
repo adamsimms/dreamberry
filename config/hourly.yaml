@@ -8,6 +8,10 @@
 # How many extra generation attempts (fresh seeds) before giving up on a frame
 # that the gates reject or that fails to generate. Total tries = retries + 1.
 retries: 3
+# Salt mixed into the hour-derived seed (blake2 of open_meteo_hour_utc).
+# Same weather hour → same first-attempt seed; each new hour gets a fresh seed
+# so dial-0 can twitch without raising denoise. Absolute override via
+# run_hourly(seed_base=…) / scripts/dream_hourly.py --seed-base.
 base_seed: 0
 
 paths:

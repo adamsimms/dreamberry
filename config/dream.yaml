@@ -47,10 +47,12 @@ generation:
     artifacts, frame border
 
 # Post-gate upscale to Cloudberry resolution (issue #12). Gates stay at native.
+# Hourly live path publishes SDXL-native (enabled: false) — SUPIR is on-demand
+# only (`modal run modal_app.py::upscale_archive --dream-id …`) for print/keepers.
 upscale:
-  enabled: true
+  enabled: false
   # auto → SUPIR on CUDA when Fanghua-Yu/SUPIR + weights exist; else Lanczos.
-  # require_supir: refuse soft Lanczos publish if SUPIR cannot run (Modal production).
+  # require_supir: refuse soft Lanczos if SUPIR cannot run (on-demand path).
   backend: auto
   require_supir: true
   target_width: 4000

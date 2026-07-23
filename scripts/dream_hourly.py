@@ -27,7 +27,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dial", type=float, default=0.0, help="Dial value (0-10); public default 0")
     ap.add_argument("--packet", default=None, help="Replay a weather packet JSON instead of live fetch")
-    ap.add_argument("--seed-base", type=int, default=None, help="Override base seed")
+    ap.add_argument(
+        "--seed-base",
+        type=int,
+        default=None,
+        help="Absolute seed override (default: hour-derived from the weather packet)",
+    )
     ap.add_argument("--retries", type=int, default=None, help="Override retry count")
     ap.add_argument("--no-wyi", action="store_true", help="Skip WYI enrichment on live fetch")
     ap.add_argument("--no-buoy", action="store_true", help="Skip buoy enrichment on live fetch")

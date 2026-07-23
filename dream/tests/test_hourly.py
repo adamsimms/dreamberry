@@ -21,6 +21,7 @@ from dream.hourly import (
     OUTCOME_SIGNAL_LOST,
     SIGNAL_LOST_SIZE,
     crash_to_signal_lost,
+    hour_seed,
     make_noise_image,
     run_hourly,
 )
@@ -56,10 +57,12 @@ class FakeEngine:
     def __init__(self, *, n_raise: int = 0):
         self.n_raise = n_raise
         self.calls = 0
+        self.seeds: list[int] = []
         self.image = Image.new("RGB", (8, 8), (120, 120, 120))
 
     def generate(self, pkt, *, dial=0.0, seed=None, **kwargs):
         self.calls += 1
+        self.seeds.append(seed)
         if self.calls <= self.n_raise:
             raise RuntimeError("gpu dead")
         return SimpleNamespace(image=self.image, sidecar=_valid_sidecar())
@@ -118,6 +121,63 @@ def _fresh_packet() -> dict:
 
 def test_frame_decision_pass():
     assert frame_decision("pass", "pass") == (True, None, None)
+
+
+def test_hour_seed_stable_and_differs_by_hour():
+    a = hour_seed({"open_meteo_hour_utc": "2026-07-23T14:30:00+00:00"})
+    b = hour_seed({"open_meteo_hour_utc": "2026-07-23T14:30:00+00:00"})
+    c = hour_seed({"open_meteo_hour_utc": "2026-07-23T15:30:00+00:00"})
+    assert a == b
+    assert a != c
+    assert 0 <= a < 2**31
+    assert hour_seed({"open_meteo_hour_utc": "2026-07-23T14:30:00+00:00"}, salt=1) != a
+
+
+def test_publish_uses_hour_derived_seed(tmp_path):
+    engine = FakeEngine()
+    pkt = _fresh_packet()
+    result = run_hourly(
+        dial=0.0,
+        packet=pkt,
+        engine=engine,
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_PUBLISHED
+    assert engine.seeds == [hour_seed(pkt, salt=0)]
+
+
+def test_seed_base_override_skips_hour_hash(tmp_path):
+    engine = FakeEngine()
+    result = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=engine,
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        now=NOW,
+        seed_base=42,
+        **_cfgs(tmp_path),
+    )
+    assert result.outcome == OUTCOME_PUBLISHED
+    assert engine.seeds == [42]
+
+
+def test_retry_bumps_hour_seed(tmp_path):
+    engine = FakeEngine()
+    pkt = _fresh_packet()
+    evals = iter([_eval("regen_or_hold", "pass"), _eval("pass", "pass")])
+    result = run_hourly(
+        dial=0.0,
+        packet=pkt,
+        engine=engine,
+        evaluate_fn=lambda *a: next(evals),
+        now=NOW,
+        **_cfgs(tmp_path),
+    )
+    base = hour_seed(pkt, salt=0)
+    assert result.outcome == OUTCOME_PUBLISHED
+    assert engine.seeds == [base, base + 1]
 
 
 def test_frame_decision_season_refuse_blocks_at_any_dial():
@@ -192,7 +252,7 @@ def test_honored_dissolve_publishes_with_collapse_failure_mode(tmp_path):
     assert result.status["hold"] is False
 
 
-def test_persistent_collapse_holds_last_good_frame(tmp_path):
+def test_persistent_collapse_is_signal_lost(tmp_path):
     engine = FakeEngine()
     result = run_hourly(
         dial=0.0,
@@ -202,14 +262,15 @@ def test_persistent_collapse_holds_last_good_frame(tmp_path):
         now=NOW,
         **_cfgs(tmp_path),
     )
-    assert result.outcome == OUTCOME_HOLD
-    assert result.failure_mode is None
-    assert result.hold_reason == "identity_collapse"
+    assert result.outcome == OUTCOME_SIGNAL_LOST
+    assert result.failure_mode == "signal_lost"
     assert engine.calls == 3  # retries=2 → 3 attempts
-    assert not (tmp_path / "public" / "current.webp").exists()
+    assert (tmp_path / "public" / "signal_lost.webp").exists()
+    assert result.status["current"] == "signal_lost.webp"
+    assert any("identity_collapse" in r for r in result.status["reasons"])
 
 
-def test_persistent_season_refuse_holds(tmp_path):
+def test_persistent_season_refuse_is_signal_lost(tmp_path):
     engine = FakeEngine()
     result = run_hourly(
         dial=0.0,
@@ -219,8 +280,9 @@ def test_persistent_season_refuse_holds(tmp_path):
         now=NOW,
         **_cfgs(tmp_path),
     )
-    assert result.outcome == OUTCOME_HOLD
-    assert result.hold_reason == "season_lock"
+    assert result.outcome == OUTCOME_SIGNAL_LOST
+    assert result.failure_mode == "signal_lost"
+    assert any("season_lock" in r for r in result.status["reasons"])
 
 
 def test_retry_then_accept_publishes(tmp_path):
@@ -274,6 +336,9 @@ def test_signal_lost_preserves_prior_last_success(tmp_path):
     )
     assert result.outcome == OUTCOME_SIGNAL_LOST
     assert result.status["last_success_at"] == "2026-07-21T14:00:00+00:00"
+    assert result.status["previous"] == "current.webp"
+    assert result.status["fade_ms"] == 10_000
+    assert result.status["fade_started_at"] == NOW.isoformat()
 
 
 def test_publish_records_last_success_dream_id(tmp_path):
@@ -335,6 +400,10 @@ def test_hold_after_signal_lost_reverts_to_dream_not_noise(tmp_path):
     assert result.status["current"] == "current.webp"
     assert result.status["dream_id"] == "2026-07-21T14:00:00Z_DREAM007"
     assert result.status["last_success_dream_id"] == "2026-07-21T14:00:00Z_DREAM007"
+    # Quick wake from noise back into the held dream.
+    assert result.status["previous"] == "signal_lost.webp"
+    assert result.status["fade_ms"] == 10_000
+    assert result.status["fade_started_at"] == NOW.isoformat()
 
 
 def test_signal_lost_preserves_last_success_dream_id(tmp_path):
@@ -390,6 +459,45 @@ def test_publish_mirrors_to_r2_store(tmp_path):
     assert any(k.endswith(".png") for k in store.objects)
     assert "current/current.webp" in store.objects
     assert "current/status.json" in store.objects
+    # First dream: nothing to blend against.
+    assert result.status["previous"] is None
+    assert result.status["fade_ms"] == 3_600_000
+
+
+def test_second_publish_promotes_previous_webp(tmp_path):
+    from datetime import timedelta
+
+    from dream.tests.test_storage import FakeR2
+
+    store = FakeR2()
+    cfgs = _cfgs(tmp_path)
+    first = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=FakeEngine(),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        store=store,
+        now=NOW,
+        **cfgs,
+    )
+    assert first.outcome == OUTCOME_PUBLISHED
+    first_bytes = store.objects["current/current.webp"]
+
+    second = run_hourly(
+        dial=0.0,
+        packet=_fresh_packet(),
+        engine=FakeEngine(),
+        evaluate_fn=lambda *a: _eval("pass", "pass"),
+        store=store,
+        now=NOW + timedelta(hours=1),
+        **cfgs,
+    )
+    assert second.outcome == OUTCOME_PUBLISHED
+    assert second.status["previous"] == "previous.webp"
+    assert second.status["fade_ms"] == 3_600_000
+    assert "current/previous.webp" in store.objects
+    assert store.objects["current/previous.webp"] == first_bytes
+    assert "current/current.webp" in store.objects
 
 
 def test_hold_updates_r2_status_only(tmp_path):
@@ -412,7 +520,7 @@ def test_hold_updates_r2_status_only(tmp_path):
     assert json.loads(store.objects["current/status.json"])["hold"] is True
 
 
-def test_gate_exception_holds_after_producing_frames(tmp_path):
+def test_gate_exception_is_signal_lost_after_retries(tmp_path):
     engine = FakeEngine()
 
     def boom(*_a):
@@ -426,11 +534,13 @@ def test_gate_exception_holds_after_producing_frames(tmp_path):
         now=NOW,
         **_cfgs(tmp_path),
     )
-    assert result.outcome == OUTCOME_HOLD
-    assert result.hold_reason and "gate:" in result.hold_reason
+    assert result.outcome == OUTCOME_SIGNAL_LOST
+    assert result.failure_mode == "signal_lost"
+    assert any("gate:" in r for r in result.status["reasons"])
+    assert (tmp_path / "public" / "signal_lost.webp").exists()
 
 
-def test_publish_exception_holds_last_good(tmp_path):
+def test_publish_exception_is_signal_lost(tmp_path):
     engine = FakeEngine()
 
     class BoomStore:
@@ -442,6 +552,9 @@ def test_publish_exception_holds_last_good(tmp_path):
 
         def publish_frame(self, **_kw):
             raise RuntimeError("R2 down")
+
+        def publish_signal_lost(self, **_kw):
+            return {"signal_lost": "current/signal_lost.webp", "status": "current/status.json"}
 
         def publish_hold(self, status):
             return {"status": "current/status.json"}
@@ -455,8 +568,10 @@ def test_publish_exception_holds_last_good(tmp_path):
         now=NOW,
         **_cfgs(tmp_path),
     )
-    assert result.outcome == OUTCOME_HOLD
-    assert result.hold_reason and "publish_failed" in result.hold_reason
+    assert result.outcome == OUTCOME_SIGNAL_LOST
+    assert result.failure_mode == "signal_lost"
+    assert any("publish_failed" in r for r in result.status["reasons"])
+    assert (tmp_path / "public" / "signal_lost.webp").exists()
 
 
 def test_crash_to_signal_lost_writes_small_noise(tmp_path):

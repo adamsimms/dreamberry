@@ -6,6 +6,7 @@ Local artifacts under `config/hourly.yaml:paths`; optional `R2Store` mirrors to 
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -19,6 +20,8 @@ from PIL import Image
 from dream.config import canonical_frame_path, load_dream_config, resolve_path
 from dream.gates.evaluate import FrameEvaluation, evaluate_frame
 from dream.storage import (
+    FADE_MS_DREAM,
+    FADE_MS_SIGNAL,
     next_dream_number_from_names,
     save_local_publish,
     save_local_signal_lost,
@@ -34,6 +37,7 @@ __all__ = [
     "HourlyResult",
     "run_hourly",
     "crash_to_signal_lost",
+    "hour_seed",
     "make_noise_image",
     "OUTCOME_PUBLISHED",
     "OUTCOME_HOLD",
@@ -78,6 +82,25 @@ def make_noise_image(size: tuple[int, int], *, seed: int = 0) -> Image.Image:
     rng = np.random.default_rng(seed)
     arr = rng.integers(0, 256, size=(size[1], size[0], 3), dtype=np.uint8)
     return Image.fromarray(arr, mode="RGB")
+
+
+def hour_seed(pkt: Mapping[str, Any], *, salt: int = 0) -> int:
+    """Deterministic torch seed for the weather hour being dreamed.
+
+    Same hour → same first-attempt seed (replayable). Next hour → a different
+    seed so dial-0 can twitch (cloud/water texture) without raising denoise.
+    `salt` (`config/hourly.yaml:base_seed`) shifts the whole sequence for A/B.
+    """
+    key = (
+        pkt.get("open_meteo_hour_utc")
+        or pkt.get("exif_iso")
+        or pkt.get("timestamp")
+        or pkt.get("time_local")
+        or "unknown"
+    )
+    digest = hashlib.blake2b(f"{int(salt)}|{key}".encode(), digest_size=8).digest()
+    # Torch CPU generators want a non-negative 32-bit-ish int.
+    return int.from_bytes(digest, "big") % (2**31)
 
 
 def _now(now: datetime | None) -> datetime:
@@ -204,6 +227,10 @@ def run_hourly(
     `store` is an optional `R2Store` (M5). When set, prior status and dream
     counters come from R2, and publish/hold/signal_lost outcomes are mirrored
     there (PNG archive / WebP current).
+
+    Seeds: when `seed_base` is omitted, the first attempt uses `hour_seed(pkt)`
+    (salted by `config/hourly.yaml:base_seed`); retries bump `+ i`. Pass
+    `seed_base` to force an absolute seed (CLI / A/B).
     """
     now = _now(now)
     dream_cfg = dream_cfg or load_dream_config()
@@ -223,7 +250,10 @@ def run_hourly(
     last_success_dream_id = prior.get("last_success_dream_id")
 
     retries = int(hourly_cfg.get("retries", 3)) if retries is None else int(retries)
-    seed_base = int(hourly_cfg.get("base_seed", 0)) if seed_base is None else int(seed_base)
+    seed_salt = int(hourly_cfg.get("base_seed", 0))
+    # Absolute override (CLI / tests) wins; otherwise derive from the weather hour
+    # after the packet is assembled.
+    seed_override = None if seed_base is None else int(seed_base)
 
     # 1) Assemble the only genuinely-live signal.
     try:
@@ -247,6 +277,7 @@ def run_hourly(
             dial=dial,
             attempts=0,
             reasons=[f"weather_fetch_failed: {type(exc).__name__}: {exc}"],
+            prior=prior,
         )
         if write:
             _write_status(status_path, status, store, hold=True)
@@ -275,6 +306,7 @@ def run_hourly(
             dial=dial,
             attempts=0,
             reasons=list(silence.reasons),
+            prior=prior,
         )
         if write:
             _write_status(status_path, status, store, hold=True)
@@ -287,6 +319,12 @@ def run_hourly(
             packet=pkt,
         )
 
+    seed_base = (
+        seed_override
+        if seed_override is not None
+        else hour_seed(pkt, salt=seed_salt)
+    )
+
     # 3) Generate + gate with fresh-seed retries.
     if engine is None:
         from dream.pipeline import DreamEngine
@@ -295,7 +333,6 @@ def run_hourly(
     if evaluate_fn is None:
         evaluate_fn = _default_evaluator(gates_cfg, dream_cfg)
 
-    produced_any = False
     last_reject: str | None = None
     last_error: str | None = None
     attempts = 0
@@ -309,10 +346,9 @@ def run_hourly(
             last_error = f"{type(exc).__name__}: {exc}"
             continue
 
-        produced_any = True
         try:
             ev = evaluate_fn(result.image, pkt, dial)
-        except Exception as exc:  # noqa: BLE001 — gate hiccup → retry / hold, not crash
+        except Exception as exc:  # noqa: BLE001 — gate hiccup → retry / signal_lost
             last_error = f"gate:{type(exc).__name__}: {exc}"
             last_reject = last_error
             continue
@@ -334,35 +370,13 @@ def run_hourly(
                     dream_cfg=dream_cfg,
                     engine=engine,
                 )
-            except Exception as exc:  # noqa: BLE001 — SUPIR / R2 / disk → hold last good
-                last_reject = f"publish_failed: {type(exc).__name__}: {exc}"
+            except Exception as exc:  # noqa: BLE001 — R2 / disk → signal_lost (dream broke)
+                last_error = f"publish_failed: {type(exc).__name__}: {exc}"
                 break
         last_reject = ev.reject_reason
 
-    # 4a) Frames generated but every one was rejected by a gate → HOLD last good.
-    if produced_any:
-        status = _status_hold(
-            now=now,
-            failure_mode=None,
-            hold_reason=last_reject or "gate_rejected",
-            last_success_at=last_success_at,
-            last_success_dream_id=last_success_dream_id,
-            dial=dial,
-            attempts=attempts,
-            reasons=[last_reject] if last_reject else [],
-        )
-        if write:
-            _write_status(status_path, status, store, hold=True)
-        return HourlyResult(
-            outcome=OUTCOME_HOLD,
-            failure_mode=None,
-            hold_reason=last_reject or "gate_rejected",
-            attempts=attempts,
-            status=status,
-            packet=pkt,
-        )
-
-    # 4b) Nothing generated at all → the channel is dead → SIGNAL LOST (noise).
+    # 4) Dream broke this hour (gen fail / gates reject / publish blow up) →
+    # SIGNAL LOST (noise). Weather silence already returned hold above.
     return _signal_lost(
         pkt=pkt,
         dial=dial,
@@ -370,7 +384,7 @@ def run_hourly(
         now=now,
         last_success_at=last_success_at,
         last_success_dream_id=last_success_dream_id,
-        error=last_error,
+        error=last_error or last_reject,
         dream_cfg=dream_cfg,
         public_dir=public_dir,
         status_path=status_path,
@@ -421,12 +435,14 @@ def _status_hold(
     dial: float,
     attempts: int,
     reasons: list[str],
+    prior: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     # Hold shows the last successful *dream* (current.webp), not the last write —
     # so a hold that follows a signal_lost reverts from noise back to the dream.
     # If nothing has ever succeeded there is nothing honest to show yet.
     has_success = bool(last_success_at)
-    return {
+    prior = prior or {}
+    status: dict[str, Any] = {
         "updated_at": now.isoformat(),
         "hold": True,
         "failure_mode": failure_mode,
@@ -439,6 +455,40 @@ def _status_hold(
         "attempts": attempts,
         "reasons": reasons,
     }
+    if has_success and prior.get("current") == "signal_lost.webp":
+        # Coming back from noise into the held dream — quick wake.
+        status["previous"] = "signal_lost.webp"
+        status["fade_ms"] = FADE_MS_SIGNAL
+        status["fade_started_at"] = now.isoformat()
+    elif has_success:
+        # Preserve the live dream's mid-join fade so late visitors still blend.
+        status["previous"] = prior.get("previous")
+        status["fade_ms"] = int(prior.get("fade_ms") or FADE_MS_DREAM)
+        status["fade_started_at"] = (
+            prior.get("fade_started_at") or prior.get("last_success_at")
+        )
+    else:
+        status["previous"] = None
+        status["fade_ms"] = FADE_MS_DREAM
+        status["fade_started_at"] = None
+    return status
+
+
+def _fade_for_publish(
+    prior: Mapping[str, Any],
+    *,
+    public_dir: Path,
+) -> tuple[str | None, int]:
+    """Basename of the outgoing frame + fade duration for a new dream publish."""
+    if prior.get("current") == "signal_lost.webp":
+        return "signal_lost.webp", FADE_MS_SIGNAL
+    if (
+        (public_dir / "current.webp").exists()
+        or prior.get("current") == "current.webp"
+        or prior.get("last_success_dream_id")
+    ):
+        return "previous.webp", FADE_MS_DREAM
+    return None, FADE_MS_DREAM
 
 
 def _publish(
@@ -467,7 +517,8 @@ def _publish(
     sidecar["validator_scores"] = evaluation.validator_scores
     sidecar["failure_mode"] = evaluation.failure_mode
 
-    # Upscale after gates (calibrated at SDXL-native) → Cloudberry ~4000×3000.
+    # Optional post-gate upscale (hourly live: disabled → SDXL-native publish;
+    # on-demand SUPIR uses upscale_archive / upscale_for_publish with enabled).
     publish_image = result.image
     if dream_cfg is not None:
         from dream.upscale import upscale_for_publish
@@ -482,21 +533,26 @@ def _publish(
         )
         publish_image = up.image
         sidecar.update(up.meta)
-        # Published dims are the upscaled frame; keep native size in upscale.*.
         sidecar["width"] = int(publish_image.size[0])
         sidecar["height"] = int(publish_image.size[1])
 
     current_name = "current.webp"
     image_path = str(public_dir / current_name)
+    prior = _read_status(status_path, store)
+    previous, fade_ms = _fade_for_publish(prior, public_dir=public_dir)
+    started = now.isoformat()
 
     status = {
-        "updated_at": now.isoformat(),
+        "updated_at": started,
         "hold": False,
         "failure_mode": evaluation.failure_mode,
         "hold_reason": None,
-        "last_success_at": now.isoformat(),
+        "last_success_at": started,
         "last_success_dream_id": dream_id,
         "current": current_name,
+        "previous": previous,
+        "fade_ms": fade_ms,
+        "fade_started_at": started,
         "dream_id": dream_id,
         "dial": float(dial),
         "attempts": attempts,
@@ -504,7 +560,7 @@ def _publish(
     }
 
     if write:
-        save_local_publish(
+        status = save_local_publish(
             image=publish_image,
             sidecar=sidecar,
             status=status,
@@ -519,8 +575,12 @@ def _publish(
                 sidecar=sidecar,
                 status=status,
             )
-            status = {**status, **{f"r2_{k}": v for k, v in keys.items()}}
-            # refresh status.json on disk with R2 keys / public URL
+            # R2 is authoritative for previous (promote may no-op if current missing).
+            status = store.read_status() or status
+            status = {
+                **status,
+                **{f"r2_{k}": v for k, v in keys.items() if v},
+            }
             _write_status(status_path, status)
 
     return HourlyResult(
@@ -556,9 +616,12 @@ def _signal_lost(
     noise_name = "signal_lost.webp"
     image_path = str(public_dir / noise_name)
     noise = make_noise_image(size, seed=int(now.timestamp()))
+    started = now.isoformat()
+    # Outgoing layer is the last dream (still on disk as current.webp) when one exists.
+    previous = "current.webp" if last_success_at else None
 
     status = {
-        "updated_at": now.isoformat(),
+        "updated_at": started,
         "hold": False,
         "failure_mode": FAILURE_SIGNAL_LOST,
         "hold_reason": None,
@@ -567,6 +630,9 @@ def _signal_lost(
         "last_success_at": last_success_at,
         "last_success_dream_id": last_success_dream_id,
         "current": noise_name,
+        "previous": previous,
+        "fade_ms": FADE_MS_SIGNAL,
+        "fade_started_at": started,
         "dream_id": None,
         "dial": float(dial),
         "attempts": attempts,

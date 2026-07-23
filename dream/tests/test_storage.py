@@ -73,7 +73,13 @@ def test_save_local_publish_layout(tmp_path):
         "weather_packet": {},
         "dream_id": "2026-07-21T00:00:00.000Z_DREAM001",
     }
-    status = {"current": "current.webp", "hold": False}
+    status = {
+        "current": "current.webp",
+        "hold": False,
+        "previous": None,
+        "fade_ms": 3_600_000,
+        "fade_started_at": "2026-07-21T00:00:00+00:00",
+    }
     pub = tmp_path / "current"
     arch = tmp_path / "archive"
     save_local_publish(
@@ -88,7 +94,58 @@ def test_save_local_publish_layout(tmp_path):
     assert (arch / "2026-07-21T00:00:00.000Z_DREAM001.json").exists()
     assert (pub / "current.webp").exists()
     assert (pub / "current.json").exists()
+    assert not (pub / "previous.webp").exists()
     assert json.loads((pub / "status.json").read_text())["current"] == "current.webp"
+
+
+def test_save_local_publish_promotes_previous(tmp_path):
+    from dream.storage import FADE_MS_DREAM
+
+    pub = tmp_path / "current"
+    arch = tmp_path / "archive"
+    pub.mkdir(parents=True)
+    Image.new("RGB", (4, 4), (9, 9, 9)).save(
+        pub / "current.webp", format="WEBP", lossless=True
+    )
+    old = (pub / "current.webp").read_bytes()
+    sidecar = {
+        "generated_at": "2026-07-21T01:00:00+00:00",
+        "labeled": "generated",
+        "dial": 0.0,
+        "dial_params": {},
+        "prompt": "x",
+        "seed": 0,
+        "width": 4,
+        "height": 4,
+        "anchor_frame": "a.JPG",
+        "anchor_source": "archive",
+        "models": {
+            "base": "b",
+            "vae": "v",
+            "controlnet_depth": "d",
+            "controlnet_softedge": "e",
+        },
+        "weather_packet": {},
+        "dream_id": "2026-07-21T01:00:00.000Z_DREAM002",
+    }
+    status = {
+        "current": "current.webp",
+        "previous": "previous.webp",
+        "fade_ms": FADE_MS_DREAM,
+        "fade_started_at": "2026-07-21T01:00:00+00:00",
+        "hold": False,
+    }
+    written = save_local_publish(
+        image=Image.new("RGB", (4, 4), (1, 2, 3)),
+        sidecar=sidecar,
+        status=status,
+        dream_id="2026-07-21T01:00:00.000Z_DREAM002",
+        public_dir=pub,
+        archive_dir=arch,
+    )
+    assert written["previous"] == "previous.webp"
+    assert (pub / "previous.webp").read_bytes() == old
+    assert (pub / "current.webp").read_bytes() != old
 
 
 def _store_without_boto():
@@ -150,15 +207,28 @@ class FakeR2:
         return {"status": STATUS_KEY}
 
     def publish_frame(self, *, dream_id, image, sidecar, status):
-        from dream.storage import encode_archive_png, encode_current_webp
+        from dream.storage import (
+            CURRENT_IMAGE_KEY,
+            PREVIOUS_IMAGE_KEY,
+            encode_archive_png,
+            encode_current_webp,
+        )
 
         png_key = f"archive/{dream_id}.png"
         self.objects[png_key] = encode_archive_png(image)
         self.objects[f"archive/{dream_id}.json"] = (
             json.dumps(dict(sidecar)) + "\n"
         ).encode()
+        status_out = dict(status)
+        if status_out.get("previous") == "previous.webp":
+            existing = self.objects.get(CURRENT_IMAGE_KEY)
+            if existing is not None:
+                self.objects[PREVIOUS_IMAGE_KEY] = existing
+            else:
+                status_out["previous"] = None
         self.objects[CURRENT_IMAGE_KEY] = encode_current_webp(image)
-        self.objects[STATUS_KEY] = (json.dumps(dict(status)) + "\n").encode()
+        status_out["current"] = "current.webp"
+        self.objects[STATUS_KEY] = (json.dumps(status_out) + "\n").encode()
         return {"archive_png": png_key, "current": CURRENT_IMAGE_KEY, "status": STATUS_KEY}
 
     def publish_signal_lost(self, *, image, status):

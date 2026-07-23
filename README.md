@@ -10,7 +10,7 @@ A **sibling** to the Cloudberry archive, not an extension of it. The archive sta
 
 ## How it works
 
-Every hour, Modal wakes an L40S GPU, pulls the island's real weather, finds the nearest real Cloudberry morning, and dreams a new frame of the same fixed view. Cloudflare R2 holds the private archive and the public pointer the window observes. The image is labeled **generated** in the details drawer — never on the picture itself.
+Every hour, Modal wakes an A10 GPU, pulls the island's real weather, finds the nearest real Cloudberry morning, and dreams a new frame of the same fixed view at SDXL-native resolution. Cloudflare R2 holds the private archive and the public pointer the window observes. The image is labeled **generated** in the details drawer — never on the picture itself. SUPIR to Cloudberry resolution is on-demand for keepers/print only.
 
 ```
                          Pinchard's Island (now)
@@ -18,7 +18,7 @@ Every hour, Modal wakes an L40S GPU, pulls the island's real weather, finds the 
                                    │
                                    ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Modal  (cron + L40S)                                                │
+│  Modal  (cron + A10)                                                 │
 │                                                                      │
 │   live weather ──► compose_prompt + weather-NN anchor                │
 │                         │                                            │
@@ -27,7 +27,7 @@ Every hour, Modal wakes an L40S GPU, pulls the island's real weather, finds the 
 │   (geometry from canonical frame; atmosphere from real morning)      │
 │                         │                                            │
 │                         ▼                                            │
-│   quality gates ──► sidecar JSON ──► SUPIR upscale                   │
+│   quality gates ──► sidecar JSON ──► native publish                  │
 └───────────────────────────┬──────────────────────────────────────────┘
                             │
               ┌─────────────┴─────────────┐
@@ -45,7 +45,7 @@ Every hour, Modal wakes an L40S GPU, pulls the island's real weather, finds the 
                           └───────────────────────────────┘
 
 Hold (weather silence): leave current.webp; update status.json only
-Signal lost (GPU/channel): publish static / noise; failure_mode set
+Signal lost (GPU/channel/dream break): publish static / noise; failure_mode set
 ```
 
 Failure modes (hold vs signal lost vs identity collapse): [docs/DREAMBERRY.md](docs/DREAMBERRY.md) §7.
@@ -55,7 +55,7 @@ Failure modes (hold vs signal lost vs identity collapse): [docs/DREAMBERRY.md](d
 | Layer | Choice |
 |-------|--------|
 | Generation | SDXL + ControlNet + IP-Adapter + weather-NN real-frame anchor (+ LoRA at mid-dial) |
-| Compute / cron | [Modal](https://modal.com) (L40S, hourly) |
+| Compute / cron | [Modal](https://modal.com) (A10 hourly; L40S on-demand SUPIR) |
 | Storage / CDN | Cloudflare R2 (`art-adamsimms-xyz-dreamberry`) |
 | Public site | Cloudflare Pages under [art.adamsimms.xyz](https://github.com/adamsimms/art.adamsimms.xyz) |
 | Dead-man | healthchecks.io |
