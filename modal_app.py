@@ -239,6 +239,30 @@ def run_once(dial: float = 0.0) -> dict:
 
 @app.function(
     image=image,
+    gpu="A10",
+    timeout=_HOURLY_TIMEOUT,
+    memory=_HOURLY_MEMORY,
+    volumes=_VOLUMES,
+    secrets=secrets,
+)
+def night_ab_dream033() -> dict:
+    """Private native-res night comparison; never writes R2/current or archive."""
+    import os
+    import sys
+
+    sys.path.insert(0, "/root/dreamberry")
+    sys.path.insert(0, "/root/dreamberry/scripts")
+    os.chdir("/root/dreamberry")
+
+    from night_ab_dream033 import run_experiment
+
+    summary = run_experiment()
+    data_vol.commit()
+    return summary
+
+
+@app.function(
+    image=image,
     gpu="L40S",
     timeout=_UPSCALE_TIMEOUT,
     memory=_UPSCALE_MEMORY,

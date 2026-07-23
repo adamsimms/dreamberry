@@ -127,6 +127,7 @@ class DreamEngine:
         pkt: Mapping[str, Any],
         *,
         dial: float = DEFAULT_DIAL,
+        params_override: DialParams | None = None,
         seed: int | None = None,
         prompt: str | None = None,
         anchor: Anchor | None = None,
@@ -137,7 +138,7 @@ class DreamEngine:
         from weather_schema.compose import compose_prompt
 
         self.load()
-        params = dial_schedule(dial)
+        params = params_override or dial_schedule(dial)
 
         if prompt is None:
             prompt = compose_prompt(pkt)
