@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: If you use this software or cite this artwork, please cite it using these metadata.
+title: Dreamberry
+type: software
+authors:
+  - family-names: Simms
+    given-names: Adam
+    email: hello@adamsimms.xyz
+    website: https://adamsimms.xyz
+abstract: >-
+  The dead Cloudberry camera dreaming — a labeled generative window on
+  Pinchard's Island, Newfoundland, conditioned by live weather. Sibling to
+  the Cloudberry archive, not an extension of it.
+keywords:
+  - generative art
+  - weather conditioning
+  - telepresence
+  - Newfoundland
+  - Pinchard's Island
+  - SDXL
+license: MIT
+repository-code: "https://github.com/adamsimms/dreamberry"
+url: "https://art.adamsimms.xyz/dreamberry"
