@@ -25,7 +25,11 @@
 
   let front = 0; // index of the currently-visible layer
   let shownKey = null; // "<current-name>@<version>" of the frame on screen
-  let firstPaint = true;
+
+  // Wall-clock crossfade — CSS transitions pause/jump in background tabs;
+  // progress is (now - fade_started_at) / fade_ms so cold loads mid-join.
+  let fade = null; // { start, duration, incoming, outgoing }
+  let fadeRaf = null;
 
   // -- fetch helpers ---------------------------------------------------------
 
@@ -33,6 +37,15 @@
     const resp = await fetch(bust(url(key), Date.now()), { cache: "no-store" });
     if (!resp.ok) throw new Error(`${key} → ${resp.status}`);
     return resp.json();
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
   }
 
   function imageUrlFor(status) {
@@ -47,6 +60,13 @@
     return bust(url(`current/${name}`), version);
   }
 
+  function previousUrlFor(status) {
+    const name = status && status.previous;
+    if (!name) return null;
+    const version = status.fade_started_at || status.updated_at || "0";
+    return bust(url(`current/${name}`), version);
+  }
+
   function frameKey(status) {
     if (!status.current) return null;
     if (status.failure_mode === "signal_lost") {
@@ -55,7 +75,25 @@
     return `${status.current}@${status.dream_id || status.updated_at || "0"}`;
   }
 
+  function fadeDurationMs(status) {
+    if (typeof status.fade_ms === "number" && status.fade_ms >= 0) {
+      return status.fade_ms;
+    }
+    if (status.failure_mode === "signal_lost") return CFG.signalFadeMs;
+    return CFG.crossfadeMs;
+  }
+
+  function fadeStartMs(status) {
+    const iso = status.fade_started_at || status.updated_at;
+    const t = Date.parse(iso);
+    return Number.isNaN(t) ? Date.now() : t;
+  }
+
   // -- crossfade -------------------------------------------------------------
+
+  function setLayerOpacity(layer, opacity) {
+    layer.style.opacity = String(opacity);
+  }
 
   function setVisibleAlt(status) {
     const visible = el.layers[front];
@@ -68,29 +106,87 @@
     hidden.setAttribute("aria-hidden", "true");
   }
 
-  function paint(src, { instant } = {}) {
-    return new Promise((resolve) => {
-      const back = 1 - front;
-      const incoming = el.layers[back];
-      const outgoing = el.layers[front];
-      const img = new Image();
-      img.onload = () => {
-        incoming.src = src;
-        if (instant) el.frame.classList.add("no-transition");
-        // next frame so the browser registers the src before the opacity flip
-        requestAnimationFrame(() => {
-          incoming.classList.add("visible");
-          outgoing.classList.remove("visible");
-          front = back;
-          if (instant) {
-            requestAnimationFrame(() => el.frame.classList.remove("no-transition"));
-          }
-          resolve(true);
-        });
-      };
-      img.onerror = () => resolve(false);
-      img.src = src;
-    });
+  function stopFadeLoop() {
+    if (fadeRaf != null) {
+      cancelAnimationFrame(fadeRaf);
+      fadeRaf = null;
+    }
+  }
+
+  function applyFadeProgress() {
+    if (!fade) return;
+    const t = Math.min(1, (Date.now() - fade.start) / fade.duration);
+    setLayerOpacity(fade.incoming, t);
+    setLayerOpacity(fade.outgoing, 1 - t);
+    if (t >= 1) {
+      setLayerOpacity(fade.incoming, 1);
+      setLayerOpacity(fade.outgoing, 0);
+      fade = null;
+      stopFadeLoop();
+    }
+  }
+
+  function startFadeLoop() {
+    stopFadeLoop();
+    const step = () => {
+      applyFadeProgress();
+      if (fade) fadeRaf = requestAnimationFrame(step);
+    };
+    fadeRaf = requestAnimationFrame(step);
+  }
+
+  /** Finish an in-flight fade immediately so a new paint can begin cleanly. */
+  function snapFadeComplete() {
+    if (!fade) return;
+    setLayerOpacity(fade.incoming, 1);
+    setLayerOpacity(fade.outgoing, 0);
+    fade = null;
+    stopFadeLoop();
+  }
+
+  /**
+   * Crossfade to `toSrc`, optionally from `fromSrc`.
+   * Uses status.fade_started_at so a cold load at :30 lands at ~50/50.
+   */
+  async function paintTo(status, toSrc, { fromSrc } = {}) {
+    const duration = fadeDurationMs(status);
+    const start = fadeStartMs(status);
+    const progress =
+      duration <= 0 ? 1 : Math.min(1, Math.max(0, (Date.now() - start) / duration));
+
+    const okTo = await loadImage(toSrc);
+    if (!okTo) return false;
+
+    let useFrom = fromSrc || null;
+    if (useFrom && progress < 1) {
+      if (!(await loadImage(useFrom))) useFrom = null;
+    } else {
+      useFrom = null;
+    }
+
+    snapFadeComplete();
+    const back = 1 - front;
+    const incoming = el.layers[back];
+    const outgoing = el.layers[front];
+
+    incoming.src = toSrc;
+    incoming.classList.add("visible");
+    outgoing.classList.remove("visible");
+    front = back;
+
+    if (!useFrom || progress >= 1) {
+      setLayerOpacity(incoming, 1);
+      setLayerOpacity(outgoing, 0);
+      return true;
+    }
+
+    outgoing.src = useFrom;
+    outgoing.classList.add("visible");
+    setLayerOpacity(incoming, progress);
+    setLayerOpacity(outgoing, 1 - progress);
+    fade = { start, duration, incoming, outgoing };
+    startFadeLoop();
+    return true;
   }
 
   function showWaiting(on) {
@@ -252,26 +348,12 @@
     if (!imgSrc) {
       // Nothing has ever published (or first-ever hold): honest emptiness.
       showWaiting(true);
-    } else if (status.hold) {
-      // Hold: show last dream. Must also recover from a prior signal_lost noise
-      // frame (shownKey is non-null but points at signal_lost.webp).
-      const onDream = shownKey && shownKey.startsWith("current.webp@");
-      if (!onDream || key !== shownKey) {
-        const ok = await paint(imgSrc, { instant: firstPaint || !onDream });
-        if (ok) {
-          shownKey = key;
-          firstPaint = false;
-          setVisibleAlt(status);
-        }
-      }
-      showWaiting(false);
     } else if (key !== shownKey) {
-      // Published or signal_lost: move the pointer with a crossfade.
+      // Publish, hold recovery, or signal_lost — mid-join via fade_started_at.
       showWaiting(false);
-      const ok = await paint(imgSrc, { instant: firstPaint });
+      const ok = await paintTo(status, imgSrc, { fromSrc: previousUrlFor(status) });
       if (ok) {
         shownKey = key;
-        firstPaint = false;
         setVisibleAlt(status);
       }
     }
@@ -320,11 +402,13 @@
 
   // -- boot ------------------------------------------------------------------
 
-  el.frame.style.setProperty("--crossfade", CFG.crossfadeMs + "ms");
   tick();
   setInterval(tick, CFG.pollMs);
-  // Catch up immediately when the tab is refocused near the top of the hour.
+  // Catch up pointer + resume wall-clock fade at the correct mid-blend.
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) tick();
+    if (document.hidden) return;
+    applyFadeProgress();
+    if (fade && fadeRaf == null) startFadeLoop();
+    tick();
   });
 })();

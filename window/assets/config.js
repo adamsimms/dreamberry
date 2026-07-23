@@ -21,11 +21,12 @@
     statusKey: "current/status.json",
     sidecarKey: "current/current.json",
 
-    // How often to check the pointer. The dream only moves hourly; this just
-    // catches the swap for anyone with the tab open across :05.
-    pollMs: 60000,
+    // Catch signal_lost's ~10s in/out; status.json is tiny.
+    pollMs: 5000,
 
-    // Weather changing behind glass — not a slideshow. ~5.5s.
-    crossfadeMs: 5500,
+    // Fallbacks when status omits fade_ms (old pointer). Prefer status.fade_ms.
+    // Dream→dream: hour-scale morph. Signal lost in/out: quick wake/sleep.
+    crossfadeMs: 60 * 60 * 1000,
+    signalFadeMs: 10 * 1000,
   };
 })();
