@@ -31,6 +31,7 @@ Pattern: `Build milestone M7 — … Follow docs/DREAMBERRY.md.`
 
 1. [docs/DREAMBERRY.md](docs/DREAMBERRY.md) — brief
 2. [docs/DREAMBERRY-WEATHER-SCHEMA.md](docs/DREAMBERRY-WEATHER-SCHEMA.md) — conditioning contract
+3. [docs/DREAMBERRY-EXHIBITION.md](docs/DREAMBERRY-EXHIBITION.md) — physical exhibition contract
 
 Do not add milestone status notes under `docs/`. Full policy (sparse docs + keep in sync):
 [`.cursor/rules/docs.mdc`](.cursor/rules/docs.mdc).

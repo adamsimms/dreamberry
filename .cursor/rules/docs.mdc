@@ -11,6 +11,7 @@ alwaysApply: true
 |------|------|
 | `docs/DREAMBERRY.md` | Art brief — concept, ethics, dial, failure modes, infra decisions |
 | `docs/DREAMBERRY-WEATHER-SCHEMA.md` | Conditioning contract — buckets, tokens, train≡live symmetry |
+| `docs/DREAMBERRY-EXHIBITION.md` | Physical exhibition contract — rooms, medium shortlist, bake-off |
 
 Add another `docs/*.md` only if it is a **decision record** or **ops contract** the code cannot own (e.g. eval baseline numbers). Default: **do not add a new doc**.
 
@@ -45,6 +46,7 @@ When a change touches any of the following, update the matching surface in the *
 | Secrets, credentials, or vulnerability reporting | `SECURITY.md` / `.env.example` |
 | Concept, ethics, dial, failure modes, infra decisions | `docs/DREAMBERRY.md` |
 | Weather buckets, tokens, or train≡live symmetry | `docs/DREAMBERRY-WEATHER-SCHEMA.md` |
+| Physical rooms, display medium, or exhibition encounter | `docs/DREAMBERRY-EXHIBITION.md` |
 | R2 layout, Modal deploy, or hold delivery | `docs/M5-PLATFORM.md` (or README if one line) |
 | Sidecar fields | `docs/M4-SIDECAR.md` + code/tests |
 | User- or ops-visible shipping note | `CHANGELOG.md` |
