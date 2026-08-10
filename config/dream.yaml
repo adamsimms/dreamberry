@@ -1,6 +1,7 @@
 # Dreamberry M2 dream-engine configuration.
-# The dial schedule itself lives in dream/dial.py (brief §6, single source of truth).
-# This file holds model IDs, device/precision, and generation defaults.
+# The dial schedule lives in dream/dial.py (brief §6). Night lighting overlays
+# solar-driven darkening on top (same module; thresholds/scales here).
+# This file also holds model IDs, device/precision, and generation defaults.
 
 models:
   base: stabilityai/stable-diffusion-xl-base-1.0
@@ -45,6 +46,19 @@ generation:
     text, watermark, signage, people, boats, wildlife, buildings other than the
     cabin, oversaturated, cartoon, illustration, painting, lens flare, jpeg
     artifacts, frame border
+
+# Solar-driven darkening at night (brief §6 data-driven). Public dial stays
+# artist-set (usually 0); effective denoise/CN/IP nudge darker so bright
+# auto-exposed night anchors + daytime ControlNet do not keep the window lit.
+# Values from private DREAM033 A/B (`solar_mismatch_params`). Merge is
+# max(denoise/defocus) / min(CN/IP) vs the dial schedule.
+night_lighting:
+  enabled: true
+  solar_elevation_deg: -6.0
+  denoise_strength: 0.70
+  controlnet_scale: 0.50
+  ip_adapter_scale: 0.25
+  defocus_strength: 0.0
 
 # Post-gate upscale to Cloudberry resolution (issue #12). Gates stay at native.
 # Hourly live path publishes SDXL-native (enabled: false) — SUPIR is on-demand

@@ -5,6 +5,9 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- **Night lighting:** when `solar_elevation < −6°`, dial-0 keeps its public dial
+  label but raises denoise and lowers ControlNet/IP (DREAM033 A/B values) so
+  night hours darken instead of staying GoPro-bright
 - **Cost cut:** hourly Modal path is **A10 + SDXL-native** (no SUPIR on cron);
   SUPIR ~4000×3000 via on-demand `upscale_archive`. Gate/publish failures →
   `signal_lost` noise for that hour (weather silence still holds)

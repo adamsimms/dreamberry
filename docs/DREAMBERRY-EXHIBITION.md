@@ -80,10 +80,12 @@ fake Pinchard's weather onto the dream.
 
 | Track | Surface | When |
 |-------|---------|------|
-| **A — Gallery (sublime)** | Low-res light field, flexible LED curtain, or fabric + fans + projection | White cube / dark media room |
+| **A — Gallery (sublime)** | Low-res LED field (matrix and/or sparse) | White cube / dark media room |
 | **B — Simple / street** | **E-ink** (or quiet paper-like panel) | Storefront, civic window, lean show — daylight OK |
 
 Same hourly dream pointer can feed both; bodies differ.
+
+**Studio prototype phase (locked 2026-08):** **LED only** — HUB75 + frost *and* sparse WS2812 in parallel materials study. Fabric+fans and e-ink deferred until LED language is chosen. Pitch target: glowing wall prototype + grant-ready notes for **~8 ft** scale (larger ~10×12 still viable).
 
 **Shelved for Dreamberry Room 1:** civic full-bleed glass as primary (too straightforward);
 media mesh (weak up close in a small room); Refik Anadol–style fine LED spectacle;
@@ -114,24 +116,26 @@ Test both “weather as light weather” and “horizon almost readable.”
 
 ---
 
-## 7. Material bake-off (required before locking A)
+## 7. Material bake-off (LED phase)
 
-Same still(s) on three bodies; score with the rubric below.
+Same stills on **two** LED bodies first; score with the rubric. Fabric / e-ink later.
 
-| Build | Lean $ | Solid $ | Prove |
-|-------|--------|---------|------|
-| **A** RGB matrix — one HUB75 panel (e.g. P4–P5 64×32/64×64) + frosted acrylic, dimmed; *or* sparse WS2812 grid ~1 m² @ 25–40 mm + cups/diffusion. ESP32/WLED or Pi + `rpi-rgb-led-matrix` | ~80–250 | ~350–600 | Campbell threshold; path to ~10×12 ft |
-| **B** White sheet + 1–2 quiet fans + 1080p projector | ~250–450 | ~500–900 | Out-of-window motion |
-| **C** E-ink — start small (e.g. ~13″ Affresco / Spectra-6); upsize only if medium wins | ~150–500 | ~1.7–2.4k | Street / simple print |
+| Build | Size target | Prove |
+|-------|-------------|--------|
+| **A1 HUB75 + frost** | Start 1–2 panels (~12–25″ wide); path to tile **~8 ft** | Campbell threshold via pitch + plexi distance; pitchable prototype |
+| **A2 Sparse WS2812** | ~1 m² @ ~25–40 mm centers + diffusion/cups | Sculptural discrete light; slower build / fab help OK |
+
+**Playback (locked intent):** continuous **~1 hour crossfade** between successive dream stills (interpolate on the Pi; update the wall every ~1–2 s — not 60 fps video). Content from local stills / `current.webp` folder.
+
+**Controller:** Raspberry Pi (already on hand) + `rpi-rgb-led-matrix` for HUB75; ESP32 + WLED *or* Pi for sparse. Montreal / 120 V North America power.
 
 **Test stills:** one clear dial-0 morning; one fog/storm; one soft/collapse if available.
-Optional slow dissolve (30–60 s) — piece is hourly stills, not video art.
 
 **Rubric (1–5):** out of the window · silent & slow · telepresence · honesty of medium ·
-path to room scale (~10×12 ft) · ops (power/heat/noise) · gut (prints next door, stay here).
+path to ~8 ft (grant) · ops (power/heat/noise) · gut (prints next door, stay here).
 
-**Build order:** A lean (HUB75 + frost first) → B lean → C lean; upgrade the winner.
-If A wins language, scale with coarser tiled matrices or rebuild sparse; do not jump to fine-pitch cabinets.
+**Build order:** A1 first (days, not weeks) → A2 with learning or a fabricator → pick language → materials study doc for venue/grant → scale.
+Do not jump to fine-pitch cabinets.
 
 ---
 
@@ -142,21 +146,22 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 | Mode | Room behavior |
 |------|----------------|
 | Weather silence → **hold** | Field freezes on last success |
-| Dream/channel → **signal lost** | Noise / static field (or e-ink equivalent of channel death) |
+| GPU/channel → **signal lost** | Noise / static field (or e-ink equivalent of channel death) |
 | Identity collapse | Honored dissolve — successful “failure”; updates the dream |
 
 ---
 
 ## 9. Open (non-blocking)
 
-- Lock Room-1 medium after bake-off
-- Target Room-1 footprint when scaling matrices (working envelope **~10×12 ft**; confirm per venue)
+- Lock Room-1 medium after A1 vs A2
+- Exact ~8 ft aspect (width vs square) per venue; larger ~10×12 still on the table
 - Tide vs moon vs both; venue tide vs Bonavista / shared ocean
 - Grip ethic if presence ever returns (tighter vs looser when watched)
 - Doris remote as named authority over grip (option; not visitor UI)
 - Whether private hourly archive is ever shown
 - About / wall-text wording for Indigenous debt
 - Permanent commission vs touring rental (changes fabricator path)
+- When to bring fabric+fans / e-ink back after LED language locks
 
 ---
 
@@ -174,3 +179,5 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 - Flip-disc → separate tide project. Mesh, Anadol-fine LED, transparent OLED, Echelman nets shelved for Room 1.
 
 **2026-07-22 (RGB matrices):** **HUB75 / tiled RGB LED matrices** named as a strong Room-1 path (dim + diffusion; prefer ≈P5–P10). Bake-off A starts with one panel + frost. Architectural scale **~10×12 ft** confirmed realistic (Pi/processor, distributed power). Fine-pitch cabinets still out.
+
+**2026-08-06 (studio prototype):** LED-only phase. Dual study: **HUB75 + frost** and **sparse WS2812**. Playback: **~1 h crossfade** between stills. Pi on hand (Montreal, 120 V). Goal: pitchable glowing prototype + materials study for grant-scale **~8 ft** wall. Fabric/e-ink deferred. Fab help OK (no prior soldering required).

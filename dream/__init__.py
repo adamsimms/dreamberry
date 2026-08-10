@@ -6,6 +6,20 @@ rocks/horizon/cabin-edge, IP-Adapter carries atmosphere, and the dream dial (0-1
 controls how hard the ghost is allowed to drift off the rocks.
 """
 
-from dream.dial import DIAL_MIN, DIAL_MAX, DialParams, dial_schedule
+from dream.dial import (
+    DIAL_MIN,
+    DIAL_MAX,
+    DialParams,
+    NightLightingConfig,
+    dial_schedule,
+    resolve_generation_params,
+)
 
-__all__ = ["DialParams", "dial_schedule", "DIAL_MIN", "DIAL_MAX"]
+__all__ = [
+    "DialParams",
+    "NightLightingConfig",
+    "dial_schedule",
+    "resolve_generation_params",
+    "DIAL_MIN",
+    "DIAL_MAX",
+]

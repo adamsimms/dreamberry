@@ -47,7 +47,10 @@ via `write_sidecar()`.
 | `lora_scale` | float | LoRA weight (reported even when no LoRA loaded) |
 | `defocus_strength` | float | Seeded defocus at high dial (0 below dial 8) |
 
-Source of truth for the schedule: `dream/dial.py`.
+Source of truth for the schedule: `dream/dial.py`. At night
+(`solar_elevation` below `config/dream.yaml:night_lighting`), effective
+denoise/ControlNet/IP may differ from the pure dial table while top-level
+`dial` stays artist-set — `dial_params` always records what was used.
 
 ---
 

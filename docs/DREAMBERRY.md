@@ -149,7 +149,7 @@ Primary source is **Open-Meteo at the cabin coordinates**, chosen because it pro
 
 **Real-time definition:** each frame reflects the island's **actual current local time, current weather, and current sun position** — a dreamed frame of the real *now*. That symmetry (real now, dreamed view) is the honest telepresence.
 
-**Cadence:** hourly, **24 hours** (night included as experiment; drop nights later if results are weak). First-attempt seed is **hour-derived** (hash of the weather hour) so dial-0 can twitch between hours without raising denoise; same hour stays replayable.
+**Cadence:** hourly, **24 hours** (night included as experiment; drop nights later if results are weak). First-attempt seed is **hour-derived** (hash of the weather hour) so dial-0 can twitch between hours without raising denoise; same hour stays replayable. **Night lighting:** when `solar_elevation < −6°`, dial stays artist-set (usually 0) but effective denoise/ControlNet/IP nudge darker (DREAM033 A/B values in `config/dream.yaml:night_lighting`) so bright auto-exposed night anchors do not keep the window lit.
 
 **Season ethics:** season must not be wrong (no summer green in February). Prefer refusal over a pretty lie.
 
@@ -436,4 +436,6 @@ Build **one milestone at a time** (issues in paren):
 **2026-07-23 (hour-derived seeds):** Dial-0 first-attempt seed = blake2 of `open_meteo_hour_utc` (+ `base_seed` salt). Same hour replayable; successive hours can micro-vary under identity lock. Absolute override via `seed_base` / `--seed-base` only.
 
 **2026-07-23 (Modal cost cut):** Hourly path publishes **SDXL-native** on **A10** (~32 GiB); **SUPIR ~4000×3000 on-demand only** (`upscale_archive`). Gate exhaustion / publish failure → **`signal_lost` noise** for that hour (weather silence still **hold**). Target ~$2–4/day vs ~$9–10/day with hourly L40S+SUPIR.
+
+**2026-07-25 (night lighting):** At dial 0, `solar_elevation < −6°` applies a solar-driven param overlay (higher denoise, lower ControlNet/IP; values from DREAM033 A/B). Public dial label unchanged; sidecar `dial_params` records effective scales.
 

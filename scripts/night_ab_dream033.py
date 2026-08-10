@@ -2,8 +2,9 @@
 """Private native-resolution night comparison for DREAM033.
 
 This experiment never publishes to current/ or archive/. It compares:
-baseline, a same-season solar-mismatch parameter override, and a cross-season
-deep-night anchor selected outside the production retrieval API.
+baseline (pre-policy dial-0 lock), production night lighting (solar-driven
+param darkening), and a cross-season deep-night anchor outside production
+retrieval.
 """
 
 from __future__ import annotations
@@ -11,7 +12,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import replace
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -28,7 +28,11 @@ from dream.config import (  # noqa: E402
     load_dream_config,
     resolve_path,
 )
-from dream.dial import DialParams, dial_schedule  # noqa: E402
+from dream.dial import (  # noqa: E402
+    DialParams,
+    dial_schedule,
+    resolve_generation_params,
+)
 from dream.hourly import _default_evaluator  # noqa: E402
 from dream.pipeline import DreamEngine  # noqa: E402
 from dream.sidecar import write_sidecar  # noqa: E402
@@ -51,14 +55,12 @@ def fetch_packet(url: str = SIDECAR_URL) -> dict[str, Any]:
     return dict(sidecar["weather_packet"])
 
 
-def solar_mismatch_params() -> DialParams:
-    """Requested dial 0 with explicit effective parameters for approach 1."""
-    return replace(
-        dial_schedule(0.0),
-        denoise_strength=0.70,
-        controlnet_scale=0.50,
-        ip_adapter_scale=0.25,
-    )
+def solar_mismatch_params(pkt: Mapping[str, Any] | None = None) -> DialParams:
+    """Night-lighting overlay at dial 0 (now also the production path)."""
+    if pkt is not None:
+        return resolve_generation_params(0.0, pkt)
+    # Fallback when called without a packet: same effective scales as production.
+    return resolve_generation_params(0.0, {"solar_elevation": -20.0})
 
 
 def select_cross_season_night(
@@ -161,7 +163,7 @@ def run_experiment(
             "dial_override",
             baseline_anchor,
             baseline_entry,
-            solar_mismatch_params(),
+            solar_mismatch_params(pkt),
         ),
         ("cross_season", cross_anchor, cross_entry, baseline_params),
     )

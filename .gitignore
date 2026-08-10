@@ -22,3 +22,9 @@ data/gates/
 *.pt
 outputs/
 .modal/
+
+# Local playground (notes, images, experiments). Contents are personal and
+# never committed; Cursor can still read them for context. Tracked stub only:
+# sketchpad/README.md
+sketchpad/**
+!sketchpad/README.md

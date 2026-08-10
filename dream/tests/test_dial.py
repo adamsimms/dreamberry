@@ -4,7 +4,15 @@ from __future__ import annotations
 
 import pytest
 
-from dream.dial import DEFAULT_DIAL, DIAL_MAX, DIAL_MIN, dial_schedule
+from dream.dial import (
+    DEFAULT_DIAL,
+    DIAL_MAX,
+    DIAL_MIN,
+    NightLightingConfig,
+    apply_night_lighting,
+    dial_schedule,
+    resolve_generation_params,
+)
 
 
 def test_default_is_dial_zero():
@@ -70,3 +78,53 @@ def test_defocus_only_at_high_dial():
 def test_dial_zero_defocus_is_zero():
     # The locked launch state must never dissolve.
     assert dial_schedule(DEFAULT_DIAL).defocus_strength == 0.0
+
+
+def test_night_lighting_darkens_dial_zero():
+    day = resolve_generation_params(0.0, {"solar_elevation": 20.0})
+    night = resolve_generation_params(0.0, {"solar_elevation": -20.0})
+    assert day.denoise_strength == 0.35
+    assert day.controlnet_scale == 0.90
+    assert day.ip_adapter_scale == 0.70
+    assert night.dial == 0.0
+    assert night.denoise_strength == 0.70
+    assert night.controlnet_scale == 0.50
+    assert night.ip_adapter_scale == 0.25
+    assert night.defocus_strength == 0.0
+
+
+def test_night_lighting_threshold_is_civil_twilight():
+    # Same boundary as curation / weather-NN: night when elev < −6°.
+    at_boundary = resolve_generation_params(0.0, {"solar_elevation": -6.0})
+    just_below = resolve_generation_params(0.0, {"solar_elevation": -6.01})
+    assert at_boundary.denoise_strength == 0.35
+    assert just_below.denoise_strength == 0.70
+
+
+def test_night_lighting_missing_elev_is_noop():
+    p = resolve_generation_params(0.0, {"month": 1})
+    assert p.denoise_strength == 0.35
+
+
+def test_night_lighting_disabled():
+    night = NightLightingConfig(enabled=False)
+    p = resolve_generation_params(
+        0.0, {"solar_elevation": -20.0}, night=night
+    )
+    assert p.denoise_strength == 0.35
+
+
+def test_night_lighting_does_not_loosen_high_dial():
+    # Dial 10 is already freer than the night overlay; keep dial-10 scales.
+    p = resolve_generation_params(10.0, {"solar_elevation": -20.0})
+    assert p.denoise_strength == 0.95
+    assert p.controlnet_scale == 0.10
+    assert p.ip_adapter_scale == 0.05
+    assert p.defocus_strength == 1.0
+
+
+def test_apply_night_lighting_preserves_dial_label():
+    base = dial_schedule(0.0)
+    out = apply_night_lighting(base, {"solar_elevation": -12.0})
+    assert out.dial == 0.0
+    assert out.lora_scale == base.lora_scale

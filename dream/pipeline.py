@@ -24,7 +24,12 @@ from dream.config import (
     resolve_path,
 )
 from dream.controls import build_control_images
-from dream.dial import DEFAULT_DIAL, DialParams, dial_schedule
+from dream.dial import (
+    DEFAULT_DIAL,
+    DialParams,
+    night_lighting_config_from_mapping,
+    resolve_generation_params,
+)
 
 
 @dataclass
@@ -138,7 +143,11 @@ class DreamEngine:
         from weather_schema.compose import compose_prompt
 
         self.load()
-        params = params_override or dial_schedule(dial)
+        if params_override is not None:
+            params = params_override
+        else:
+            night = night_lighting_config_from_mapping(self.cfg.get("night_lighting"))
+            params = resolve_generation_params(dial, pkt, night=night)
 
         if prompt is None:
             prompt = compose_prompt(pkt)
