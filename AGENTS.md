@@ -37,3 +37,7 @@ Do not add milestone status notes under `docs/`. Full policy (sparse docs + keep
 [`.cursor/rules/docs.mdc`](.cursor/rules/docs.mdc).
 
 Also: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Private vault
+
+Working notes live in a local Obsidian vault shared with Rover, Glowberry, and Camera Pi (not this repo). A gitignored Cursor rule names the path on this machine. Start at the Studio Vault Index, then the Dreamberry project index, then Concept and Ethics or Exhibition as needed. Do not copy restricted material into this repo. Public `docs/` stay sparse contracts. Dual-write brief/exhibition decisions to `docs/` and the vault in the same turn. `sketchpad/` is scratch only.
