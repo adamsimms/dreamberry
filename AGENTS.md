@@ -40,4 +40,8 @@ Also: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Private vault
 
-Working notes live in a local Obsidian vault shared with Rover, Glowberry, and Camera Pi (not this repo). A gitignored Cursor rule names the path on this machine. Start at the Studio Vault Index, then the Dreamberry project index, then Concept and Ethics or Exhibition as needed. Do not copy restricted material into this repo. Public `docs/` stay sparse contracts. Dual-write brief/exhibition decisions to `docs/` and the vault in the same turn. `sketchpad/` is scratch only.
+Working notes live in a local Obsidian vault shared with Rover, Glowberry, and Camera Philosophies (not this repo). A gitignored Cursor rule names the path on this machine. Start at the Studio Vault Index, then the Dreamberry project index, then Concept and Ethics or Exhibition as needed. Do not copy restricted material into this repo. Public `docs/` stay sparse contracts. Dual-write brief/exhibition decisions to `docs/` and the vault in the same turn. `sketchpad/` is scratch only.
+
+## Bibliography / Zotero
+
+Zotero is the PDF and source library. The art brief remains canon for the work. The vault does not sync with Zotero. Do not query `~/Zotero/zotero.sqlite`. Do not invent citations. `sketchpad/import_bibliography_to_zotero.py` is a one-shot import, not an agent tool.
