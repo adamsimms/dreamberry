@@ -53,9 +53,10 @@ fake Pinchard's weather onto the dream.
 
 ### Room 2 — the archive shore
 
-- **Cloudberry originals**, printed — series of **≥10**, about **16×20 or 20×30**.
-- Smaller than the dream field; memory as a body of photographs, not a competing window.
-- Labeled photographs (sacred corpus; never mixed with generated frames in the prints).
+- **Cloudberry originals**, printed. Corpus the dream field is trained on. Smaller than the field; never mixed with generated frames.
+- A **few core Pinchard's Island prints** may be in the room as lineage anchors, not a retrospective. A portrait of Doris hangs with them. She has agreed to that portrait being exhibited, in this show and in others. Family authority over the wider story stays with Doris and family.
+- **Bound Cloudberry book** is a pitched edition (lectern copy plus copies for sale; confirm with the gallery). Solo artist packet.
+- Paper grammar: open until install. The 2026 packet pictures unframed stills, mixed sizes, hanging so they are hard to hold (no ceiling). Fabric, frames, and clothespins formalize after acceptance. Grid and salon out. Accordion still in research.
 
 ### Honesty / telemetry
 
@@ -154,6 +155,8 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 ## 9. Open (non-blocking)
 
 - Lock Room-1 medium after A1 vs A2
+- Whether Doris's voice enters the work later (her portrait is settled; she has agreed to it being exhibited)
+- Cloudberry hang hardware (fabric, frames, clothespins) formalizes after acceptance. Studio lean for now: Tillmans constellation with clothespins; fabric as a subset unless Room 1 stays LED frost. Packet names the encounter, not the SKU. Accordion still in research. Grid and salon out.
 - Exact ~8 ft aspect (width vs square) per venue; larger ~10×12 still on the table
 - Tide vs moon vs both; venue tide vs Bonavista / shared ocean
 - Grip ethic if presence ever returns (tighter vs looser when watched)
@@ -181,3 +184,5 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 **2026-07-22 (RGB matrices):** **HUB75 / tiled RGB LED matrices** named as a strong Room-1 path (dim + diffusion; prefer ≈P5–P10). Bake-off A starts with one panel + frost. Architectural scale **~10×12 ft** confirmed realistic (Pi/processor, distributed power). Fine-pitch cabinets still out.
 
 **2026-08-06 (studio prototype):** LED-only phase. Dual study: **HUB75 + frost** and **sparse WS2812**. Playback: **~1 h crossfade** between stills. Pi on hand (Montreal, 120 V). Goal: pitchable glowing prototype + materials study for grant-scale **~8 ft** wall. Fabric/e-ink deferred. Fab help OK (no prior soldering required).
+
+**2026-09-07 (Eastern Edge Main Gallery 2028-2029):** First public gallery apply for this contract. [dreamberry#49](https://github.com/adamsimms/dreamberry/issues/49). Show: Dreamberry field, Cloudberry as the corpus it dreams from, a few core Pinchard's Island prints in the room (not a retrospective), bound Cloudberry book as a pitched edition. The 2026 packet sells that encounter; hang hardware (fabric, frames, clothespins) and Room-1 medium formalize after acceptance. Solo artist packet (hired Cloudberry development help is not named as a collaborator). Packet spec: title *Dreamberry*; all ten slots; finish estimate bake-off through 2027, prints and hang 2027-2028, ready for the first 2028 slot; **live** weather feed, so gallery internet is a technical need; one sentence of AI-extraction contrast, no more; statement adapted image-forward; Indigenous debt named in the cultural-knowledge field, not the proposal; Doris portrait with the lineage prints (she has agreed to it being exhibited here and elsewhere). Proposal language (first revision pass): the camera **went dark** rather than died; Room 1 is described concretely as a freestanding wall of tiled LED behind frost diffusion, roughly eight feet, floor-built and braced to the wall, which is the locked LED-only prototype path and does not pre-empt the bake-off; the provenance station stays inside the 500 words. Out: Rover, Glowberry (studio stays [glowberry#54](https://github.com/adamsimms/glowberry/issues/54)), rOGUE. Venue cannot hang from the ceiling. Do not claim family or cultural clearance. Deadline 2026-09-14.
