@@ -38,6 +38,14 @@ Do not add milestone status notes under `docs/`. Full policy (sparse docs + keep
 
 Also: [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## GitHub Projects
+
+Dreamberry has no dedicated board yet. Track apply / exhibition deadlines on **[Rover — Residencies](https://github.com/users/adamsimms/projects/5)** alongside Rover residency apply Issues.
+
+**Issue titles:** no kind prefix. Do not start titles with `[residency]`, `Apply -`, `M7 spike:`, `OBORO -`, or similar. Kind lives on labels (`residency`, `exhibition`, `concept`, `model`, `weather`, `docs`, …). Leave existing titles unless asked to rename.
+
+**Due dates:** personal repos do not get native issue due-date fields. Keep the call deadline in the issue body **and** set the Residencies board **Due date** column. Body text alone is not enough for sorting or calendar views.
+
 ## Private vault
 
 Working notes live in a local Obsidian vault shared with Rover, Glowberry, and Camera Philosophies (not this repo). A gitignored Cursor rule names the path on this machine. Start at the Studio Vault Index, then the Dreamberry project index (`Dreamberry/MOCs/`), then Concept and Ethics or Exhibition as needed. Dreamberry notes live under `Dreamberry/`. Filename prefix `Dreamberry -`. Do not copy restricted material into this repo. Public `docs/` stay sparse contracts. Dual-write brief/exhibition decisions to `docs/` and the vault in the same turn. `sketchpad/` is scratch only.

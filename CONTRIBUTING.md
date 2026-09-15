@@ -77,4 +77,4 @@ Do not open public issues for vulnerabilities. Email **hello@adamsimms.xyz** —
 
 ## Work tracking
 
-Milestones **M0–M7** are delivery chunks, not version numbers. Prefer linking a PR to the relevant issue.
+Milestones **M0–M7** are delivery chunks, not version numbers. Prefer linking a PR to the relevant issue. Issue titles have no kind prefix (`Apply -`, `[residency]`, …); use labels.
