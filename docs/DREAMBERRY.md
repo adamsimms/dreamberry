@@ -439,3 +439,5 @@ Build **one milestone at a time** (issues in paren):
 
 **2026-07-25 (night lighting):** At dial 0, `solar_elevation < −6°` applies a solar-driven param overlay (higher denoise, lower ControlNet/IP; values from DREAM033 A/B). Public dial label unchanged; sidecar `dial_params` records effective scales.
 
+**2026-10-15 (CALQ Exploration and Research):** Filed for 1 December 2026 to 15 April 2027. [dreamberry#50](https://github.com/adamsimms/dreamberry/issues/50). The research trains on the Cloudberry photographs, then runs a collapse loop: dreams return to the corpus, and originals retire a few at a time. Two measures: distance to the nearest real photograph, and spread inside a batch. The public window stays the current screen until that trained model exists. Pinchard's weather stays the only live weather. Finland is not photographed into the model. Filed copy: [sketchpad/residencies/calq-exploration-research-2026-10-15/form-answers.md](../sketchpad/residencies/calq-exploration-research-2026-10-15/form-answers.md).
+
