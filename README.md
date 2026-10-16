@@ -110,6 +110,13 @@ Platform deploy (after secrets + Modal Volume sync) — see [docs/M5-PLATFORM.md
 
 Never commit `.env` or R2 credentials. See [SECURITY.md](SECURITY.md).
 
+Private generation archive browse (Access-gated, not linked from the public window):
+`https://dreamberry.adamsimms.xyz/archive/` — see [docs/M5-PLATFORM.md](docs/M5-PLATFORM.md).
+
+```bash
+PYTHONPATH=. .venv/bin/python scripts/build_archive_index.py --upload-ui
+```
+
 ## License
 
 - **Code and docs:** [MIT](LICENSE)

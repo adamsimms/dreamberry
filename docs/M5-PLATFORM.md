@@ -20,14 +20,20 @@ failure / hold honesty).
 | Window fade | dream→dream **1h** mid-join; signal_lost in/out **~10s** (`fade_ms` / `fade_started_at` / `previous`) |
 | LoRA | not required for dial-0; train later |
 | Dead-man | healthchecks.io via `HEALTH_PING_URL` |
+| Private browse (#37) | Access-gated studio at `/archive/studio/` (`hello@adamsimms.xyz`); object GETs for `archive/*.png` + sidecars stay public |
 
 ---
 
 ## Layout on R2
 
 ```
-archive/2017-08-16T08:00:37.000Z_DREAM001.png
-archive/2017-08-16T08:00:37.000Z_DREAM001.json
+archive/<TIMESTAMP>_DREAM###.png
+archive/<TIMESTAMP>_DREAM###.json
+archive/studio/index.html      # Access-gated browse UI (#37)
+archive/studio/index.json
+archive/studio/studio.css
+archive/studio/studio.js
+archive/thumbs/<id>.webp       # gallery thumbs (not Access-gated)
 current/current.webp
 current/previous.webp      # prior dream for mid-join crossfade
 current/current.json
@@ -36,6 +42,15 @@ current/signal_lost.webp   # only when channel is dead
 ```
 
 Public URL example: `https://dreamberry.adamsimms.xyz/current/current.webp`
+
+Private studio (Cloudflare Access, email OTP): `https://dreamberry.adamsimms.xyz/archive/` → `/archive/studio/index.html`. Rebuild index / upload UI:
+
+```bash
+PYTHONPATH=. .venv/bin/python scripts/build_archive_index.py --upload-ui
+PYTHONPATH=. .venv/bin/python scripts/build_archive_thumbs.py   # once (or after gaps)
+```
+
+Gallery loads thumbs only; click opens a Cloudberry-style full viewer (`?id=`).
 
 `status.json` fade fields for the public window:
 

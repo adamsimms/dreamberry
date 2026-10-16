@@ -5,6 +5,12 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- **Private archive browse (#37):** Access-gated studio at
+  `dreamberry.adamsimms.xyz/archive/` (Cloudberry day-column gallery + full
+  viewer). Thumbs at `archive/thumbs/*.webp` so the grid never loads full PNGs.
+  Allowlist `hello@adamsimms.xyz`. Rebuild:
+  `scripts/build_archive_index.py --upload-ui` and
+  `scripts/build_archive_thumbs.py`.
 - **Dual license (#39):** code/docs MIT; Cloudberry stills, public Dreamberry
   frames, and the private hourly dream archive CC BY 4.0. Sacred archive stays
   product ethics; reuse outside the piece is explicit (`NOTICE`, README, about,
