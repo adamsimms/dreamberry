@@ -54,6 +54,8 @@ OUTCOME_SIGNAL_LOST = "signal_lost"
 FAILURE_WEATHER_SILENCE = "weather_silence"
 FAILURE_SIGNAL_LOST = "signal_lost"
 FAILURE_IDENTITY_COLLAPSE = "identity_collapse"
+# Night packet, no dark archive init after #27 gates — hold prior dream (#27).
+FAILURE_NO_HONEST_NIGHT_ANCHOR = "no_honest_night_anchor"
 
 # The frame evaluator contract: (image, packet, dial) -> FrameEvaluation.
 Evaluator = Callable[[Any, Mapping[str, Any], float], FrameEvaluation]
@@ -342,7 +344,38 @@ def run_hourly(
         seed = seed_base + i
         try:
             result = engine.generate(pkt, dial=dial, seed=seed)
-        except Exception as exc:  # noqa: BLE001 — any generation failure = channel dead
+        except Exception as exc:  # noqa: BLE001 — classify honesty hold vs channel dead
+            from dream.anchor import NoHonestNightAnchorError
+
+            if isinstance(exc, NoHonestNightAnchorError):
+                reasons = [
+                    f"no_honest_night_anchor: {exc}",
+                    *[
+                        f"{r.get('filename')}:{r.get('reason')}"
+                        for r in exc.reject_reasons[:8]
+                    ],
+                ]
+                status = _status_hold(
+                    now=now,
+                    failure_mode=FAILURE_NO_HONEST_NIGHT_ANCHOR,
+                    hold_reason=FAILURE_NO_HONEST_NIGHT_ANCHOR,
+                    last_success_at=last_success_at,
+                    last_success_dream_id=last_success_dream_id,
+                    dial=dial,
+                    attempts=attempts,
+                    reasons=reasons,
+                    prior=prior,
+                )
+                if write:
+                    _write_status(status_path, status, store, hold=True)
+                return HourlyResult(
+                    outcome=OUTCOME_HOLD,
+                    failure_mode=FAILURE_NO_HONEST_NIGHT_ANCHOR,
+                    hold_reason=FAILURE_NO_HONEST_NIGHT_ANCHOR,
+                    attempts=attempts,
+                    status=status,
+                    packet=pkt,
+                )
             last_error = f"{type(exc).__name__}: {exc}"
             continue
 

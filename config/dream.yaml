@@ -60,6 +60,23 @@ night_lighting:
   ip_adapter_scale: 0.25
   defocus_strength: 0.0
 
+# Twilight honesty (#27). Dial-0 locks to the weather-NN init; auto-exposed
+# dusk/dawn archive frames can read as midday. Prefer same USNO solar band,
+# reject bright inits below the luminance gate, never fall back to the day
+# canonical on night-side packets. If every hit is bright, take the darkest
+# night-class hit (`weather_nn_relaxed`) rather than inventing daylight.
+anchor_honesty:
+  enabled: true
+  solar_band_filter: true
+  luminance_gate: true
+  luminance_gate_solar_elevation_deg: -4.0
+  # Cloudberry night/twilight is mostly auto-exposed ~110–135; DREAM006's blown
+  # dawn latch was ~146. Gate rejects the bright tail; relax picks darkest if
+  # the whole pool is above this (never the day canonical).
+  max_mean_luminance: 110.0
+  query_k: 20
+  relax_luminance_if_empty: true
+
 # Post-gate upscale to Cloudberry resolution (issue #12). Gates stay at native.
 # Hourly live path publishes SDXL-native (enabled: false) — SUPIR is on-demand
 # only (`modal run modal_app.py::upscale_archive --dream-id …`) for print/keepers.

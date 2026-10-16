@@ -298,3 +298,83 @@ def test_save_load_preserves_solar_elevation(tmp_path: Path):
     assert loaded.night_solar_elevation_deg == pytest.approx(-6.0)
     payload = json.loads(path.read_text())
     assert payload["version"] == 2
+
+
+def test_solar_band_prefers_same_band_for_twilight_query():
+    """Nautical-twilight query prefers same band over closer astr. night (#27)."""
+    index = WeatherNNIndex(
+        [
+            IndexEntry(
+                "astr_close.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.50),
+                solar_elevation=-15.0,
+            ),
+            IndexEntry(
+                "nautical_far.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.90),
+                solar_elevation=-8.0,
+            ),
+        ],
+        solar_band_filter=True,
+    )
+    pkt = {
+        "month": 8,
+        "solar_elevation": -8.5,
+        "cloud_cover": 50.0,
+        "weather_code": 0,
+    }
+    hits = index.query(pkt, k=1)
+    assert hits[0]["filename"] == "nautical_far.jpg"
+    assert hits[0]["solar_band"] == "nautical_twilight"
+
+
+def test_solar_band_widens_within_night_when_thin():
+    """Thin same-band night pool widens to other night bands, not day."""
+    index = WeatherNNIndex(
+        [
+            IndexEntry(
+                "astr_only.jpg",
+                month=8,
+                feature_vector=_vec(),
+                solar_elevation=-15.0,
+            ),
+            IndexEntry(
+                "day.jpg",
+                month=8,
+                feature_vector=_vec(),
+                solar_elevation=30.0,
+            ),
+        ],
+        solar_band_filter=True,
+    )
+    pkt = {"month": 8, "solar_elevation": -8.5, "weather_code": 0}
+    hits = index.query(pkt, k=2)
+    assert [h["filename"] for h in hits] == ["astr_only.jpg"]
+    assert "day.jpg" not in {h["filename"] for h in hits}
+
+
+def test_day_query_skips_fine_solar_band_filter():
+    """Wave 1: day-side queries keep coarse day/night gate only."""
+    index = WeatherNNIndex(
+        [
+            IndexEntry(
+                "golden.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.50),
+                solar_elevation=2.0,
+            ),
+            IndexEntry(
+                "noon.jpg",
+                month=8,
+                feature_vector=_vec(cloud_cover=0.90),
+                solar_elevation=40.0,
+            ),
+        ],
+        solar_band_filter=True,
+    )
+    pkt = {"month": 8, "solar_elevation": 40.0, "cloud_cover": 50.0, "weather_code": 0}
+    hits = index.query(pkt, k=2)
+    names = {h["filename"] for h in hits}
+    assert names == {"golden.jpg", "noon.jpg"}

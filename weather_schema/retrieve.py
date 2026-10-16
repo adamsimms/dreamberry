@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from weather_schema.buckets import season_token
+from weather_schema.solar_bands import same_solar_band, solar_band
 from weather_schema.vector import (
     DEFAULT_THETA_SHORE_DEG,
     FEATURE_NAMES,
@@ -50,10 +51,12 @@ class WeatherNNIndex:
         *,
         theta_shore_deg: float = DEFAULT_THETA_SHORE_DEG,
         night_solar_elevation_deg: float = DEFAULT_NIGHT_SOLAR_ELEVATION_DEG,
+        solar_band_filter: bool = True,
     ) -> None:
         self.entries = list(entries)
         self.theta_shore_deg = theta_shore_deg
         self.night_solar_elevation_deg = float(night_solar_elevation_deg)
+        self.solar_band_filter = bool(solar_band_filter)
         self.weights = list(FEATURE_WEIGHTS)
 
     def __len__(self) -> int:
@@ -163,6 +166,32 @@ class WeatherNNIndex:
             night_solar_elevation_deg=self.night_solar_elevation_deg,
         )
 
+    def _band_allowed(
+        self,
+        query_elevation: float | None,
+        entry_elevation: float | None,
+        *,
+        widen_band: bool,
+    ) -> bool:
+        """Prefer same USNO band on night-side queries (#27); never cross day/night.
+
+        Day-side queries skip the fine band filter (Wave 1). Night-side: same
+        band first; when `widen_band`, any night-class elevation is allowed
+        (still blocked from day by `_night_allowed`).
+        """
+        if not self.solar_band_filter:
+            return True
+        if query_elevation is None or entry_elevation is None:
+            return True
+        if not is_night_elevation(
+            query_elevation,
+            night_solar_elevation_deg=self.night_solar_elevation_deg,
+        ):
+            return True
+        if widen_band:
+            return True
+        return same_solar_band(query_elevation, entry_elevation)
+
     def query(
         self,
         pkt: Mapping[str, Any],
@@ -177,6 +206,9 @@ class WeatherNNIndex:
         entries, widen to the adjacent season family (§4.3 thin-pool rule).
         Day/night is a hard gate (elev ↔ `night_solar_elevation_deg`); thin
         night pools do **not** widen into day.
+
+        When `solar_band_filter` is on, night-side queries prefer the same USNO
+        band (#27), then widen within the night class before season widen.
         `exclude` drops candidate filenames (leave-one-out for held-out eval).
         """
         if k <= 0:
@@ -188,23 +220,42 @@ class WeatherNNIndex:
         q_vals, _ = feature_vector(pkt, theta_shore_deg=self.theta_shore_deg)
         excluded = exclude or set()
 
-        def _score(*, widen: bool) -> list[tuple[float, IndexEntry]]:
+        def _score(
+            *, widen_season: bool, widen_band: bool
+        ) -> list[tuple[float, IndexEntry]]:
             scored: list[tuple[float, IndexEntry]] = []
             for entry in self.entries:
                 if entry.filename in excluded:
                     continue
-                if not self._season_allowed(query_month, entry.month, widen=widen):
+                if not self._season_allowed(
+                    query_month, entry.month, widen=widen_season
+                ):
                     continue
                 if not self._night_allowed(query_elev, entry.solar_elevation):
+                    continue
+                if not self._band_allowed(
+                    query_elev, entry.solar_elevation, widen_band=widen_band
+                ):
                     continue
                 dist = weighted_distance(q_vals, entry.feature_vector, self.weights)
                 scored.append((dist, entry))
             scored.sort(key=lambda item: item[0])
             return scored
 
-        scored = _score(widen=False)
-        if len(scored) < k:
-            scored = _score(widen=True)
+        use_band = self.solar_band_filter and query_elev is not None and is_night_elevation(
+            query_elev,
+            night_solar_elevation_deg=self.night_solar_elevation_deg,
+        )
+        if use_band:
+            scored = _score(widen_season=False, widen_band=False)
+            if len(scored) < k:
+                scored = _score(widen_season=False, widen_band=True)
+            if len(scored) < k:
+                scored = _score(widen_season=True, widen_band=True)
+        else:
+            scored = _score(widen_season=False, widen_band=True)
+            if len(scored) < k:
+                scored = _score(widen_season=True, widen_band=True)
 
         results: list[dict[str, Any]] = []
         for dist, entry in scored[:k]:
@@ -212,6 +263,9 @@ class WeatherNNIndex:
                 "filename": entry.filename,
                 "distance": dist,
             }
+            if entry.solar_elevation is not None:
+                row["solar_elevation"] = entry.solar_elevation
+                row["solar_band"] = solar_band(entry.solar_elevation)
             if include_prompt and entry.prompt is not None:
                 row["prompt"] = entry.prompt
             results.append(row)
@@ -226,6 +280,7 @@ class WeatherNNIndex:
             "feature_weights": list(FEATURE_WEIGHTS),
             "theta_shore_deg": self.theta_shore_deg,
             "night_solar_elevation_deg": self.night_solar_elevation_deg,
+            "solar_band_filter": self.solar_band_filter,
             "entries": [
                 {
                     "filename": e.filename,
@@ -279,4 +334,5 @@ class WeatherNNIndex:
                     "night_solar_elevation_deg", DEFAULT_NIGHT_SOLAR_ELEVATION_DEG
                 )
             ),
+            solar_band_filter=bool(payload.get("solar_band_filter", True)),
         )

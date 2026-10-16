@@ -52,6 +52,8 @@ class ProvenanceSidecar:
     models: dict[str, Any]
     weather_packet: dict[str, Any]
     anchor_distance: float | None = None
+    anchor_mean_luminance: float | None = None
+    anchor_reject_reasons: list[dict[str, Any]] | None = None
     edge_crop: dict[str, float] | None = None
     device: str | None = None
     dtype: str | None = None
@@ -60,10 +62,17 @@ class ProvenanceSidecar:
     failure_mode: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        # Omit empty honesty diagnostics so older consumers stay quiet.
+        if not data.get("anchor_reject_reasons"):
+            data.pop("anchor_reject_reasons", None)
+        if data.get("anchor_mean_luminance") is None:
+            data.pop("anchor_mean_luminance", None)
+        return data
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> ProvenanceSidecar:
+        rejects = data.get("anchor_reject_reasons")
         return cls(
             generated_at=str(data["generated_at"]),
             labeled=str(data["labeled"]),
@@ -79,6 +88,14 @@ class ProvenanceSidecar:
             weather_packet=dict(data["weather_packet"]),
             anchor_distance=(
                 None if data.get("anchor_distance") is None else float(data["anchor_distance"])
+            ),
+            anchor_mean_luminance=(
+                None
+                if data.get("anchor_mean_luminance") is None
+                else float(data["anchor_mean_luminance"])
+            ),
+            anchor_reject_reasons=(
+                None if rejects is None else [dict(r) for r in rejects]
             ),
             edge_crop=(
                 None if data.get("edge_crop") is None else dict(data["edge_crop"])
@@ -126,6 +143,10 @@ def build_sidecar(
         anchor_frame=anchor.filename,
         anchor_source=anchor.source,
         anchor_distance=anchor.distance,
+        anchor_mean_luminance=anchor.mean_luminance,
+        anchor_reject_reasons=(
+            [dict(r) for r in anchor.reject_reasons] if anchor.reject_reasons else None
+        ),
         models=_models_block(models, use_ip_adapter=models.get("use_ip_adapter", True)),
         device=device,
         dtype=dtype,
