@@ -1,0 +1,423 @@
+/* Dreamberry archive studio — Cloudberry gallery / viewer grammar. */
+
+:root {
+  --bg: #fff;
+  --ink: #1a1a1a;
+  --ink-dim: #6b6b6b;
+  --line: #ececec;
+  --accent: #2a5a8c;
+  --nav-height: 52px;
+  --font: "DM Sans", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --gallery-days-nav-offset: var(--nav-height);
+  --gallery-days-column-pad: 12px;
+  --gallery-days-date-line: 11px;
+  --gallery-days-date-band: calc(
+    var(--gallery-days-date-line) + var(--gallery-days-column-pad) + 1px
+  );
+  /* Match Cloudberry: ~12 slots tall so thumbs stay readable. */
+  --gallery-days-max-photos: 12;
+  --gallery-days-photo-height: calc(
+    (
+        100dvh - var(--gallery-days-nav-offset) - var(--gallery-days-column-pad) -
+          var(--gallery-days-date-band)
+      ) / var(--gallery-days-max-photos)
+  );
+  --gallery-days-column-width: calc(var(--gallery-days-photo-height) * 288 / 224);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* —— Nav (Cloudberry-style fixed bar) —— */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 max(1rem, env(safe-area-inset-right)) 0
+    max(1rem, env(safe-area-inset-left));
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand:hover {
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.brand-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.nav-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+}
+
+/* —— Gallery —— */
+
+body.gallery-page {
+  overflow: hidden;
+}
+
+body.gallery-page.is-viewer {
+  overflow: auto;
+}
+
+body.gallery-page.is-viewer .gallery-days-layout {
+  display: none;
+}
+
+body.gallery-page.is-viewer .viewer {
+  display: grid;
+}
+
+.gallery-days-layout {
+  position: fixed;
+  top: var(--gallery-days-nav-offset);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-days-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  cursor: grab;
+  outline: none;
+  border-top: 1px solid var(--line);
+}
+
+.gallery-days-scroll.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.gallery-days-scroll.is-dragging .gallery-day-photo {
+  pointer-events: none;
+}
+
+.gallery-days-track {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: max-content;
+  min-height: 100%;
+  gap: 0;
+  padding: 0;
+}
+
+.gallery-day-column {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--gallery-days-column-width);
+  width: var(--gallery-days-column-width);
+  padding-top: var(--gallery-days-column-pad);
+}
+
+.gallery-day-label {
+  flex: 0 0 auto;
+  height: var(--gallery-days-date-band);
+  padding: 0 4px;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  line-height: var(--gallery-days-date-line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gallery-day-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  border-right: 1px solid var(--line);
+}
+
+/* Extra hours (night) stay reachable via column scroll on desktop. */
+@media (min-width: 768px) {
+  .gallery-day-column {
+    max-height: calc(100dvh - var(--gallery-days-nav-offset));
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+
+  .gallery-day-column::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.gallery-day-column:last-child .gallery-day-stack {
+  border-right: none;
+}
+
+.gallery-day-photo {
+  display: block;
+  position: relative;
+  height: var(--gallery-days-photo-height);
+  overflow: hidden;
+  background: #f3f3f3;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.gallery-day-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  vertical-align: top;
+}
+
+.gallery-day-photo:hover img,
+.gallery-day-photo:focus-visible img {
+  filter: brightness(1.04);
+}
+
+.gallery-day-photo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.gallery-day-photo .time {
+  position: absolute;
+  left: 3px;
+  bottom: 2px;
+  font-size: 0.55rem;
+  font-family: var(--mono);
+  color: #fff;
+  text-shadow: 0 1px 2px #000a;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.gallery-day-photo:hover .time,
+.gallery-day-photo:focus-visible .time {
+  opacity: 1;
+}
+
+.gallery-day-photo.is-missing-thumb {
+  background: #e8e8e8;
+}
+
+.gallery-day-photo.is-missing-thumb .time {
+  color: #444;
+  text-shadow: none;
+}
+
+/* —— Viewer (Cloudberry archive/?filename= grammar) —— */
+
+.viewer {
+  display: none;
+  grid-template-columns: 1fr;
+  min-height: calc(100dvh - var(--nav-height));
+  margin-top: var(--nav-height);
+  background: #0d0d0d;
+  color: #f2f2f2;
+}
+
+@media (min-width: 900px) {
+  .viewer {
+    grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 22rem);
+  }
+}
+
+.viewer-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+  background: #000;
+  padding: 0.75rem;
+}
+
+.viewer-stage img {
+  max-width: 100%;
+  max-height: calc(100dvh - var(--nav-height) - 1.5rem);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff22;
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.viewer-nav:hover {
+  background: #ffffff44;
+}
+
+.viewer-nav.prev {
+  left: 0.75rem;
+}
+
+.viewer-nav.next {
+  right: 0.75rem;
+}
+
+.viewer-meta {
+  padding: 1.25rem 1.35rem 2rem;
+  background: #111;
+  border-top: 1px solid #222;
+}
+
+@media (min-width: 900px) {
+  .viewer-meta {
+    border-top: 0;
+    border-left: 1px solid #222;
+    overflow-y: auto;
+    max-height: calc(100dvh - var(--nav-height));
+  }
+}
+
+.viewer-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.viewer-meta h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.viewer-sub {
+  margin: 0 0 1.1rem;
+  color: #bdbdbd;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.viewer-meta dl {
+  margin: 0 0 1.25rem;
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.viewer-meta dt {
+  color: #8f8f8f;
+}
+
+.viewer-meta dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  word-break: break-word;
+  color: #e8e8e8;
+}
+
+.viewer-raw {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.viewer-raw a {
+  color: #9ec3e8;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gallery-days-max-photos: 12;
+  }
+
+  .gallery-days-scroll {
+    overflow-x: hidden;
+  }
+
+  .gallery-days-track {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .gallery-day-column {
+    flex: none;
+    width: 100%;
+    padding: 0.75rem max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .gallery-day-stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 2px;
+    border-right: 0;
+  }
+
+  .gallery-day-photo {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+
+}
