@@ -199,6 +199,8 @@ When the ghost cannot hold the window (low confidence, high dial, undertrained n
 
 When Open-Meteo / WYI / buoy feeds fail or are stale beyond tolerance: **do not generate a new frame**. Leave `current.png` untouched; update `status.json` (`hold:true`, `failure_mode:"weather_silence"`, `last_success_at`). The dream stays; the sensors went quiet — waiting, like the Pi that never woke.
 
+Same hold grammar when a night/twilight packet has **no honest dark archive anchor** after luminance/band gates (`failure_mode:"no_honest_night_anchor"`) — do not invent daylight from the geometry master (#27).
+
 ### Tertiary — Provider / GPU / dream-path outage → **white noise / static**
 
 When Modal/GPU fails, generation throws after retries, gates reject every attempt, or publish/R2 blows up: show a **white-noise / static field** (or swap `current` to a noise asset) and set `failure_mode:"signal_lost"`. Different from weather silence: the *channel* (or this hour's dream) is dead — broadcast failure, not a sleeping cabin. Next successful hour restores the window. Do **not** hold the previous dream over a broken hour.
@@ -439,6 +441,8 @@ Build **one milestone at a time** (issues in paren):
 **2026-07-23 (Modal cost cut):** Hourly path publishes **SDXL-native** on **A10** (~32 GiB); **SUPIR ~4000×3000 on-demand only** (`upscale_archive`). Gate exhaustion / publish failure → **`signal_lost` noise** for that hour (weather silence still **hold**). Target ~$2–4/day vs ~$9–10/day with hourly L40S+SUPIR.
 
 **2026-07-25 (night lighting):** At dial 0, `solar_elevation < −6°` applies a solar-driven param overlay (higher denoise, lower ControlNet/IP; values from DREAM033 A/B). Public dial label unchanged; sidecar `dial_params` records effective scales.
+
+**2026-10-16 (twilight honesty, [#27](https://github.com/adamsimms/dreamberry/issues/27)):** Night-side weather-NN prefers the same USNO solar band, rejects auto-exposed bright inits above a luminance gate, and never falls back to the day canonical. Empty honest night pool → hold (`no_honest_night_anchor`). Config: `dream.yaml:anchor_honesty`.
 
 **2026-10-15 (CALQ Exploration and Research):** Filed for 1 December 2026 to 15 April 2027. [dreamberry#50](https://github.com/adamsimms/dreamberry/issues/50). The research trains on the Cloudberry photographs, then runs a collapse loop: dreams return to the corpus, and originals retire a few at a time. Two measures: distance to the nearest real photograph, and spread inside a batch. The public window stays the current screen until that trained model exists. Pinchard's weather stays the only live weather. Finland is not photographed into the model. Filed copy: [sketchpad/residencies/calq-exploration-research-2026-10-15/form-answers.md](../sketchpad/residencies/calq-exploration-research-2026-10-15/form-answers.md).
 

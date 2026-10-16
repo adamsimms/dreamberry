@@ -5,6 +5,11 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- **Twilight honesty (#27):** night/twilight dial-0 anchors prefer the same USNO
+  solar band and reject auto-exposed bright inits (`anchor_honesty` in
+  `config/dream.yaml`). Sidecar records `anchor_reject_reasons` /
+  `anchor_mean_luminance`. Empty honest night pool holds rather than inventing
+  daylight.
 - **Private archive browse (#37):** Access-gated studio at
   `dreamberry.adamsimms.xyz/archive/` (Cloudberry day-column gallery + full
   viewer). Thumbs at `archive/thumbs/*.webp` so the grid never loads full PNGs.

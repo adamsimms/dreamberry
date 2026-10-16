@@ -419,6 +419,19 @@ Retrieval candidates are filtered **before** distance is computed:
   img2img + IP-Adapter, so a dawn frame for a twilight packet reads as daylight.
 - Thin night pools **do not** widen into day (season widen still applies within night).
 
+**USNO solar band + luminance honesty** ([#27](https://github.com/adamsimms/dreamberry/issues/27); config `dream.yaml:anchor_honesty`)
+
+- Night-side queries prefer the same fine band as §2.6 phase groups: `night` /
+  `astronomical_twilight` / `nautical_twilight`. If that pool is thin, widen within the
+  night class (still never into day). Day-side fine-band filtering is deferred.
+- When query `solar_elevation` is below `luminance_gate_solar_elevation_deg` (default
+  `−4°`), reject candidates whose mean luminance exceeds `max_mean_luminance` (default
+  `110/255`; corpus night frames are mostly auto-exposed ~110–135, blown latches
+  ~146). Sidecar records skips in `anchor_reject_reasons`.
+- If every night hit fails the luminance gate, take the darkest remaining night-class
+  hit (`anchor_source: weather_nn_relaxed`) rather than the bright day canonical. If the
+  night pool is empty, hold with `no_honest_night_anchor` — do not invent daylight.
+
 ### 4.4 Missing-buoy / missing-data handling in retrieval
 
 - **Buoy offline (`wave_ht_sig` null):** drop feature #5 from *both* vectors for that query

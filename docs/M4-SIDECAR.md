@@ -25,8 +25,10 @@ via `write_sidecar()`.
 | `height` | integer | yes | never | Output pixels |
 | `edge_crop` | object | no | when zero | Fractional insets applied before resize (GoPro fisheye trim) |
 | `anchor_frame` | string | yes | never | Cloudberry filename used as img2img / IP-Adapter init |
-| `anchor_source` | string | yes | never | `"weather_nn"` or `"canonical_fallback"` |
-| `anchor_distance` | float | no | canonical fallback | Weighted NN distance when `anchor_source` is `weather_nn` |
+| `anchor_source` | string | yes | never | `"weather_nn"`, `"weather_nn_relaxed"`, or `"canonical_fallback"` |
+| `anchor_distance` | float | no | canonical fallback | Weighted NN distance when `anchor_source` is weather-NN |
+| `anchor_mean_luminance` | float | no | when unread | Mean luma 0–255 of the chosen init (#27) |
+| `anchor_reject_reasons` | array | no | when empty | Skipped NN hits (`luminance_too_high`, `missing_file`, …) |
 | `models` | object | yes | never | Model + LoRA versions (see below) |
 | `device` | string | no | — | Resolved runtime device (`cpu`, `cuda`, `mps`) |
 | `dtype` | string | no | — | Torch dtype used for inference |
