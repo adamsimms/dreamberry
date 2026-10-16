@@ -292,6 +292,18 @@ class R2Store:
         archive_json = f"{ARCHIVE_PREFIX}{dream_id}.json"
         self.put_bytes(archive_png, encode_archive_png(image), content_type="image/png")
         self.put_json(archive_json, sidecar)
+        try:
+            from dream.thumbs import put_archive_thumb
+
+            put_archive_thumb(self, dream_id=dream_id, image=image)
+        except Exception:  # noqa: BLE001 — thumbs must not fail the hour
+            pass
+        try:
+            from dream.archive_index import upsert_archive_index_entry
+
+            upsert_archive_index_entry(self, dream_id=dream_id, sidecar=sidecar)
+        except Exception:  # noqa: BLE001 — browse index must not fail the hour
+            pass
         status_out = dict(status)
         if status_out.get("previous") == "previous.webp":
             if not self.promote_current_to_previous():
