@@ -6,7 +6,7 @@ The dead [Cloudberry](https://art.adamsimms.xyz/cloudberry/archive/) camera **dr
 **Live window:** [art.adamsimms.xyz/dreamberry/window](https://art.adamsimms.xyz/dreamberry/window/)  
 **Artist:** [Adam Simms](https://adamsimms.xyz)
 
-A **sibling** to the Cloudberry archive, not an extension of it. The archive stays sacred and separate. Concept and ethics: [docs/DREAMBERRY.md](docs/DREAMBERRY.md).
+A **sibling** to the Cloudberry archive, not an extension of it. As a product, the archive stays sacred and separate (no mixing generated frames into Cloudberry). Outside the piece, Cloudberry stills and Dreamberry frames are remixable under CC BY 4.0. Concept and ethics: [docs/DREAMBERRY.md](docs/DREAMBERRY.md).
 
 ## How it works
 
@@ -109,6 +109,13 @@ Platform deploy (after secrets + Modal Volume sync) — see [docs/M5-PLATFORM.md
 ```
 
 Never commit `.env` or R2 credentials. See [SECURITY.md](SECURITY.md).
+
+## License
+
+- **Code and docs:** [MIT](LICENSE)
+- **Art assets** (public Dreamberry frames, Cloudberry stills used here, private hourly dream archive): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+Details, credit expectations, and what is *not* covered (weather upstreams, model weights): [NOTICE](NOTICE).
 
 ## Related
 

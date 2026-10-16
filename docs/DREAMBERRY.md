@@ -57,6 +57,7 @@ It inherits telepresence and the abundance-sublime, but replaces capture with *i
 
 - **Public surface:** current frame only — a true window, not a second gallery.
 - **Private:** full hourly generation archive (for training critique, exhibition, artist study).
+- **Sacred as product, remix outside:** the Cloudberry corpus stays closed inside the artworks (no generated frames mixed into Cloudberry R2; Dreamberry frames labeled generated in the drawer). Separately, Cloudberry stills, public Dreamberry window frames, and the private hourly dream archive are licensed **CC BY 4.0** for reuse outside the piece. Code stays **MIT**. See [NOTICE](../NOTICE). Weather upstreams and model weights keep their own deeds.
 - **Training rule (first adapter / M0–M6):** the model trains/anchors **only** on Cloudberry originals — no generated frames in the mix. Keeps identity sharp for the success baseline.
 - **Training rule (later chapter → the ending / M7):** intentionally feed Dreamberry's own outputs back into training — *dreams about dreams* — and let the window slowly soften, drift, and forget. This is not just an experiment; it is a candidate **mortality** for the piece (see §4). A second, self-inflicted resettlement: the machine forgets the place until it can no longer hold it. Kept separate and labeled; never silently pollutes the first public adapter.
 
@@ -440,4 +441,6 @@ Build **one milestone at a time** (issues in paren):
 **2026-07-25 (night lighting):** At dial 0, `solar_elevation < −6°` applies a solar-driven param overlay (higher denoise, lower ControlNet/IP; values from DREAM033 A/B). Public dial label unchanged; sidecar `dial_params` records effective scales.
 
 **2026-10-15 (CALQ Exploration and Research):** Filed for 1 December 2026 to 15 April 2027. [dreamberry#50](https://github.com/adamsimms/dreamberry/issues/50). The research trains on the Cloudberry photographs, then runs a collapse loop: dreams return to the corpus, and originals retire a few at a time. Two measures: distance to the nearest real photograph, and spread inside a batch. The public window stays the current screen until that trained model exists. Pinchard's weather stays the only live weather. Finland is not photographed into the model. Filed copy: [sketchpad/residencies/calq-exploration-research-2026-10-15/form-answers.md](../sketchpad/residencies/calq-exploration-research-2026-10-15/form-answers.md).
+
+**2026-10-16 (dual license, [#39](https://github.com/adamsimms/dreamberry/issues/39)):** Code/docs remain **MIT**. Media grant **CC BY 4.0** for public Dreamberry frames, Cloudberry stills used here, and the private hourly dream archive. Sacred/closed stays *product* language; reuse outside the piece is explicit. Weather upstreams and third-party weights unchanged. Recorded in [NOTICE](../NOTICE).
 

@@ -251,7 +251,8 @@
       row("Generated at", fmt.when(sc.generated_at)),
       row("Frame id", sc.dream_id, true),
     ].join("");
-    return `<section class="group"><h2>Generation</h2><dl>${rows}</dl></section>`;
+    return `<section class="group"><h2>Generation</h2><dl>${rows}</dl>
+      <p class="attrib">Frame © Adam Simms · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> (remix outside the piece). Code <a href="https://github.com/adamsimms/dreamberry/blob/main/LICENSE">MIT</a>.</p></section>`;
   }
 
   function weatherGroup(sc) {

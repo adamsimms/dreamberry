@@ -5,6 +5,10 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- **Dual license (#39):** code/docs MIT; Cloudberry stills, public Dreamberry
+  frames, and the private hourly dream archive CC BY 4.0. Sacred archive stays
+  product ethics; reuse outside the piece is explicit (`NOTICE`, README, about,
+  drawer). Weather upstreams and model weights unchanged.
 - **Night lighting:** when `solar_elevation < −6°`, dial-0 keeps its public dial
   label but raises denoise and lowers ControlNet/IP (DREAM033 A/B values) so
   night hours darken instead of staying GoPro-bright

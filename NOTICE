@@ -1,0 +1,48 @@
+Dreamberry dual license
+=======================
+
+Code and documentation in this repository are under the MIT License
+(see LICENSE).
+
+Art assets by Adam Simms are under Creative Commons Attribution 4.0
+International (CC BY 4.0):
+
+  https://creativecommons.org/licenses/by/4.0/
+
+That media grant covers:
+
+  - Public Dreamberry window frames (published current stills)
+  - Cloudberry stills used as training / anchor corpus for this work
+  - The private hourly Dreamberry generation archive
+
+You may remix those images into your own work, including commercially,
+provided you give appropriate credit (Adam Simms; Dreamberry and/or
+Cloudberry as applicable; a link to the license; and note if you changed
+the material).
+
+Product ethics (unchanged by this grant)
+----------------------------------------
+
+Inside Dreamberry / Cloudberry as artworks:
+
+  - The Cloudberry archive stays a closed, sacred corpus: do not mix
+    generated Dreamberry frames into Cloudberry R2 or present them as
+    photographs.
+  - Generated frames stay labeled generated in the details drawer, not
+    as an overlay on the image.
+
+The CC BY grant is about reuse outside the piece. It does not reopen the
+archive product or change labeling honesty.
+
+Not covered by the media grant
+------------------------------
+
+  - Upstream weather data (Open-Meteo / SmartAtlantic CC BY 4.0; ECCC
+    open data). Use their deeds and attribution.
+  - Third-party model weights, libraries, and other dependencies. Those
+    keep their own licenses.
+
+Taste constraints in the about / ethics copy (no NFT framing, no
+climate-campaign or tourism bait) are practice rules, not license terms.
+
+Issue: https://github.com/adamsimms/dreamberry/issues/39
