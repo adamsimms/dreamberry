@@ -1,6 +1,8 @@
 /* Dreamberry archive studio — Cloudberry gallery → full viewer. */
 (function () {
   const INDEX_URL = "./index.json";
+  // Hourly publishes land at :05; a few minutes of lag is fine.
+  const REFRESH_MS = 5 * 60 * 1000;
   // Absolute archive root (never resolve relative to /studio/).
   const ARCHIVE_ORIGIN = `${window.location.origin}/archive/`;
 
@@ -93,12 +95,21 @@
     return [d, v];
   }
 
+  function galleryMeta() {
+    return `${flat.length} dreams · newest first`;
+  }
+
   function showGallery() {
     el.page.classList.remove("is-viewer");
     el.viewer.hidden = true;
     el.gallery.hidden = false;
-    el.navMeta.textContent =
-      flat.length > 0 ? `${flat.length} dreams · newest first` : el.navMeta.textContent;
+    if (flat.length > 0) el.navMeta.textContent = galleryMeta();
+  }
+
+  function updateViewerNav() {
+    el.navMeta.textContent = `${currentIndex + 1} / ${flat.length}`;
+    el.prevBtn.disabled = currentIndex <= 0;
+    el.nextBtn.disabled = currentIndex >= flat.length - 1;
   }
 
   async function openViewer(entry) {
@@ -176,9 +187,7 @@
 
     el.viewerPng.href = png;
     el.viewerJson.href = jsonUrl;
-    el.navMeta.textContent = `${currentIndex + 1} / ${flat.length}`;
-    el.prevBtn.disabled = currentIndex <= 0;
-    el.nextBtn.disabled = currentIndex >= flat.length - 1;
+    updateViewerNav();
   }
 
   function go(delta) {
@@ -221,6 +230,7 @@
     for (const [day, frames] of groupByDay(entries)) {
       const col = document.createElement("section");
       col.className = "gallery-day-column";
+      col.dataset.day = day;
       col.setAttribute("aria-label", frames[0]?.cabin_feed || day);
 
       const label = document.createElement("div");
@@ -335,6 +345,73 @@
     else showGallery();
   }
 
+  async function fetchIndex() {
+    const res = await fetch(INDEX_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`index ${res.status}`);
+    const doc = await res.json();
+    return doc.entries || [];
+  }
+
+  function setEntries(entries) {
+    flat = entries;
+    byId = new Map(flat.map((e, i) => [e.dream_id, i]));
+  }
+
+  /** Re-render with new entries, keeping horizontal and per-day scroll. */
+  function applyRefresh(entries) {
+    const viewingId =
+      el.page.classList.contains("is-viewer") && currentIndex >= 0
+        ? flat[currentIndex]?.dream_id
+        : null;
+
+    const scroller = el.scroll;
+    const atNewestEdge = scroller.scrollLeft < 40;
+    const oldWidth = scroller.scrollWidth;
+    const oldLeft = scroller.scrollLeft;
+    const stackTops = new Map();
+    el.track.querySelectorAll(".gallery-day-column").forEach((col) => {
+      const stack = col.querySelector(".gallery-day-stack");
+      if (stack) stackTops.set(col.dataset.day, stack.scrollTop);
+    });
+
+    setEntries(entries);
+    renderGallery(flat);
+
+    el.track.querySelectorAll(".gallery-day-column").forEach((col) => {
+      const top = stackTops.get(col.dataset.day);
+      const stack = col.querySelector(".gallery-day-stack");
+      if (stack && top != null) stack.scrollTop = top;
+    });
+    // Newest days render on the left; keep a scrolled-away reader in place.
+    if (!atNewestEdge) {
+      scroller.scrollLeft = oldLeft + (scroller.scrollWidth - oldWidth);
+    }
+
+    if (viewingId != null && byId.has(viewingId)) {
+      currentIndex = byId.get(viewingId);
+      updateViewerNav();
+    } else if (!el.page.classList.contains("is-viewer")) {
+      el.navMeta.textContent = galleryMeta();
+    }
+  }
+
+  let refreshing = false;
+  async function refresh() {
+    if (refreshing || document.visibilityState !== "visible") return;
+    refreshing = true;
+    try {
+      const entries = await fetchIndex();
+      const changed =
+        entries.length !== flat.length ||
+        entries[0]?.dream_id !== flat[0]?.dream_id;
+      if (changed) applyRefresh(entries);
+    } catch (_) {
+      // Expired Access session or a transient miss: keep what is on screen.
+    } finally {
+      refreshing = false;
+    }
+  }
+
   async function main() {
     enableDragScroll(el.scroll);
     el.prevBtn.addEventListener("click", () => go(-1));
@@ -358,17 +435,18 @@
     });
 
     try {
-      const res = await fetch(INDEX_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error(`index ${res.status}`);
-      const doc = await res.json();
-      flat = doc.entries || [];
-      byId = new Map(flat.map((e, i) => [e.dream_id, i]));
-      el.navMeta.textContent = `${doc.count ?? flat.length} dreams · newest first`;
+      setEntries(await fetchIndex());
       renderGallery(flat);
       route();
     } catch (err) {
       el.navMeta.textContent = `Could not load index (${err.message || err})`;
+      return;
     }
+
+    setInterval(refresh, REFRESH_MS);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") refresh();
+    });
   }
 
   main();
