@@ -54,6 +54,10 @@ _IGNORE = [
     ".env",
     ".env.*",
     "third_party",
+    # Local scratch and private working files; never needed on the GPU.
+    "sketchpad",
+    "assets",
+    ".impeccable",
 ]
 
 image = (
