@@ -18,6 +18,6 @@
 | [Adam-Simms-CV-FR.pdf](Adam-Simms-CV-FR.pdf) | Three-page French CV (uploaded). |
 | [portfolio-fr/](portfolio-fr/) | Ten support slides as uploaded (5760 × 4320 JPG, French captions on each). |
 
-English working draft and notes: [../calls/recto-verso-application-responses.md](../calls/recto-verso-application-responses.md).
+English working draft and notes: [../calls/recto-verso-application-responses.md](../calls/recto-verso-application-responses.md). French working file with the glossary and translation notes (machine draft, DeepL comparison, professional translation): [../calls/recto-verso-formulaire-fr.md](../calls/recto-verso-formulaire-fr.md).
 
 Figma: [2026 Recto-Verso, Pôle numérique, Support Materials](https://www.figma.com/design/yxau0zIGq7yPkaEZJfWqMF) (pages Support (FR), Support (EN), Parked). CV: [CALQ-Dreamberry-CV](https://www.figma.com/design/F3vlq7QZQqhpNEa1JvwYwU/CALQ-Dreamberry-CV), page CALQ CV (FR).
