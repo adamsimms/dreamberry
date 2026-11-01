@@ -40,16 +40,20 @@ Also: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## GitHub Projects
 
-Dreamberry has no dedicated board yet. Track apply / exhibition deadlines on **[Rover — Residencies](https://github.com/users/adamsimms/projects/5)** alongside Rover residency apply Issues.
+Issues here are about the work: concept, model, weather, exhibition design, docs. Applications, calls, residencies and their deadlines are tracked in the private studio repo (see Private material), not here. Do not open apply issues in this repo.
 
-**Issue titles:** no kind prefix. Do not start titles with `[residency]`, `Apply -`, `M7 spike:`, `OBORO -`, or similar. Kind lives on labels (`residency`, `exhibition`, `concept`, `model`, `weather`, `docs`, …). Leave existing titles unless asked to rename.
+**Issue titles:** no kind prefix. Do not start titles with `[residency]`, `Apply -`, `M7 spike:`, or similar. Kind lives on labels (`concept`, `model`, `weather`, `exhibition`, `docs`, …). Leave existing titles unless asked to rename.
 
-**Due dates:** personal repos do not get native issue due-date fields. Keep the call deadline in the issue body **and** set the Residencies board **Due date** column. Body text alone is not enough for sorting or calendar views.
+## Private material
 
-## Private vault
+Applications, funder and call records, the CV, contact details and private research notes live in the private repo **adamsimms/studio** (`~/Documents/GitHub/studio`; read its `AGENTS.md` first). Dreamberry's are under `applications/dreamberry/` and `research/dreamberry/`. Nothing from studio comes into this repo unless an issue says so and Adam approved it. Never put a phone number or home address here; a global pre-commit guard blocks them.
 
-Working notes live in a local Obsidian vault shared with Rover, Glowberry, and Camera Philosophies (not this repo). A gitignored Cursor rule names the path on this machine. Start at the Studio Vault Index, then the Dreamberry project index (`Dreamberry/MOCs/`), then Concept and Ethics or Exhibition as needed. Dreamberry notes live under `Dreamberry/`. Filename prefix `Dreamberry -`. Do not copy restricted material into this repo. Public `docs/` stay sparse contracts. Dual-write brief/exhibition decisions to `docs/` and the vault in the same turn. `sketchpad/` is scratch only.
+Public `docs/` stay sparse contracts: record decisions about the work, not application history. `sketchpad/` is scratch only. The old Obsidian vault is frozen and read-only.
 
 ## Bibliography / Zotero
 
-Zotero is the PDF and source library. The art brief remains canon for the work. The vault does not sync with Zotero. Do not query `~/Zotero/zotero.sqlite`. Do not invent citations. `sketchpad/import_bibliography_to_zotero.py` is a one-shot import, not an agent tool.
+Zotero is the PDF and source library (public library, collection Dreamberry `MI5FLXGH`). [docs/BIBLIOGRAPHY.md](docs/BIBLIOGRAPHY.md) is generated from it; rebuild with `node ~/Documents/GitHub/studio/scripts/zotero/build-bibliography.mjs dreamberry --out docs/BIBLIOGRAPHY.md` and do not edit it by hand. The art brief remains canon for the work. Writing to Zotero is publishing: only write batches Adam approved. Do not query `~/Zotero/zotero.sqlite`. Do not invent citations.
+
+## Support
+
+No funder support to acknowledge yet. When an award lands, add the funder and its required acknowledgement wording here and in the README.
