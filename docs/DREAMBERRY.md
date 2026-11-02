@@ -379,6 +379,7 @@ Build **one milestone at a time** (issues in paren):
 - When to open visitor / data-driven / Doris dial modes (**M6** stays artist-only @ 0; exhibition visitor dissolve dial shelved — see exhibition brief)
 - After M3: whether to A/B FLUX / Z-Image / Flux Klein (only if dial-0 lock is solid and look is hated)
 - Exhibition medium lock + tide/moon grip mapping — [DREAMBERRY-EXHIBITION.md](DREAMBERRY-EXHIBITION.md) §9
+- Rest look for intentional sleep (solar and battery, gallery power-down): presence without a new dream, distinct from hold and signal lost (§7)
 
 ---
 

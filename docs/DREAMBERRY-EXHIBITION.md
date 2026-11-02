@@ -56,7 +56,7 @@ fake Pinchard's weather onto the dream.
 - **Cloudberry originals**, printed. Corpus the dream field is trained on. Smaller than the field; never mixed with generated frames.
 - A **few core Pinchard's Island prints** may be in the room as lineage anchors, not a retrospective. A portrait of Doris hangs with them. She has agreed to that portrait being exhibited, in this show and in others. Family authority over the wider story stays with Doris and family.
 - **Bound Cloudberry book** is a pitched edition (lectern copy plus copies for sale; confirm with the gallery). Solo artist packet.
-- Paper grammar: open until install. The 2026 packet pictures unframed stills, mixed sizes, hanging so they are hard to hold (no ceiling). Fabric, frames, and clothespins formalize after acceptance. Grid and salon out. Accordion still in research.
+- Paper grammar: open until install. The 2026 packet pictures unframed stills, mixed sizes, hanging so they are hard to hold (no ceiling). Fabric, frames, and clothespins formalize after acceptance. Grid and salon out: Cloudberry is one frame changing in time, so a grid reprints a second window and fights the dream field. Accordion still in research.
 
 ### Honesty / telemetry
 
@@ -126,7 +126,7 @@ Same stills on **two** LED bodies first; score with the rubric. Fabric / e-ink l
 | **A1 HUB75 + frost** | Start 1–2 panels (~12–25″ wide); path to tile **~8 ft** | Campbell threshold via pitch + acrylic gap; pitchable prototype |
 | **A2 Sparse WS2812** | ~1 m² @ ~25–40 mm centers + diffusion/cups | Sculptural discrete light; slower build / fab help OK |
 
-**Playback (locked intent):** continuous **~1 hour crossfade** between successive dream stills (interpolate on the Pi; update the wall every ~1–2 s — not 60 fps video). Content from local stills / `current.webp` folder.
+**Playback (locked intent):** continuous **~1 hour crossfade** between successive dream stills (interpolate on the Pi; update the wall every ~1–2 s — not 60 fps video). Content from local stills / `current.webp` folder. The Pi is playback only, not an inference box: on-board models fight RAM bandwidth, thermals and the matrix driver, and a generic 512² still takes minutes. Dreaming stays on GPU (Modal).
 
 **Controller:** Raspberry Pi (already on hand) + `rpi-rgb-led-matrix` for HUB75; ESP32 + WLED *or* Pi for sparse. Montreal / 120 V North America power.
 
@@ -185,14 +185,6 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 
 **2026-08-06 (studio prototype):** LED-only phase. Dual study: **HUB75 + frost** and **sparse WS2812**. Playback: **~1 h crossfade** between stills. Pi on hand (Montreal, 120 V). Goal: pitchable glowing prototype + materials study for grant-scale **~8 ft** wall. Fabric/e-ink deferred. Fab help OK (no prior soldering required).
 
-**2026-09-15 (research residency variant):** Research, not exhibition. The lab stay is the two-pane frost HUB75 window (30 x 50 in each, acrylic gap), with solar and battery sleep, not a gallery show. Dreaming already runs; fabrication is the stay.
+**2026-09-07 (no grid):** §4 Room 2 now says why grid and salon are out.
 
-**2026-09-16 (single-room variant):** For a smaller room the lead is a dark chamber, not a bisecting pane, and not a remix of the two-zone layout. Far-wall frost LED diptych (30 x 50 in each, sill height), lighting rail off, microcomputer disclosed on a plinth. Project text names only Dreamberry. Solar out. Cloudberry prints out. Cabin grammar out. First gallery encounter; hallway sentence is a stranger standing in front of the model forgetting the place.
-
-**2026-09-16 (two-room variant):** Main gallery plus a second room. The second room is a window that is a field of light you sit with (frost LED diptych only; no facing cabin photograph). Cloudberry grid plus offset clotheslines in the main room as corpus; Pinchard's pictures and Doris as lineage. No book. Photographs, dreamed light, and family pictures are held without collapsing them into one kind of image.
-
-**2026-09-16 (two-zone variant):** One gallery space, two zones: frost LED diptych plus Cloudberry shore and a few Pinchard's lineage prints. No book. No screening room. Placement after acceptance.
-
-**2026-09-07 (first public gallery proposal):** Show: Dreamberry field, Cloudberry as the corpus it dreams from, a few core Pinchard's Island prints in the room (not a retrospective), bound Cloudberry book as a pitched edition. The proposal sells that encounter; hang hardware (fabric, frames, clothespins) and Room-1 medium formalize after acceptance. Finish estimate: bake-off through 2027, prints and hang 2027-2028, ready for 2028. **Live** weather feed, so gallery internet is a technical need. One sentence of AI-extraction contrast, no more. Indigenous debt is named in its own cultural-knowledge statement, not in the proposal text. Doris portrait hangs with the lineage prints. Proposal language: the camera **went dark** rather than died; Room 1 is described concretely as a freestanding wall of tiled LED behind frost diffusion, roughly eight feet, floor-built and braced to the wall, which is the locked LED-only prototype path and does not pre-empt the bake-off; the provenance station stays inside the proposal. Out: Rover, Glowberry, rOGUE. Do not claim family or cultural clearance.
-
-**2026-10-15 (research build):** Research build, not a gallery lock: one 64 by 48 cm window, three interchangeable outdoor LED surfaces at 5, 8 and 10 mm pitch, six modules each, acrylic diffusers. Pitch, frost, and brightness vary independently. The gallery bake-off in §6 and §7 stays open.
+**2026-09-20 (Pi is playback):** §7: the exhibition Pi plays stills; dreaming stays on GPU.
