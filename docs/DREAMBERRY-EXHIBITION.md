@@ -167,23 +167,16 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 
 ## 10. Decisions log
 
-**2026-07-22 (exhibition spike):**
+One line per change, saying what changed and where. The body above is the current state; git keeps the history.
 
-- Break the dream **out of the window** (Mug Up parallel); no CABIN-style framed monitor as lead.
-- Encounter: silent/slow; telepresence-first; no visitor dissolve dial.
-- Soft third-place modulator: **tide/moon**; occupancy shelved.
-- **Two rooms:** dream field vs Cloudberry print series (≥10 @ ~16×20/20×30).
-- Honesty off the dream; separate station.
-- Tracks: gallery sublime (Campbell / flexible LED / fabric+fans) + **e-ink** simple/street.
-- Bake-off required before locking medium; DIY LED over LiteZilla product.
-- Flip-disc → separate tide project. Mesh, Anadol-fine LED, transparent OLED, Echelman nets shelved for Room 1.
+**2026-07-22 (exhibition spike):** Out of the window (no framed monitor as lead); silent, slow, telepresence-first, no visitor dial; tide/moon as the soft modulator; two rooms; honesty on a separate station; gallery and street tracks; bake-off before locking a medium; flip-disc is a separate project. §3 to §7, §9.
 
-**2026-07-22 (RGB matrices):** **HUB75 / tiled RGB LED matrices** named as a strong Room-1 path (dim + diffusion; prefer ≈P5–P10). Bake-off A starts with one panel + frost. Architectural scale **~10×12 ft** confirmed realistic (Pi/processor, distributed power). Fine-pitch cabinets still out.
+**2026-07-22 (RGB matrices):** HUB75 tiled matrices behind diffusion are a strong Room-1 path (≈P5 to P10); ~10×12 ft is realistic; fine-pitch cabinets out. §6.
 
-**2026-08-06 (studio prototype):** LED-only phase. Dual study: **HUB75 + frost** and **sparse WS2812**. Playback: **~1 h crossfade** between stills. Pi on hand (Montreal, 120 V). Goal: pitchable glowing prototype + materials study for grant-scale **~8 ft** wall. Fabric/e-ink deferred. Fab help OK (no prior soldering required).
+**2026-08-06 (studio prototype):** LED-only phase, HUB75 + frost and sparse WS2812 in parallel; ~1 h crossfade playback; ~8 ft wall target; fabric and e-ink deferred. §5, §7.
 
 **2026-09-07 (no grid):** §4 Room 2 says why grid and salon are out.
 
-**2026-11-02 (Room 2 back to the work):** §4 Room 2 and §9 return to the July contract; the lineage prints, portrait, book and paper grammar were one application's proposal and live with it.
-
 **2026-09-20 (Pi is playback):** §7: the exhibition Pi plays stills; dreaming stays on GPU.
+
+**2026-11-02 (Room 2 back to the work):** §4 Room 2 and §9 return to the July contract; one application's proposal (lineage prints, portrait, book, paper grammar) lives with that application.

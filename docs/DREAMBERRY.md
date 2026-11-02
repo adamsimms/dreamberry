@@ -95,7 +95,7 @@ These are load-bearing. The practice-forward brief demands they be *held*, not r
 
 
 
-### Generation architecture (v1 — resolved by [pipeline spike](8ffaca47-0a48-4ca2-b606-e878e70f4312))
+### Generation architecture (v1 — resolved by pipeline spike)
 
 **A plain LoRA does NOT lock composition** — it teaches the *look* but not the geometry. Dreamberry is a **control** problem, so the lock comes from anchoring, not fine-tuning.
 
@@ -131,7 +131,7 @@ These are load-bearing. The practice-forward brief demands they be *held*, not r
 
 
 
-### Weather → conditioning (resolved by [weather spike](610da137-04d1-4491-92be-14fdff5d9d23))
+### Weather → conditioning (resolved by weather spike)
 
 Full spec: **[DREAMBERRY-WEATHER-SCHEMA.md](DREAMBERRY-WEATHER-SCHEMA.md)**. A deterministic map from numeric weather/ocean/sky/astronomy → a fixed-slot prompt (trigger `cldbry window view of Pinchard's Island, Newfoundland` + season, light, sky, fog, precip, sea state, wind) and a 9-feature weighted retrieval vector. **Symmetry contract:** one `compose_prompt` code path runs on both ERA5-archive packets (captioning) and live packets (inference), so training and live vocabularies are identical by construction. Thresholds are authoritative (oktas/METAR, WMO No. 782 fog/mist, WMO 4677 precip, WMO 3700/Douglas sea state, Beaufort wind, USNO twilight + golden hour, NL-adjusted seasons).
 
@@ -172,7 +172,7 @@ Primary source is **Open-Meteo at the cabin coordinates**, chosen because it pro
 | **10** | Dissolves — the truest state    | ~0.95 + seeded defocus | ~0.1              | ~0.05      | ~1.0        |
 
 
-*(Indicative schedule from the [pipeline spike](8ffaca47-0a48-4ca2-b606-e878e70f4312); tune during dial experiments. As the dial rises the real-frame anchor lets go and the LoRA "memory" takes over — the ghost drifting off the rocks.)*
+*(Indicative schedule from the pipeline spike; tune during dial experiments. As the dial rises the real-frame anchor lets go and the LoRA "memory" takes over — the ghost drifting off the rocks.)*
 
 **Control modes (all remain live options — decide per context):**
 
@@ -273,7 +273,7 @@ Still open: whether `GOPR4102`'s truncation is capture-time or a later copy; how
 
 
 
-### Infrastructure (v1 — resolved by [infra spike](08bc0b0d-f2a1-45a1-bc61-9c5dd881b807))
+### Infrastructure (v1 — resolved by infra spike)
 
 24 images/day at SDXL-native on A10 is modest GPU — the axis is **reliability + low babysitting**, not maximizing resolution every hour.
 
@@ -299,87 +299,13 @@ Still open: whether `GOPR4102`'s truncation is capture-time or a later copy; how
 
 
 
-### Issues as the plan
+### Work tracking
 
-Track work as **GitHub Issues**: [#1–#24](https://github.com/adamsimms/dreamberry/issues). Prefer issues over a backlog doc. Labels: `dataset`, `model`, `weather`, `window`, `infra`, `concept`, `docs`, `blocked`.
-
-**Naming:** milestones use `M` (milestone), not `v` (version). The public artwork has no “version number” — M0…M7 are delivery chunks you can hand to Cursor as “build this.”
-
-### Milestone deliverables (8)
-
-About **8 milestones** is the right grain for this project: each is one focused Cursor build (≈2–4 issues), with a crisp **done-when**. Fewer than ~6 lumps too much into one chat; more than ~10 is admin without clearer handoffs.
-
-
-| Milestone                       | Done when                                                                                           | Issues       | Agent                        |
-| ------------------------------- | --------------------------------------------------------------------------------------------------- | ------------ | ---------------------------- |
-| **M0 — Dataset**                | Curated JPEGs + EXIF times + ERA5 packets ready                                                     | #2–#4        | Composer                     |
-| **M1 — Weather conditioning**   | `compose_prompt` + weather-NN anchor index offline                                                  | #5–#6        | Opus → Composer              |
-| **M2 — Dream engine**           | SDXL+ControlNet+anchor runs; `canonical_frame` + dial schedule                                      | #7–#8        | Opus                         |
-| **M3 — Quality gates**          | Collapse + season validators; dial-0 eval baseline                                                  | #9–#11       | Opus                         |
-| **M4 — Hourly generation path** | Weather → generate+gate → sidecar → SUPIR (ad-hoc OK)                                               | #12–#15      | Composer + Opus (#14)        |
-| **M5 — Platform**               | Modal hourly cron + R2 public/private + honest hold                                                 | #16–#17, #19 | Composer + Opus review (#19) |
-| **M6 — Public window**          | `art.adamsimms.xyz/dreamberry` live (artist dial 0) + drawer + about                                | #18, #20–#22 | Opus + Composer (#20)        |
-| **M7 — Forgetting**             | Containered dreams-about-dreams (+ de-fisheye); first public adapter untouched; end timing variable | #23–#25      | Opus                         |
-
-
-**Cursor prompt pattern:** `Build milestone M0 — Dataset (issues #2–#4). Follow docs/DREAMBERRY.md. Use Composer for mechanical work.`
-
-### Coding-agent model routing
-
-Use the **Cursor chat model** (or subagent model) that matches the *kind* of work — not only the milestone number.
-
-
-| Model                          | Use when                                                                                                                                                                     | Typical issues                                             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **Opus 4.8** (or current Opus) | Conceptual integrity, architecture, validators that encode failure modes, about/ethics copy, dial semantics, anything that could quietly resurrect the “live camera” fiction | #5, #7–#11, #14, #18–#19, #21–#22, #24                     |
-| **Composer 2.5-fast**          | Spec already decided; mechanical implement / download / boilerplate / wiring / tests against fixed tables                                                                    | #2–#4, #6 (once vector spec frozen), #12–#13, #15–#17, #20 |
-| **Either → Opus review**       | Composer implements; Opus reviews for honesty / season lock / hold behavior before merge                                                                                     | #14, #18, #19 especially                                   |
-
-
-**Rules of thumb**
-
-- If the brief already names the tool and acceptance criteria → **Composer**.
-- If a wrong choice would change the *artwork* (elegy, identity collapse, weather-as-truth, labeling) → **Opus**.
-- Prefer **one milestone (or one issue) per chat** when using Composer; keep Opus chats for judgment-heavy milestones (M2–M3, M6 honesty).
-- Subagents: Composer for parallel mechanical tasks; Opus for synthesis / review.
-
-**Issue → suggested model** (default; override when stuck)
-
-
-| #                      | Suggested                                                 |
-| ---------------------- | --------------------------------------------------------- |
-| 2, 3, 4                | Composer                                                  |
-| 5                      | Opus (implement) → Composer (tests) OK once tables locked |
-| 6                      | Composer (after #5)                                       |
-| 7, 8, 9, 10, 11        | Opus                                                      |
-| 12, 13, 15, 16, 17, 20 | Composer                                                  |
-| 14, 18, 19             | Opus (or Composer + Opus review)                          |
-| 21, 22, 24             | Opus                                                      |
-| 23                     | Composer or Opus (experiment design = Opus)               |
-
+Plan and status live in GitHub [milestones](https://github.com/adamsimms/dreamberry/milestones) (M0 to M7; `M` for milestone, not version) and issues, not here. Agent and model routing: [AGENTS.md](../AGENTS.md).
 
 ---
 
-
-
-## 11. Build sequence
-
-Build **one milestone at a time** (issues in paren):
-
-1. **M0 Dataset** (#2–#4)
-2. **M1 Weather conditioning** (#5–#6)
-3. **M2 Dream engine** (#7–#8)
-4. **M3 Quality gates** (#9–#11) — offline dial-0 baseline
-5. **M4 Hourly generation path** (#12–#15)
-6. **M5 Platform** (#16–#17, #19)
-7. **M6 Public window** (#18, #20–#22)
-8. **M7 Forgetting** (#25 spike → #23–#24) — after the live window is solid; container first
-
----
-
-
-
-## 12. Open decisions (non-blocking)
+## 11. Open decisions (non-blocking)
 
 - `canonical_frame` locked: `2017-09-18T09:59:44.000Z_GOPR2537.JPG` (backup `GOPR2479`)
 - Whether nights stay after first month of results
@@ -398,7 +324,7 @@ Build **one milestone at a time** (issues in paren):
 
 
 
-## 13. Naming note
+## 12. Naming note
 
 **Dreamberry** keeps the berry lineage (bakeapple / Cloudberry) and allows night without contradiction. Internal artifacts may use `dreamberry-lora`, `dreamberry-window`, etc.
 
@@ -408,59 +334,28 @@ Build **one milestone at a time** (issues in paren):
 
 ## Decisions log
 
-**2026-07-20 (initial):** Title Dreamberry; URL `art.adamsimms.xyz/dreamberry`; new repo `adamsimms/dreamberry` tracked via Issues; 24h hourly, night experimental; failures = identity collapse + weather silence; honesty in details drawer, no image overlay; archive sacred & separate; public = current frame, private = full archive; weather labels via EXIF DateTimeOriginal; solo; quality over cost.
+One line per change, saying what changed and where. The body above is the current state; git keeps the history.
 
-**2026-07-20 (Opus review):**
+**2026-07-20 (founding):** Title, URL and repo; the reframe ("the dead camera dreaming"; identity collapse is the truest state); weather as the only truth; forgetting as the ending (M7); geometry lock plus a real-frame anchor; symmetric weather schema; provenance sidecar; honesty in the drawer, never on the image; archive sacred and separate; held tensions (Indigenous debt, family authority). §1 to §8.
 
-- **Reframe:** "the dead camera dreaming," not "still running" — resolves the elegy conflict; identity collapse is the *truest state*.
-- **Weather = the only truth**; real-now / dreamed-view asymmetry is the honest core.
-- **Mortality:** dreams-about-dreams = built-in *forgetting* / ending (**M7**), first-class.
-- **Architecture corrected:** LoRA alone does NOT lock composition → geometry lock (ControlNet) + real-frame anchor (weather-NN → img2img); LoRA only if it earns its place. Details from research spikes.
-- **Weather conditioning:** deterministic, symmetric train/live schema (spike).
-- **Data primary:** Open-Meteo (historical + live symmetric); WYI + buoy enrich.
-- **Provenance sidecar** per frame; **eval harness** required.
-- **Dataset:** keep manual-test bursts (real); dedupe; night bucket; keep fisheye first, de-fisheye later; 4:3 4000×3000.
-- **Seam:** none on the web image; gallery telemetry on a *separate tethered screen* — in conversation, not merged.
-- **Doris's dial:** named-collaborator control over the dream variable (option).
-- **Held tensions:** Indigenous debt (unresolved, acknowledged), family authority (permission held).
-- **Infra:** not locked to Cloudflare (spike).
-**2026-07-20 (spikes integrated):**
-- **Generation** ([spike](8ffaca47-0a48-4ca2-b606-e878e70f4312)): **SDXL** v1 (Z-Image parallel track); lock = real-frame img2img anchor + **ControlNet depth + soft-edge** + IP-Adapter; **LoRA = mid-dial identity reservoir**, not the lock (kohya_ss, 4:3 buckets, native fisheye, rank 32, ~2.5–4k steps, weather captions, season-balanced); collapse = **DINOv2 kNN + horizon-edge**; season = same-season retrieval + calibrated CLIP zero-shot; dissolve = **deliberate seeded defocus**; upscale = **SUPIR** → ~4000×3000. FLUX dev set aside (license).
-- **Weather** ([spike](610da137-04d1-4491-92be-14fdff5d9d23)): deterministic symmetric schema in **[DREAMBERRY-WEATHER-SCHEMA.md](DREAMBERRY-WEATHER-SCHEMA.md)** — fixed-slot prompt + 9-feature retrieval vector; one `compose_prompt` path for captioning + inference; authoritative thresholds.
-- **Infra** ([spike](08bc0b0d-f2a1-45a1-bc61-9c5dd881b807)): **Modal** (cron + GPU) → **R2** archive + `current`/`status.json` → **Pages** window; **healthchecks.io** dead-man switch; all-Modal escape hatch if leaving Cloudflare. (2026-07-23: hourly **A10** native; SUPIR on-demand.)
+**2026-07-20 (spikes):** Generation on SDXL with a real-frame anchor (§5); deterministic weather schema ([DREAMBERRY-WEATHER-SCHEMA.md](DREAMBERRY-WEATHER-SCHEMA.md)); Modal for cron and GPU, R2 and Pages for delivery (§10).
 
-**2026-07-21 (milestone plan + agent routing):**
+**2026-07-21 (design pass):** Canonical frame locked; dawn and dusk stay in the day set; print upscale on demand; JSON sidecar only; weather silence holds, GPU failure is signal lost; selfie excluded; one live frame, full private archive. §5, §7, §8, §11.
 
-- Plan as **milestone deliverables** — use `M` not `v` (milestones ≠ software versions).
-- Grain: **8 milestones (M0–M7)**; former “v1 window” split into M4 path / M5 platform / M6 public window.
-- **Coding-agent routing:** Opus 4.8 for judgment; Composer 2.5-fast for mechanical/spec’d implement; Opus review for gate/hold/UI honesty.
-
-**2026-07-21 (design decisions pass):**
-
-- **M7:** no hard end date (variable timing); **container spike #25** before forgetting — may invent trees/placement, must not leave NL maritime climate/geography.
-- **Canonical:** locked `2017-09-18T09:59:44.000Z_GOPR2537.JPG`; backup `GOPR2479`; weather-NN for weather.
-- **Dawn/dusk:** stay in main day training (not a night-style separate bucket) unless M3 eval says otherwise.
-- **Print:** on-demand upscale only.
-- **Models:** keep SDXL; A/B FLUX/etc. only after M3 if lock solid and look hated.
-- **Provenance:** JSON sidecar only.
-- **Silence split:** weather → hold; GPU/provider → white noise / `signal_lost`.
-- **Shadows:** reproduce.
-- **Exclude:** `2018-02-26T11:54:20.000Z_GOPR4086.JPG` (selfie).
-- **Public/private:** one live frame; full private archive.
-
-**2026-07-22 (exhibition brief):** Physical presentation contract in **[DREAMBERRY-EXHIBITION.md](DREAMBERRY-EXHIBITION.md)** — out of the window; two rooms (dream vs Cloudberry prints); tide/moon grip; bake-off shortlist; e-ink simple/street track; flip-disc as sibling.
+**2026-07-22 (exhibition):** Physical presentation contract moved to [DREAMBERRY-EXHIBITION.md](DREAMBERRY-EXHIBITION.md).
 
 **2026-07-23 (hour-derived seeds):** Dial-0 first-attempt seed = blake2 of `open_meteo_hour_utc` (+ `base_seed` salt). Same hour replayable; successive hours can micro-vary under identity lock. Absolute override via `seed_base` / `--seed-base` only.
 
-**2026-07-23 (Modal cost cut):** Hourly path publishes **SDXL-native** on **A10** (~32 GiB); **SUPIR ~4000×3000 on-demand only** (`upscale_archive`). Gate exhaustion / publish failure → **`signal_lost` noise** for that hour (weather silence still **hold**). Target ~$2–4/day vs ~$9–10/day with hourly L40S+SUPIR.
+**2026-07-23 (Modal cost cut):** Hourly path publishes SDXL-native on A10; SUPIR (~4000×3000) on demand only (`upscale_archive`). Gate exhaustion or publish failure is `signal_lost` for that hour. Target ~$2 to 4/day. §10.
 
-**2026-07-25 (night lighting):** At dial 0, `solar_elevation < −6°` applies a solar-driven param overlay (higher denoise, lower ControlNet/IP; values from DREAM033 A/B). Public dial label unchanged; sidecar `dial_params` records effective scales.
+**2026-07-25 (night lighting):** At dial 0, `solar_elevation < −6°` applies a solar-driven parameter overlay (values from DREAM033 A/B). Public dial label unchanged; sidecar `dial_params` records effective scales.
 
-**2026-10-16 (twilight honesty, [#27](https://github.com/adamsimms/dreamberry/issues/27)):** Night-side weather-NN prefers the same USNO solar band, rejects auto-exposed bright inits above a luminance gate, and never falls back to the day canonical. Empty honest night pool → hold (`no_honest_night_anchor`). Config: `dream.yaml:anchor_honesty`.
+**2026-09-18 (Cloudberry's end, from the files):** §8 records what the corpus shows; per-frame lists in `data/evidence/`.
 
 **2026-10-15 (collapse-loop research):** The research trains on the Cloudberry photographs, then runs a collapse loop: dreams return to the corpus, and originals retire a few at a time. Two measures: distance to the nearest real photograph, and spread inside a batch. The public window stays the current screen until that trained model exists. Pinchard's weather stays the only live weather. Finland is not photographed into the model.
 
+**2026-10-16 (twilight honesty, [#27](https://github.com/adamsimms/dreamberry/issues/27)):** Night-side weather-NN prefers the same USNO solar band, rejects auto-exposed bright inits above a luminance gate, and never falls back to the day canonical. Empty honest night pool → hold (`no_honest_night_anchor`). Config: `dream.yaml:anchor_honesty`.
+
 **2026-10-16 (dual license, [#39](https://github.com/adamsimms/dreamberry/issues/39)):** Code/docs remain **MIT**. Media grant **CC BY 4.0** for public Dreamberry frames, Cloudberry stills used here, and the private hourly dream archive. Sacred/closed stays *product* language; reuse outside the piece is explicit. Weather upstreams and third-party weights unchanged. Recorded in [NOTICE](../NOTICE).
 
-
-**2026-09-18 (Cloudberry's end, from the files):** §8 records what the corpus shows: two counts, black hours while capture ran, the silences, the last frame, and what not to claim. Per-frame lists in `data/evidence/`.
+**2026-11-02 (docs pass):** Agent routing and the milestone plan moved out (AGENTS.md, GitHub milestones); log reduced to one line per change.
