@@ -24,6 +24,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from dream.anchor import Anchor, select_anchor  # noqa: E402
 from dream.config import (  # noqa: E402
+    media_dir,
     load_dataset_config,
     load_dream_config,
     resolve_path,
@@ -227,13 +228,15 @@ def run_experiment(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--packet-url", default=SIDECAR_URL)
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument(
         "--select-only",
         action="store_true",
         help="Print candidate anchors without loading diffusion models",
     )
     args = parser.parse_args()
+    if args.output_dir is None:
+        args.output_dir = media_dir("03 TESTS", "night-ab-dream033", DEFAULT_OUTPUT_DIR)
 
     if args.select_only:
         pkt = fetch_packet(args.packet_url)
