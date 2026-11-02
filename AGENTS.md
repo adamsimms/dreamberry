@@ -50,7 +50,7 @@ Applications, funder and call records, the CV, contact details and private resea
 
 Media (renders, maquettes, visual tests, experiment output) never stays in this repo's ignored folders: they are not backed up. It goes to the project's synced Drive folder, `$MEDIA_DIR` (`30 STUDIO/32 PROJECTS/DREAMBERRY/`): `01 REFERENCES`, `02 STUDIES` (concept and visual exploration), `03 TESTS` (technical experiments), `04 ARTWORK` (the finished work's own media), `05 DOCUMENTATION` (one folder per activity, named like studio's). Inside 02 and 03, one dated folder per piece of work: `<YYYY-MM> <name>`. `data/dream/` is for rebuildable caches only.
 
-Public `docs/` stay sparse contracts: record decisions about the work, not application history. `sketchpad/` is scratch only. The old Obsidian vault is frozen and read-only.
+Public `docs/` stay sparse contracts: record decisions about the work, not application history. `sketchpad/` is scratch only.
 
 ## Bibliography / Zotero
 
