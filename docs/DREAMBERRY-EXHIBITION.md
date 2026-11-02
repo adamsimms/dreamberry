@@ -49,7 +49,7 @@ fake Pinchard's weather onto the dream.
 
 - One luminous (or paper) presence. No drawer chrome on or beside it.
 - Not a single standard monitor in a window frame.
-- Medium **unlocked** until bake-off (§7); shortlist below.
+- Medium **unlocked** until bake-off (§7); shortlist below. Form open too: a two-pane diptych or a single panel. Window-sized, not an architectural wall.
 
 ### Room 2 — the archive shore
 
@@ -85,7 +85,7 @@ fake Pinchard's weather onto the dream.
 
 Same hourly dream pointer can feed both; bodies differ.
 
-**Studio prototype phase (locked 2026-08):** **LED only** — HUB75 + frost *and* sparse WS2812 in parallel materials study. Fabric+fans and e-ink deferred until LED language is chosen. Pitch target: glowing wall prototype + grant-ready notes for **~8 ft** scale (larger ~10×12 still viable).
+**Studio prototype phase (locked 2026-08):** **LED only** — HUB75 + frost *and* sparse WS2812 in parallel materials study. Fabric+fans and e-ink deferred until LED language is chosen. Scale target: window-sized.
 
 **Shelved for Dreamberry Room 1:** civic full-bleed glass as primary (too straightforward);
 media mesh (weak up close in a small room); Refik Anadol–style fine LED spectacle;
@@ -109,7 +109,7 @@ instrument — oceanic, slow, separate from the color dream.
 | Reference only | Villareal-like sparse point fields | If content gives way entirely to atmosphere |
 | Contingency | Projection on fixed surface | Finance/ops fallback; not lead |
 
-**Matrix scale:** tiled RGB matrices scale to architectural size — **~10×12 ft (~3×3.7 m) is realistic** (Pi / LED processor + parallel chains, distributed 5 V power, wall frame). Same hourly dream → heavy downsample. Fine pitch (P2.5-class) and Anadol-style walls stay out of scope.
+**Matrix scale:** window-sized (2026-11). Tiled matrices could go architectural (~10×12 ft), but the work does not. Same hourly dream → heavy downsample. Fine pitch (P2.5-class) and Anadol-style walls stay out of scope.
 
 Legibility: need not resolve rocks across the room; vary with pitch / diffusion / cloth.
 Test both “weather as light weather” and “horizon almost readable.”
@@ -122,7 +122,7 @@ Same stills on **two** LED bodies first; score with the rubric. Fabric / e-ink l
 
 | Build | Size target | Prove |
 |-------|-------------|--------|
-| **A1 HUB75 + frost** | Start 1–2 panels (~12–25″ wide); path to tile **~8 ft** | Campbell threshold via pitch + acrylic gap; pitchable prototype |
+| **A1 HUB75 + frost** | Start 1–2 panels (~12–25″ wide); window-sized | Campbell threshold via pitch + acrylic gap; pitchable prototype |
 | **A2 Sparse WS2812** | ~1 m² @ ~25–40 mm centers + diffusion/cups | Sculptural discrete light; slower build / fab help OK |
 
 **Playback (locked intent):** continuous **~1 hour crossfade** between successive dream stills (interpolate on the Pi; update the wall every ~1–2 s — not 60 fps video). Content from local stills / `current.webp` folder. The Pi is playback only, not an inference box: on-board models fight RAM bandwidth, thermals and the matrix driver, and a generic 512² still takes minutes. Dreaming stays on GPU (Modal).
@@ -132,7 +132,7 @@ Same stills on **two** LED bodies first; score with the rubric. Fabric / e-ink l
 **Test stills:** one clear dial-0 morning; one fog/storm; one soft/collapse if available.
 
 **Rubric (1–5):** out of the window · silent & slow · telepresence · honesty of medium ·
-path to ~8 ft (grant) · ops (power/heat/noise) · gut (prints next door, stay here).
+window scale · ops (power/heat/noise) · gut (prints next door, stay here).
 
 **Build order:** A1 first (days, not weeks) → A2 with learning or a fabricator → pick language → materials study doc for venue/grant → scale.
 Do not jump to fine-pitch cabinets.
@@ -153,8 +153,8 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 
 ## 9. Open (non-blocking)
 
-- Lock Room-1 medium after A1 vs A2
-- Exact ~8 ft aspect (width vs square) per venue; larger ~10×12 still on the table
+- Lock Room-1 medium and form (diptych or single panel) after A1 vs A2; bake-off likely during the Arteles residency (February 2027)
+- Sound: barely audible island fog and wind, or none
 - Tide vs moon vs both; venue tide vs Bonavista / shared ocean
 - Grip ethic if presence ever returns (tighter vs looser when watched)
 - Doris remote as named authority over grip (option; not visitor UI)
@@ -180,3 +180,5 @@ One line per change, saying what changed and where. The body above is the curren
 **2026-09-20 (Pi is playback):** §7: the exhibition Pi plays stills; dreaming stays on GPU.
 
 **2026-11-02 (Room 2 back to the work):** §4 Room 2 and §9 return to the July contract; one application's proposal (lineage prints, portrait, book, paper grammar) lives with that application.
+
+**2026-11-02 (window-sized):** §4 Room 1, §5 to §7, §9: the work is window-sized, not an ~8 ft or ~10×12 ft wall; diptych or single panel stays open until the bake-off; sound added as an open question.
