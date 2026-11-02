@@ -45,6 +45,23 @@ def resolve_path(rel: str | Path) -> Path:
     return p if p.is_absolute() else REPO_ROOT / p
 
 
+def media_dir(stage: str, name: str, fallback: Path | str, when: str | None = None) -> Path:
+    """Where reviewable output (studies, tests) goes.
+
+    With DREAMBERRY_MEDIA_DIR set (the project's synced Drive folder), returns
+    `<media>/<stage>/<YYYY-MM> <name>`; otherwise the gitignored local fallback,
+    which is not backed up.
+    """
+    _load_dotenv()
+    root = os.environ.get("DREAMBERRY_MEDIA_DIR")
+    if not root:
+        return resolve_path(fallback)
+    from datetime import date
+
+    month = when or date.today().strftime("%Y-%m")
+    return Path(root).expanduser() / stage / f"{month} {name}"
+
+
 def crop_signature(edge_crop: dict[str, Any] | None) -> str:
     """Short stable tag for cache filenames, e.g. 't9r12'."""
     if not edge_crop:
