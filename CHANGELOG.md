@@ -5,6 +5,8 @@ semver — this file tracks shipping notes.
 
 ## Unreleased
 
+- **Media folder:** dial sweeps, the night A/B and the M3 eval write to `$DREAMBERRY_MEDIA_DIR/03 TESTS/<YYYY-MM> <name>/` (synced Drive) when set. `data/raw/` is fetched on demand (`scripts/download_images.py`).
+- **Docs:** the brief and exhibition contract hold the current state; decisions logs are one line per change; agent routing lives in `AGENTS.md`. Application material lives in the private studio repo.
 - **Twilight honesty (#27):** night/twilight dial-0 anchors prefer the same USNO
   solar band and reject auto-exposed bright inits (`anchor_honesty` in
   `config/dream.yaml`). Sidecar records `anchor_reject_reasons` /
