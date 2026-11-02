@@ -230,6 +230,19 @@ Documented decisions for preparing the ~1,652 originals:
 
 
 
+### What the corpus shows about Cloudberry's end
+
+Checked 2026-09-18 against `data/manifest.json`, the public pinchards.is catalog and the recovered Pi SD card. The corpus is fixed; this changes only if an open question below closes.
+
+- **Two counts.** Cite **1,955** for the public archive and **1,652** for what Dreamberry trained on. The 303 extra public files are all ISO 800, 1/2 s night-mode frames inside Aug 2017 to Mar 2018; they fill no silence.
+- **Black hours while capture still ran.** 439 public frames are ISO 800 (434 also 1/2 s). On 3 Feb 2018 the GoPro wrote a normal window at 13:59 UTC (`GOPR3955`) and a near-black frame at 14:59 UTC (`GOPR3956`) with the sun about 23 degrees up. Failure lived in the photographs before the final silence. Per-frame lists: [`data/evidence/iso800.csv`](../data/evidence/iso800.csv) and the 55-frame visual pass [`data/evidence/class-c-visual-pass.csv`](../data/evidence/class-c-visual-pass.csv) (16 void, 37 dim window, 2 bright disk; no frost or smear confirmed).
+- **Silences.** 55 calendar days have no frame. The longest, 33 days (14 Nov to 16 Dec 2017), is a camera or camera-connection failure, not a dead Pi: the card kept hourly wakes and logs GoPro `410 Gone` and Wi-Fi timeouts from 1 Dec ([cabinberry card logs](https://github.com/adamsimms/cloudberry/tree/main/docs/field/cabinberry-card)). Then 13 days (13 to 25 Feb 2018), 5 days (1 to 5 Jan 2018), and shorter gaps.
+- **The end.** The last frame, `GOPR4132` (1 Mar 2018), is a successful winter dusk. The ending is the absence of a next hour.
+
+Do not claim: the last frame shows the camera dying of frost; every dark JPEG is a malfunction (night and dusk are content); clock drift blacked out `GOPR3956` (the shutter was the Blink and the Hero4 meter); the Pi died in the 33-day gap.
+
+Still open: whether `GOPR4102`'s truncation is capture-time or a later copy; how the recovered card's Hero3 test run maps onto the public Hero4 series.
+
 ## 9. Presentation (first public / M6 intent)
 
 - **One live image** at `/dreamberry` — window, not archive UX. **No text overlay and no honesty mark on the image itself** for the web piece.
@@ -449,3 +462,5 @@ Build **one milestone at a time** (issues in paren):
 
 **2026-10-16 (dual license, [#39](https://github.com/adamsimms/dreamberry/issues/39)):** Code/docs remain **MIT**. Media grant **CC BY 4.0** for public Dreamberry frames, Cloudberry stills used here, and the private hourly dream archive. Sacred/closed stays *product* language; reuse outside the piece is explicit. Weather upstreams and third-party weights unchanged. Recorded in [NOTICE](../NOTICE).
 
+
+**2026-09-18 (Cloudberry's end, from the files):** §8 records what the corpus shows: two counts, black hours while capture ran, the silences, the last frame, and what not to claim. Per-frame lists in `data/evidence/`.

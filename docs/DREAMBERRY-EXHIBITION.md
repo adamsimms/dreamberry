@@ -53,10 +53,9 @@ fake Pinchard's weather onto the dream.
 
 ### Room 2 — the archive shore
 
-- **Cloudberry originals**, printed. Corpus the dream field is trained on. Smaller than the field; never mixed with generated frames.
-- A **few core Pinchard's Island prints** may be in the room as lineage anchors, not a retrospective. A portrait of Doris hangs with them. She has agreed to that portrait being exhibited, in this show and in others. Family authority over the wider story stays with Doris and family.
-- **Bound Cloudberry book** is a pitched edition (lectern copy plus copies for sale; confirm with the gallery). Solo artist packet.
-- Paper grammar: open until install. The 2026 packet pictures unframed stills, mixed sizes, hanging so they are hard to hold (no ceiling). Fabric, frames, and clothespins formalize after acceptance. Grid and salon out: Cloudberry is one frame changing in time, so a grid reprints a second window and fights the dream field. Accordion still in research.
+- **Cloudberry originals**, printed: a series of **≥10**, about **16×20 or 20×30**. The corpus the dream field is trained on.
+- Smaller than the dream field; memory as a body of photographs, not a competing window. Never mixed with generated frames.
+- Grid and salon out: Cloudberry is one frame changing in time, so a grid reprints a second window and fights the dream field. Hang method otherwise open.
 
 ### Honesty / telemetry
 
@@ -155,8 +154,6 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 ## 9. Open (non-blocking)
 
 - Lock Room-1 medium after A1 vs A2
-- Whether Doris's voice enters the work later (her portrait is settled; she has agreed to it being exhibited)
-- Cloudberry hang hardware (fabric, frames, clothespins) formalizes after acceptance. Studio lean for now: Tillmans constellation with clothespins; fabric as a subset unless Room 1 stays LED frost. Packet names the encounter, not the SKU. Accordion still in research. Grid and salon out.
 - Exact ~8 ft aspect (width vs square) per venue; larger ~10×12 still on the table
 - Tide vs moon vs both; venue tide vs Bonavista / shared ocean
 - Grip ethic if presence ever returns (tighter vs looser when watched)
@@ -185,6 +182,8 @@ Unchanged semantics ([DREAMBERRY.md](DREAMBERRY.md) §7):
 
 **2026-08-06 (studio prototype):** LED-only phase. Dual study: **HUB75 + frost** and **sparse WS2812**. Playback: **~1 h crossfade** between stills. Pi on hand (Montreal, 120 V). Goal: pitchable glowing prototype + materials study for grant-scale **~8 ft** wall. Fabric/e-ink deferred. Fab help OK (no prior soldering required).
 
-**2026-09-07 (no grid):** §4 Room 2 now says why grid and salon are out.
+**2026-09-07 (no grid):** §4 Room 2 says why grid and salon are out.
+
+**2026-11-02 (Room 2 back to the work):** §4 Room 2 and §9 return to the July contract; the lineage prints, portrait, book and paper grammar were one application's proposal and live with it.
 
 **2026-09-20 (Pi is playback):** §7: the exhibition Pi plays stills; dreaming stays on GPU.
