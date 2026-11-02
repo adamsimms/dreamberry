@@ -34,7 +34,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from PIL import Image  # noqa: E402
 
-from dream.config import canonical_frame_path, load_dream_config, resolve_path  # noqa: E402
+from dream.config import canonical_frame_path, load_dream_config, media_dir, resolve_path  # noqa: E402
 from dream.gates.embed import DinoReference, embed_image  # noqa: E402
 from dream.gates.horizon import horizon_displacement  # noqa: E402
 from dream.gates.identity import IdentityScores, collapse_verdict  # noqa: E402
@@ -124,7 +124,7 @@ def main() -> int:
     id_cfg = gates["identity_collapse"]
     dino_model = gates["models"]["dino"]
 
-    eval_dir = resolve_path(gates["paths"]["eval_dir"])
+    eval_dir = media_dir("03 TESTS", "m3-eval", gates["paths"]["eval_dir"])
     eval_dir.mkdir(parents=True, exist_ok=True)
 
     results = []
