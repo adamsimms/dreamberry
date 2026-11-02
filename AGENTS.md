@@ -46,7 +46,7 @@ Issues here are about the work: concept, model, weather, exhibition design, docs
 
 ## Private material
 
-Applications, funder and call records, the CV, contact details and private research notes live in the private repo **adamsimms/studio** (`~/Documents/GitHub/studio`; read its `AGENTS.md` first). Dreamberry's are under `applications/dreamberry/` and `research/dreamberry/`. Nothing from studio comes into this repo unless an issue says so and Adam approved it. Never put a phone number or home address here; a global pre-commit guard blocks them.
+Applications, funder and call records, the CV, contact details and private research notes live in the private repo **adamsimms/studio** (`~/Documents/GitHub/studio`; read its `AGENTS.md` first). Dreamberry applications are `applications/<cycle>-<call>-dreamberry/`; private research is in `research/dreamberry/`. Nothing from studio comes into this repo unless an issue says so and Adam approved it. Never put a phone number or home address here; a global pre-commit guard blocks them.
 
 Public `docs/` stay sparse contracts: record decisions about the work, not application history. `sketchpad/` is scratch only. The old Obsidian vault is frozen and read-only.
 
