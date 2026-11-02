@@ -15,7 +15,7 @@ alwaysApply: true
 
 Add another `docs/*.md` only if it is a **decision record** or **ops contract** the code cannot own (e.g. eval baseline numbers). Default: **do not add a new doc**.
 
-Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATFORM.md`. Do not revive deleted `M*.md` status notes.
+Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATFORM.md`, and `BIBLIOGRAPHY.md` (generated from Zotero; never edit by hand). Do not revive deleted `M*.md` status notes.
 
 ## Never commit
 
@@ -25,6 +25,12 @@ Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATF
 - Re-tables of hold / signal_lost / collapse — one home: `DREAMBERRY.md` §7; link it
 - “Why included” padding, implementation checklists, AI-review changelogs that restate the brief
 - README docs indexes or Contribute footers that duplicate GitHub header tabs
+
+## Decisions: work, proposal, option
+
+- **Work decision** (true whatever happens to any application): edit the brief or contract body in place, then add one dated line to its Decisions log saying what changed and where. Delete log lines a later change supersedes; git keeps the history.
+- **Proposal choice** (made for one call: room layout, what to include, how to pitch): never goes here. It lives with the application in the private studio repo. If the show is confirmed it becomes that show's plan there; it reaches these docs only if it holds beyond that show.
+- **Option or research** (a menu, a precedent, a finding): options go in the relevant section's shortlist; precedents go to Zotero as notes on the item.
 
 ## Writing rules
 

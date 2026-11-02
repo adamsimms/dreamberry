@@ -1,0 +1,56 @@
+filename,visual_class,mean_luma,solar_elevation_deg,note
+2018-02-03T14:59:15.000Z_GOPR3956.JPG,void,0.09,23.543,no horizon
+2018-02-09T16:58:59.000Z_GOPR4035.JPG,void,0.25,24.404,no horizon
+2018-01-17T14:59:54.000Z_GOPR3765.JPG,void,0.53,19.487,no horizon
+2017-12-24T14:00:51.000Z_GOPR3576.JPG,void,0.58,14.566,no horizon
+2018-02-11T17:58:55.000Z_GOPR4062.JPG,void,0.94,20.685,no horizon
+2017-12-17T15:01:16.000Z_GOPR3500.JPG,void,0.96,17.192,no horizon
+2018-01-13T15:00:03.000Z_GOPR3713.JPG,void,0.96,18.796,no horizon
+2018-01-13T18:00:03.000Z_GOPR3716.JPG,void,0.98,13.146,no horizon
+2018-01-14T16:00:01.000Z_GOPR3727.JPG,dim_window,1.0,19.512,horizon or dusk still there
+2018-01-17T16:59:54.000Z_GOPR3767.JPG,void,1.04,18.185,no horizon
+2017-09-24T19:59:30.000Z_GOPR2638.JPG,dim_window,1.14,13.358,horizon or dusk still there
+2018-01-13T17:00:03.000Z_GOPR3715.JPG,void,1.16,17.379,no horizon
+2018-01-15T14:59:59.000Z_GOPR3739.JPG,dim_window,1.18,19.128,horizon or dusk still there
+2017-12-20T15:00:59.000Z_GOPR3525.JPG,void,1.19,17.097,no horizon
+2018-01-13T16:00:03.000Z_GOPR3714.JPG,void,1.2,19.332,no horizon
+2018-02-11T16:58:56.000Z_GOPR4061.JPG,void,1.25,25.045,no horizon
+2018-02-12T17:58:53.000Z_GOPR4075.JPG,dim_window,1.34,20.993,horizon or dusk still there
+2018-02-12T16:58:54.000Z_GOPR4074.JPG,dim_window,1.34,25.37,horizon or dusk still there
+2018-01-15T16:59:59.000Z_GOPR3741.JPG,dim_window,1.35,17.77,horizon or dusk still there
+2018-02-12T18:58:53.000Z_GOPR4076.JPG,dim_window,1.38,14.585,horizon or dusk still there
+2018-01-15T17:59:58.000Z_GOPR3742.JPG,dim_window,1.39,13.547,horizon or dusk still there
+2018-02-06T14:59:08.000Z_GOPR3994.JPG,dim_window,1.4,24.427,horizon or dusk still there
+2018-01-14T15:00:01.000Z_GOPR3726.JPG,dim_window,1.42,18.959,horizon or dusk still there
+2018-02-12T15:58:53.000Z_GOPR4073.JPG,dim_window,1.5,27.227,horizon or dusk still there
+2017-12-21T16:00:57.000Z_GOPR3539.JPG,bright_disk,1.6,17.132,disk at right; land almost gone
+2017-12-17T14:01:06.000Z_GOPR3499.JPG,void,1.67,14.819,no horizon
+2018-01-15T15:59:59.000Z_GOPR3740.JPG,dim_window,1.69,19.7,horizon or dusk still there
+2018-01-19T17:59:50.000Z_GOPR3780.JPG,void,1.74,14.413,no horizon
+2018-02-07T14:59:06.000Z_GOPR4007.JPG,dim_window,1.82,24.731,horizon or dusk still there
+2018-01-14T18:00:01.000Z_GOPR3729.JPG,void,1.83,13.343,no horizon
+2018-01-14T17:00:01.000Z_GOPR3728.JPG,dim_window,2.04,17.571,horizon or dusk still there
+2018-01-16T14:59:57.000Z_GOPR3752.JPG,dim_window,2.09,19.304,horizon or dusk still there
+2017-12-21T17:00:57.000Z_GOPR3540.JPG,dim_window,2.1,14.778,horizon or dusk still there
+2018-02-26T19:28:22.000Z_GOPR4094.JPG,dim_window,2.38,14.827,horizon or dusk still there
+2017-10-21T18:58:26.000Z_GOPR3092.JPG,dim_window,2.46,13.011,horizon or dusk still there
+2017-12-21T18:00:57.000Z_GOPR3541.JPG,dim_window,2.65,10.259,horizon or dusk still there
+2017-09-20T19:59:38.000Z_GOPR2582.JPG,dim_window,2.69,14.763,horizon or dusk still there
+2017-10-23T18:58:22.000Z_GOPR3118.JPG,dim_window,2.72,12.397,horizon or dusk still there
+2018-01-16T17:59:56.000Z_GOPR3755.JPG,dim_window,2.79,13.755,horizon or dusk still there
+2018-01-16T16:59:56.000Z_GOPR3754.JPG,dim_window,3.03,17.974,horizon or dusk still there
+2017-12-19T14:01:01.000Z_GOPR3517.JPG,bright_disk,3.17,14.711,disk at right; land almost gone
+2017-12-20T17:00:59.000Z_GOPR3527.JPG,dim_window,3.34,14.751,horizon or dusk still there
+2018-01-16T15:59:57.000Z_GOPR3753.JPG,dim_window,3.57,19.893,horizon or dusk still there
+2017-12-17T16:01:06.000Z_GOPR3501.JPG,dim_window,3.8,17.152,horizon or dusk still there
+2017-12-17T17:01:06.000Z_GOPR3502.JPG,dim_window,3.97,14.713,horizon or dusk still there
+2018-02-28T19:28:17.000Z_GOPR4120.JPG,dim_window,4.16,15.412,horizon or dusk still there
+2017-12-20T16:00:59.000Z_GOPR3526.JPG,dim_window,4.55,17.125,horizon or dusk still there
+2017-09-22T19:59:34.000Z_GOPR2612.JPG,dim_window,4.97,14.062,horizon or dusk still there
+2017-12-17T18:01:06.000Z_GOPR3503.JPG,dim_window,5.3,10.119,horizon or dusk still there
+2017-12-20T18:00:59.000Z_GOPR3528.JPG,dim_window,5.56,10.213,horizon or dusk still there
+2017-10-16T18:58:38.000Z_GOPR2973.JPG,dim_window,7.21,14.605,horizon or dusk still there
+2018-02-27T19:28:20.000Z_GOPR4107.JPG,dim_window,7.4,15.118,horizon or dusk still there
+2018-01-06T14:00:17.000Z_GOPR3656.JPG,dim_window,7.71,15.052,horizon or dusk still there
+2018-02-09T14:59:01.000Z_GOPR4033.JPG,dim_window,8.41,25.354,horizon or dusk still there
+2017-09-12T19:59:58.000Z_GOPR2449.JPG,dim_window,8.8,17.549,horizon or dusk still there
