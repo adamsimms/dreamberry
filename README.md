@@ -100,6 +100,12 @@ cd window && python3 -m http.server 8080
 # → http://localhost:8080/window/?base=<r2-or-fixture-base>
 ```
 
+Cloudberry originals are not kept locally by default. Fetch them into `data/raw/` before rebuilding gates, syncing the Modal Volume, or running dial sweeps. This pulls the current public catalog (1,955 images, about 9 GB, read from `../pinchards.is/data/catalog.json`); the 1,652-frame training slice is the subset listed in `data/manifest.json`:
+
+```bash
+.venv/bin/python scripts/download_images.py
+```
+
 Platform deploy (after secrets + Modal Volume sync) — see [docs/M5-PLATFORM.md](docs/M5-PLATFORM.md):
 
 ```bash
