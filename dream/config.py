@@ -48,12 +48,12 @@ def resolve_path(rel: str | Path) -> Path:
 def media_dir(stage: str, name: str, fallback: Path | str, when: str | None = None) -> Path:
     """Where reviewable output (studies, tests) goes.
 
-    With DREAMBERRY_MEDIA_DIR set (the project's synced Drive folder), returns
+    With MEDIA_DIR set (the project's synced Drive folder), returns
     `<media>/<stage>/<YYYY-MM> <name>`; otherwise the gitignored local fallback,
     which is not backed up.
     """
     _load_dotenv()
-    root = os.environ.get("DREAMBERRY_MEDIA_DIR")
+    root = os.environ.get("MEDIA_DIR")
     if not root:
         return resolve_path(fallback)
     from datetime import date
