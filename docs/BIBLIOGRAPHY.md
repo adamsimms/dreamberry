@@ -50,6 +50,7 @@ Barthes, Roland (1981). *Camera Lucida: Reflections on Photography*. Hill and Wa
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/UXN3NB9L) · `zotero://select/library/items/UXN3NB9L`
 - URL: https://us.macmillan.com/books/9780374532338/cameralucida/
+- Note: Dreamberry preliminary bibliography (2026). Themes: 1. The classic link between photograph, death, and mourning. Useful as *counterpoint*: Cloudberry’s archive is Barthesian attestation (“this has been”); Dreamberry deliberately breaks that contract — generated frames that loo...
 - Tags: bibliography, dreamberry, preliminary-research, theme:elegy-of-apparatus
 
 ### batchenPhotographyDegreeZero2009
@@ -98,6 +99,7 @@ Böhme, Gernot (2017). *The Aesthetics of Atmospheres*. Routledge.
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/DBX7ZMQS) · `zotero://select/library/items/DBX7ZMQS`
 - DOI: https://doi.org/10.4324/9781315538181
+- Note: Dreamberry preliminary bibliography (2026). Themes: 3, 6. Atmosphere as in-between phenomenon (neither pure object nor pure mood) — born of meteorological language, then staged in art and architecture. Gives exhibition language for Room 1 as *felt weather-field* without preten...
 - Tags: bibliography, dreamberry, preliminary-research, theme:exhibition-encounter, theme:weather-as-truth
 
 ### bohmeTheoryAtmospheresIts2014
@@ -146,14 +148,8 @@ Campbell, Jim (2000). Delusions of Dialogue: Control and Choice in Interactive A
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/XP38JA77) · `zotero://select/library/items/XP38JA77`
 - DOI: https://doi.org/10.1162/002409400552397
+- Note: Dreamberry preliminary bibliography (2026). Themes: 6 (also 2). Primary statement against gimmicky interactivity — once the viewer maps action→response, dialogue dies. Aligns with exhibition brief: no visitor dial / “push to dissolve.” Campbell’s later low-res LED work (thresh...
 - Tags: bibliography, dreamberry, pass:2, preliminary-research, theme:exhibition-encounter, theme:machine-as-presence
-
-### campbellDelusionsDialogueControl2000a
-
-Campbell, Jim (2000). Delusions of Dialogue: Control and Choice in Interactive Art. *Leonardo*, 33(2), 133-136.
-
-- Zotero: [web](https://www.zotero.org/adamsimms/items/KEHDXH86) · `zotero://select/library/items/KEHDXH86`
-- DOI: https://doi.org/10.1162/002409400552397
 
 ### christophUnderstandingCharlesBonnet2026
 
@@ -321,6 +317,7 @@ Ernst, Wolfgang (2011). Media Archaeography: Method and Machine versus History a
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/GFD9SVFM) · `zotero://select/library/items/GFD9SVFM`
 - DOI: https://doi.org/10.1525/9780520948518
+- Note: Dreamberry preliminary bibliography (2026). Themes: 1. Pushback against soft “dead media” nostalgia. Ernst wants operative, time-critical machines — not elegiac storytelling *about* them. Productive friction for Dreamberry: the piece *is* elegy, but the weather pipeline and ho...
 - Tags: bibliography, dreamberry, preliminary-research, theme:elegy-of-apparatus
 
 ### fisherGhostsMyLife2014
@@ -329,6 +326,7 @@ Fisher, Mark (2014). *Ghosts of My Life: Writings on Depression, Hauntology and 
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/I8BR5ZSY) · `zotero://select/library/items/I8BR5ZSY`
 - URL: https://www.collectiveinkbooks.com/zer0-books/our-books/ghosts-my-life
+- Note: Dreamberry preliminary bibliography (2026). Themes: 1, 4. Hauntology as cultural condition — present haunted by lost futures; looping, spectral media. Strong conceptual ally for a dead camera that keeps performing the window, and for M7 “dreams about dreams” as a machine that ...
 - Tags: bibliography, dreamberry, preliminary-research, theme:elegy-of-apparatus, theme:forgetting-mortality
 
 ### fletcherOurPhotographicFuture2025
@@ -361,6 +359,7 @@ Friedberg, Anne (2006). *The Virtual Window: From Alberti to Microsoft*. The MIT
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/ZQYA6CTL) · `zotero://select/library/items/ZQYA6CTL`
 - URL: https://mitpress.mit.edu/9780262512503/the-virtual-window/
+- Note: Dreamberry preliminary bibliography (2026). Themes: 2, 6. Genealogy of the window as metaphor, architecture, and screen. Dreamberry’s public surface is explicitly “a true window, not a second gallery.” Friedberg gives historical language for fixed-frame looking, Alberti’s open...
 - Tags: bibliography, dreamberry, pass:2, preliminary-research, theme:exhibition-encounter, theme:machine-as-presence
 
 ### fultonOpacityDreamsLopacite2024
@@ -385,6 +384,7 @@ Goldberg, Ken (Ed.) (2000). *The Robot in the Garden: Telerobotics and Telepiste
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/G2EYY6VV) · `zotero://select/library/items/G2EYY6VV`
 - URL: https://mitpress.mit.edu/9780262571548/the-robot-in-the-garden/
+- Note: Dreamberry preliminary bibliography (2026). Themes: 2, 3 (asymmetry of “live”). Core kit for **telepistemology** — how distance shapes belief, truth, and perception when sense-data *claims* a remote physical reality. Goldberg’s distinction (with Kac and others) between VR (syn...
 - Tags: bibliography, dreamberry, preliminary-research, theme:machine-as-presence, theme:weather-as-truth
 
 ### gortazarNavigatingSubjectivityAIgenerated2024
@@ -456,14 +456,8 @@ Ingold, Tim (2007). Earth, sky, wind, and weather. *Journal of the Royal Anthrop
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/3SVACAR6) · `zotero://select/library/items/3SVACAR6`
 - DOI: https://doi.org/10.1111/j.1467-9655.2007.00401.x
+- Note: Dreamberry preliminary bibliography (2026). Themes: 3. The **weather-world** vs landscape: weather is not scenery on a surface but the medium we perceive *in*. Directly sharpens “weather as the only truth” — rocks as remembered/invented substance; wind, fog, cloud as live medi...
 - Tags: bibliography, dreamberry, preliminary-research, theme:weather-as-truth
-
-### ingoldEarthSkyWind2007a
-
-Ingold, Tim (2007). Earth, sky, wind, and weather. *Journal of the Royal Anthropological Institute*, 13(s1).
-
-- Zotero: [web](https://www.zotero.org/adamsimms/items/W7TZJ8JS) · `zotero://select/library/items/W7TZJ8JS`
-- DOI: https://doi.org/10.1111/j.1467-9655.2007.00401.x
 
 ### ingoldPerceptionEnvironmentEssays2011
 
@@ -551,6 +545,7 @@ McCloskey, Michael; Cohen, Neal J. (1989). Catastrophic Interference in Connecti
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/7DL7TB8V) · `zotero://select/library/items/7DL7TB8V`
 - DOI: https://doi.org/10.1016/S0079-7421(08)60536-8
+- Note: Dreamberry preliminary bibliography (2026). Themes: 4. Names **catastrophic forgetting** — new learning overwriting old. Dreamberry’s M7 arc weaponizes what ML usually treats as a bug: train on own hallucinations until grip fails. Read the *idea*, not the math. Later skim “gen...
 - Tags: bibliography, dreamberry, preliminary-research, theme:forgetting-mortality
 
 ### melamedOperationalImagesVisual2024
@@ -577,6 +572,15 @@ Miller, Sarah M. (2024). Trevor Paglen: Ways of Seeing. *Aperture*(257), 38-49.
 - URL: https://research.ebsco.com/plink/022d2bef-b4f1-35b9-83ae-afb7fc9a8d59
 - Tags: dreamberry, to read
 
+### modemworksDreamRecorder2025
+
+Modem Works (2025). *Dream Recorder*.
+
+- Zotero: [web](https://www.zotero.org/adamsimms/items/S5EST48R) · `zotero://select/library/items/S5EST48R`
+- URL: https://github.com/modem-works/dream-recorder
+- Note: Dreamberry: take the craft, not the appliance (2026-09-20). Take its object craft: the look as a second instrument (denoise, blur and grain as composed settings), a designed rest state, and two-field provenance (what was said vs the engineered prompt). For Dreamberry: frost an...
+- Tags: dreamberry, precedent
+
 ### moskatovaGenerativeRephotographyPhotographic2025
 
 Moskatova, Olga (2025). Generative re-photography: On photographic automatisms of synthetic images. *Philosophy of Photography*, 16(2), 263-286.
@@ -599,6 +603,7 @@ Parikka, Jussi (2012). *What is Media Archaeology?*. Polity.
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/8AXMPALT) · `zotero://select/library/items/8AXMPALT`
 - URL: https://www.wiley.com/en-us/What+is+Media+Archaeology%3F-p-9780745650265
+- Note: Dreamberry preliminary bibliography (2026). Themes: 1, 4. Best single doorway into media archaeology — imaginary media, archive dynamics, creative remediation. Helps frame Dreamberry as practice *with* sedimented capture tech (GoPro, solar, modem) rather than nostalgia for “de...
 - Tags: bibliography, dreamberry, preliminary-research, theme:elegy-of-apparatus, theme:forgetting-mortality
 
 ### pessoaFillingInPerceptualCompletion2003
@@ -663,6 +668,7 @@ Ruskin, John (1843). Of the Open Sky. *Modern Painters, Volume I*. Smith, Elder 
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/XBSMQEMV) · `zotero://select/library/items/XBSMQEMV`
 - URL: https://www.guildofstgeorge.org.uk/resources/readings-from-ruskin/of-the-open-sky
+- Note: Dreamberry preliminary bibliography (2026). Themes: 3. Fierce insistence that sky is transparent medium connected to cloud, not a painted dome with opaque “cloud objects.” A nineteenth-century ancestor of weather-as-truth — useful for dialing wonder/sublimity tone without tour...
 - Tags: bibliography, dreamberry, preliminary-research, theme:weather-as-truth
 
 ### shankenInterviewDanielShanken2026
@@ -680,6 +686,14 @@ Shumailov, Ilia; Shumaylov, Zakhar; Zhao, Yiren; Papernot, Nicolas; Anderson, Ro
 - Zotero: [web](https://www.zotero.org/adamsimms/items/NRG4TEZU) · `zotero://select/library/items/NRG4TEZU`
 - DOI: https://doi.org/10.1038/s41586-024-07566-y
 - Tags: concordia-library, dreamberry, theme:forgetting-mortality
+
+### singhMuseumChanceBookcase2015
+
+Singh, Dayanita (2015). *Museum of Chance (book-case)*.
+
+- Zotero: [web](https://www.zotero.org/adamsimms/items/WCXVF3AB) · `zotero://select/library/items/WCXVF3AB`
+- Note: Closest precedents for a framed accordion on a wall: Dayanita Singh's Museum of Chance book-case (2015), five book-objects hinged into an open-face accordion that hangs like prints; her hinged teak museum structures that unfold as wings; and the medieval concertina polyptych (...
+- Tags: display, dreamberry, precedent
 
 ### somainiPhotographicStatusImages2022
 
@@ -727,6 +741,7 @@ Villareal, Leo (n.d.). Leo Villareal. *Pace Gallery*.
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/I757JJHR) · `zotero://select/library/items/I757JJHR`
 - URL: https://www.pacegallery.com/artists/leo-villareal/
+- Note: Dreamberry preliminary bibliography (2026). Themes: 6. Discrete light as atmosphere — code as essence, light as manifestation; emergent, non-repeating sequences tuned to breath/tempo rather than spectacle. Second named lineage in the exhibition brief. Use to keep Room 1 as *fi...
 - Tags: bibliography, dreamberry, pass:2, preliminary-research, theme:exhibition-encounter
 
 ### welischAIAtemporalityVs2024
