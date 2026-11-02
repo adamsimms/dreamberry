@@ -1,7 +1,7 @@
 # M3 dial-0 eval baseline (n=50)
 
 Reproducible via `scripts/eval_dream.py --n 50` (seed 20260721). Full per-frame
-table + JSON live under `data/gates/eval/` (gitignored, regenerable); this file
+table + JSON from the 2026-07 run are in the project media folder (`03 TESTS/2026-07 m3-eval-baseline/`); new runs write to `$DREAMBERRY_MEDIA_DIR/03 TESTS/<YYYY-MM> m3-eval/`; this file
 records the baseline and the threshold calibration decision.
 
 ## Aggregates
