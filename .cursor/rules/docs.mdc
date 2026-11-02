@@ -15,7 +15,7 @@ alwaysApply: true
 
 Add another `docs/*.md` only if it is a **decision record** or **ops contract** the code cannot own (e.g. eval baseline numbers). Default: **do not add a new doc**.
 
-Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATFORM.md`. Do not revive deleted `M*.md` status notes.
+Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATFORM.md`, and `BIBLIOGRAPHY.md` (generated from Zotero; never edit by hand). Do not revive deleted `M*.md` status notes.
 
 ## Never commit
 
