@@ -29,8 +29,7 @@ outputs/
 sketchpad/**
 !sketchpad/README.md
 
-# Machine-specific vault path and multi-root workspace (home-directory paths).
-.cursor/rules/vault-local.mdc
+# Multi-root workspace (home-directory paths).
 *.code-workspace
 
 # Local image dumps / design tooling (not committed)
