@@ -2,7 +2,7 @@
 
 Generated from the Zotero collection [MI5FLXGH](https://www.zotero.org/adamsimms/collections/MI5FLXGH) by adamsimms/studio scripts/zotero/build-bibliography.mjs. Do not edit; change the items or their notes in Zotero and rebuild.
 
-93 sources.
+94 sources.
 
 ### 6OpacityDreams
 
@@ -42,7 +42,7 @@ Bachelard, Gaston (1994). *The Poetics of Space*. Beacon Press.
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/88JYJ8LZ) · `zotero://select/library/items/88JYJ8LZ`
 - URL: https://concordiauniversity.on.worldcat.org/search/detail/28423776
-- Tags: concordia-library, dreamberry, theme:exhibition-encounter, theme:machine-as-presence
+- Tags: body, concordia-library, critical-research, dreamberry, glowberry, light-art, optional, phenomenology, round-2, theme:exhibition-encounter, theme:machine-as-presence, theory, tier-2
 
 ### barthesCameraLucidaReflections1981
 
@@ -50,7 +50,7 @@ Barthes, Roland (1981). *Camera Lucida: Reflections on Photography*. Hill and Wa
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/UXN3NB9L) · `zotero://select/library/items/UXN3NB9L`
 - URL: https://us.macmillan.com/books/9780374532338/cameralucida/
-- Note: Dreamberry preliminary bibliography (2026). Themes: 1. The classic link between photograph, death, and mourning. Useful as *counterpoint*: Cloudberry’s archive is Barthesian attestation (“this has been”); Dreamberry deliberately breaks that contract — generated frames that loo...
+- Note: Rover research note (vault, 2026). Barthes&#x27;s Camera Lucida assumes a human witness the rover&#x27;s automatic shutter breaks Roland Barthes&#x27;s Camera Lucida is already in the artist&#x27;s thesis citation set, worth a deliberate re-read for the punctum/studium distinc...
 - Tags: bibliography, dreamberry, preliminary-research, theme:elegy-of-apparatus
 
 ### batchenPhotographyDegreeZero2009
@@ -182,6 +182,14 @@ Clark, Andy (2016). *Surfing Uncertainty: Prediction, Action, and the Embodied M
 - Zotero: [web](https://www.zotero.org/adamsimms/items/8U5J7X38) · `zotero://select/library/items/8U5J7X38`
 - URL: https://concordiauniversity.on.worldcat.org/search/detail/904011681
 - Tags: concordia-library, dreamberry, pass:1, theme:machine-as-presence
+
+### clubefemeerVoile2024
+
+Club Efemeer (2024). Voile. *Club Efemeer*.
+
+- Zotero: [web](https://www.zotero.org/adamsimms/items/GN297I5M) · `zotero://select/library/items/GN297I5M`
+- URL: https://clubefemeer.com/voile
+- Tags: artist-reference, club-efemeer, dreamberry, installation, light, to read
 
 ### coltheartCharlesBonnetSyndrome2018
 
@@ -570,6 +578,7 @@ Miller, Sarah M. (2024). Trevor Paglen: Ways of Seeing. *Aperture*(257), 38-49.
 
 - Zotero: [web](https://www.zotero.org/adamsimms/items/8NJ43KMG) · `zotero://select/library/items/8NJ43KMG`
 - URL: https://research.ebsco.com/plink/022d2bef-b4f1-35b9-83ae-afb7fc9a8d59
+- Note: Rover research note (vault, 2026). Trevor Paglen makes surveillance infrastructure visible in landscape photography Trevor Paglen reinterprets American landscape photography to make surveillance infrastructure itself visible — relevant if any part of this project wants to sit ...
 - Tags: dreamberry, to read
 
 ### modemworksDreamRecorder2025
