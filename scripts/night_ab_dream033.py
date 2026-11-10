@@ -236,7 +236,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     if args.output_dir is None:
-        args.output_dir = media_dir("03 TESTS", "night-ab-dream033", DEFAULT_OUTPUT_DIR)
+        args.output_dir = media_dir("03-TESTS", "night-ab-dream033", DEFAULT_OUTPUT_DIR)
 
     if args.select_only:
         pkt = fetch_packet(args.packet_url)

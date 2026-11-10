@@ -27,16 +27,67 @@ Pattern: `Build milestone M7 — … Follow docs/DREAMBERRY.md.`
 - Season lock is ethical, not cosmetic.
 - Secrets only via `.env` / Modal Secrets — see [SECURITY.md](SECURITY.md).
 
-## Canonical docs
+## Docs policy
+
+### Canonical docs
 
 1. [docs/DREAMBERRY.md](docs/DREAMBERRY.md) — brief
 2. [docs/DREAMBERRY-WEATHER-SCHEMA.md](docs/DREAMBERRY-WEATHER-SCHEMA.md) — conditioning contract
 3. [docs/DREAMBERRY-EXHIBITION.md](docs/DREAMBERRY-EXHIBITION.md) — physical exhibition contract
 
-Do not add milestone status notes under `docs/`. Full policy (sparse docs + keep in sync):
-[`.cursor/rules/docs.mdc`](.cursor/rules/docs.mdc).
+Add another `docs/*.md` only if it is a **decision record** or **ops contract** the code cannot own (e.g. eval baseline numbers). Default: **do not add a new doc**.
+
+Allowed exceptions already in tree: `M3-BASELINE.md`, `M4-SIDECAR.md`, `M5-PLATFORM.md`, and `BIBLIOGRAPHY.md` (generated from Zotero; never edit by hand). Do not revive deleted `M*.md` status notes.
 
 Also: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Never commit to docs/
+
+- Milestone / issue status diaries ("landed ✅", "not in this slice")
+- Agent routing, Cursor prompt patterns, model pickers → `AGENTS.md` only
+- Setup already covered by README, CONTRIBUTING, or GitHub repo tabs
+- Re-tables of hold / signal_lost / collapse — one home: `DREAMBERRY.md` §7; link it
+- "Why included" padding, implementation checklists, AI-review changelogs that restate the brief
+- README docs indexes or Contribute footers that duplicate GitHub header tabs
+
+### Decision taxonomy
+
+- **Work decision** (true whatever happens to any application): edit the brief or contract body in place, then add one dated line to its Decisions log saying what changed and where. Delete log lines a later change supersedes; git keeps the history.
+- **Proposal choice** (made for one call: room layout, what to include, how to pitch): never goes here. It lives with the application in the private studio repo. If the show is confirmed it becomes that show's plan there; it reaches these docs only if it holds beyond that show.
+- **Option or research** (a menu, a precedent, a finding): options go in the relevant section's shortlist; precedents go to Zotero as notes on the item.
+
+### Writing rules
+
+1. **One source of truth** — if it lives in the brief, schema, code, or an issue, do not paste it again.
+2. **Delta only** — decisions logs record what changed, not a re-summary of architecture.
+3. **Contracts over narration** — thresholds, field lists, R2 layout yes; process essays no (ethics/concept stay in the brief).
+4. **Ship status → Issues/PRs**, not `docs/`.
+5. **No module docstring stamps** (`M4 / issue #14`) — one-line purpose; tracking in git.
+6. **README stays short** — how it works + local run; no docs catalog.
+
+### Keep in sync (same PR)
+
+When a change touches any of the following, update the matching surface in the **same PR** — edit the existing file; do not invent a new one:
+
+| Change touches… | Update… |
+|-----------------|---------|
+| Public behavior, stack, or how to run locally | `README.md` |
+| Dev setup, artistic boundaries, or PR expectations | `CONTRIBUTING.md` |
+| Secrets, credentials, or vulnerability reporting | `SECURITY.md` / `.env.example` |
+| Concept, ethics, dial, failure modes, infra decisions | `docs/DREAMBERRY.md` |
+| Weather buckets, tokens, or train≡live symmetry | `docs/DREAMBERRY-WEATHER-SCHEMA.md` |
+| Physical rooms, display medium, or exhibition encounter | `docs/DREAMBERRY-EXHIBITION.md` |
+| R2 layout, Modal deploy, or hold delivery | `docs/M5-PLATFORM.md` (or README if one line) |
+| Sidecar fields | `docs/M4-SIDECAR.md` + code/tests |
+| User- or ops-visible shipping note | `CHANGELOG.md` |
+
+Stale docs that contradict the code are a bug. Prefer a one-line fix over a new section.
+
+### Before adding or expanding a doc
+
+> Does this encode a decision or contract someone must follow later — or does it narrate that work happened?
+
+If the latter → update the issue/PR, not `docs/`.
 
 ## GitHub Projects
 
@@ -48,7 +99,7 @@ Issues here are about the work: concept, model, weather, exhibition design, docs
 
 Applications, funder and call records, the CV, contact details and private research notes live in the private repo **adamsimms/studio** (`~/Documents/GitHub/studio`; read its `AGENTS.md` first). Dreamberry applications are `applications/<cycle>-<call>-dreamberry/`; private research is in `research/dreamberry/`. Nothing from studio comes into this repo unless an issue says so and Adam approved it. Never put a phone number or home address here; a global pre-commit guard blocks them.
 
-Media (renders, maquettes, visual tests, experiment output) never stays in this repo's ignored folders: they are not backed up. It goes to the project's synced Drive folder, `$MEDIA_DIR` (`30 STUDIO/32 PROJECTS/DREAMBERRY/`): `01 REFERENCES`, `02 STUDIES` (concept and visual exploration), `03 TESTS` (technical experiments), `04 ARTWORK` (the finished work's own media), `05 DOCUMENTATION` (one folder per activity, named like studio's). Inside 02 and 03, one dated folder per piece of work: `<YYYY-MM> <name>`. `data/dream/` is for rebuildable caches only.
+Media (renders, maquettes, visual tests, experiment output) never stays in this repo's ignored folders: they are not backed up. It goes to the project's synced Drive folder, `$MEDIA_DIR` (`30 STUDIO/32 PROJECTS/DREAMBERRY/`): `01-REFERENCES`, `02-STUDIES` (concept and visual exploration), `03-TESTS` (technical experiments), `04-ARTWORK` (the finished work's own media), `05-DOCUMENTATION` (one folder per activity, named like studio's). Inside 02 and 03, one dated folder per piece of work: `<YYYY-MM>-<name>`. `data/dream/` is for rebuildable caches only.
 
 Public `docs/` stay sparse contracts: record decisions about the work, not application history. `sketchpad/` is scratch only.
 

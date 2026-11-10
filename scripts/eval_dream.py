@@ -124,7 +124,7 @@ def main() -> int:
     id_cfg = gates["identity_collapse"]
     dino_model = gates["models"]["dino"]
 
-    eval_dir = media_dir("03 TESTS", "m3-eval", gates["paths"]["eval_dir"])
+    eval_dir = media_dir("03-TESTS", "m3-eval", gates["paths"]["eval_dir"])
     eval_dir.mkdir(parents=True, exist_ok=True)
 
     results = []

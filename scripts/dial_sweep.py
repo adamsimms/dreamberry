@@ -4,7 +4,7 @@
 The public window is locked to **artist-only, dial 0** (DREAMBERRY.md §6). Dial
 experiments happen here, privately, and must never touch the public pointer:
 
-  * writes to `$MEDIA_DIR/03 TESTS/<YYYY-MM> dial-sweep <packet>/` when set
+  * writes to `$MEDIA_DIR/03-TESTS/<YYYY-MM>-dial-sweep-<packet>/` when set
     (synced Drive), else `data/dream/dial/` (gitignored, not backed up) — a sandbox,
     kept out of the hourly archive and its DREAM### roll counter;
   * never imports `dream.storage`, never uploads to R2, never writes status.json;
@@ -98,7 +98,7 @@ def main() -> int:
         pkt = enrich_packet(json.load(f))
 
     stem = packet_path.name.replace(".json", "")
-    out_dir = media_dir("03 TESTS", f"dial-sweep {stem}", DIAL_ROOT / stem)
+    out_dir = media_dir("03-TESTS", f"dial-sweep-{stem}", DIAL_ROOT / stem)
     if args.run:
         out_dir = out_dir / args.run
     out_dir.mkdir(parents=True, exist_ok=True)
