@@ -4,7 +4,7 @@
 The public window is locked to **artist-only, dial 0** (DREAMBERRY.md §6). Dial
 experiments happen here, privately, and must never touch the public pointer:
 
-  * writes to `$MEDIA_DIR/03-TESTS/<YYYY-MM>-dial-sweep-<packet>/` when set
+  * writes to `$MEDIA_DIR/03-TESTS/<YYYY-MM>-DIAL-SWEEP-<PACKET>/` when set
     (synced Drive), else `data/dream/dial/` (gitignored, not backed up) — a sandbox,
     kept out of the hourly archive and its DREAM### roll counter;
   * never imports `dream.storage`, never uploads to R2, never writes status.json;

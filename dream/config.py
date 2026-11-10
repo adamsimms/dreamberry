@@ -49,7 +49,7 @@ def media_dir(stage: str, name: str, fallback: Path | str, when: str | None = No
     """Where reviewable output (studies, tests) goes.
 
     With MEDIA_DIR set (the project's synced Drive folder), returns
-    `<media>/<stage>/<YYYY-MM>-<name>`; otherwise the gitignored local fallback,
+    `<media>/<stage>/<YYYY-MM>-<NAME>`; otherwise the gitignored local fallback,
     which is not backed up.
     """
     _load_dotenv()
@@ -59,7 +59,7 @@ def media_dir(stage: str, name: str, fallback: Path | str, when: str | None = No
     from datetime import date
 
     month = when or date.today().strftime("%Y-%m")
-    return Path(root).expanduser() / stage / f"{month}-{name}"
+    return Path(root).expanduser() / stage / f"{month}-{name.replace(' ', '-').upper()}"
 
 
 def crop_signature(edge_crop: dict[str, Any] | None) -> str:
