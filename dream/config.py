@@ -48,7 +48,7 @@ def resolve_path(rel: str | Path) -> Path:
 def media_dir(stage: str, name: str, fallback: Path | str, when: str | None = None) -> Path:
     """Where reviewable output (studies, tests) goes.
 
-    With MEDIA_DIR set (the project's synced Drive folder), returns
+    With MEDIA_DIR set (the project's media folder, pushed off-site), returns
     `<media>/<stage>/<YYYY-MM>-<NAME>`; otherwise the gitignored local fallback,
     which is not backed up.
     """
